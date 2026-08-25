@@ -19,6 +19,19 @@ import {
   QUESTIONS_PER_CATEGORY,
   QUESTIONS_PER_CATEGORY_LEVEL,
 } from "./category-progress";
+import {
+  ASSETS,
+  EMPTY_ALLOCATION,
+  PORTFOLIO_RULE_VERSION,
+  RISK_CENTERS,
+  normalizeAllocation,
+  portfolioTypeFor,
+  riskScoreFor,
+  targetFor,
+  type Allocation,
+  type AssetKey,
+  type PortfolioType,
+} from "./portfolio-rules";
 
 type View = "home" | "learn" | "category" | "portfolio" | "profile";
 type Difficulty = "초급" | "중급" | "고급";
@@ -98,9 +111,6 @@ type QuizSession = {
   lesson?: number;
 };
 
-type AssetKey = "domestic" | "overseas" | "bond" | "fund" | "cash" | "gold";
-type Allocation = Record<AssetKey, number>;
-type PortfolioType = "안정형" | "중립형" | "공격형";
 type ScoreLabel = "Excellent" | "Good" | "Fair" | "Poor";
 type MatchLevel = "우수" | "보통" | "불일치";
 type TraitLevel = "낮음" | "보통" | "높음";
@@ -125,16 +135,25 @@ type PortfolioResult = {
   coach: string;
 };
 
+type AIFeedback = {
+  summary_ko: string;
+  strengths: string[];
+  cautions: string[];
+  improvements: string[];
+  concept_refs: string[];
+};
+
 type Account = { username: string };
 type AccountPayload = {
   account: Account;
   progress?: Partial<Progress>;
   portfolio?: {
-    allocation?: Allocation;
+    allocation?: unknown;
     amount?: number;
     goal?: string;
     horizon?: string;
     result?: PortfolioResult | null;
+    ruleVersion?: string;
   };
 };
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -157,18 +176,7 @@ const CATEGORY_COLORS: Record<(typeof CATEGORIES)[number]["color"], string> = {
   blue: "#2f8fe5",
 };
 
-const ASSETS: { key: AssetKey; label: string; short: string; color: string; icon: string; risk: number }[] = [
-  { key: "domestic", label: "국내주식", short: "국내", color: "#58cc02", icon: "KR", risk: 60 },
-  { key: "overseas", label: "해외주식", short: "해외", color: "#1cb0f6", icon: "GL", risk: 65 },
-  { key: "bond", label: "채권", short: "채권", color: "#9069e7", icon: "B", risk: 25 },
-  { key: "fund", label: "ETF/펀드", short: "ETF", color: "#ff9600", icon: "F", risk: 45 },
-  { key: "cash", label: "현금성자산", short: "현금", color: "#2bb6a8", icon: "₩", risk: 5 },
-  { key: "gold", label: "금", short: "금", color: "#ffc800", icon: "Au", risk: 40 },
-];
-
-const RISK_CENTERS: Record<PortfolioType, number> = { 안정형: 30.2, 중립형: 40, 공격형: 51.8 };
 const HORIZON_CENTERS: Record<string, number> = { "1년 미만": 20, "1~3년": 40, "3~5년": 55, "5년 이상": 70 };
-const EMPTY_ALLOCATION: Allocation = { domestic: 20, overseas: 15, bond: 30, fund: 15, cash: 10, gold: 10 };
 
 const DEFAULT_PROGRESS: Progress = {
   xp: 0,
@@ -253,13 +261,6 @@ function sumAllocation(value: Allocation) {
   return Object.values(value).reduce((sum, item) => sum + Number(item || 0), 0);
 }
 
-function targetFor(tendency: Progress["tendency"]): Allocation {
-  const profile = tendency === "진단 전" ? "중립형" : tendency;
-  if (profile === "안정형") return { domestic: 5, overseas: 10, bond: 55, fund: 5, cash: 15, gold: 10 };
-  if (profile === "공격형") return { domestic: 20, overseas: 40, bond: 10, fund: 20, cash: 5, gold: 5 };
-  return { domestic: 10, overseas: 20, bond: 30, fund: 20, cash: 10, gold: 10 };
-}
-
 function trait(value: number, low: number, high: number): TraitLevel {
   return value < low ? "낮음" : value <= high ? "보통" : "높음";
 }
@@ -279,15 +280,15 @@ function analyzeAllocation(current: Allocation, target: Allocation, tendency: Pr
   const diversification = clamp(Math.round(((1 - hhi) / (1 - 1 / ASSETS.length)) * 100));
   const maxWeight = Math.max(...Object.values(current));
   const concentrationPenalty = Math.max(0, Math.round((maxWeight - 50) * 10) / 10);
-  const riskScore = Math.round(ASSETS.reduce((sum, asset) => sum + current[asset.key] * asset.risk, 0) / 10) / 10;
+  const riskScore = riskScoreFor(current);
   const gap = Math.round(Math.abs(riskScore - RISK_CENTERS[profile]) * 10) / 10;
   const fit = Math.round(clamp(100 - gap * 4) * 10) / 10;
   const horizonFit = Math.round(clamp(100 - Math.abs(riskScore - HORIZON_CENTERS[horizon]) * 1.5) * 10) / 10;
   const score = Math.round(clamp(0.45 * fit + 0.25 * diversification + 0.15 * horizonFit - concentrationPenalty));
   const scoreLabel: ScoreLabel = score >= 85 ? "Excellent" : score >= 70 ? "Good" : score >= 50 ? "Fair" : "Poor";
-  const portfolioType: PortfolioType = riskScore <= 35.1 ? "안정형" : riskScore <= 45.9 ? "중립형" : "공격형";
+  const portfolioType = portfolioTypeFor(riskScore);
   const profileMatch: PortfolioResult["profileMatch"] = { level: gap <= 5 ? "우수" : gap <= 12 ? "보통" : "불일치", gap };
-  const growth = current.domestic + current.overseas + current.fund;
+  const growth = current.domestic + current.overseas + current.equityFund;
   const defense = current.bond + current.cash;
   const heldClasses = ASSETS.filter((asset) => current[asset.key] > 0).length;
   const characteristics: PortfolioResult["characteristics"] = {
@@ -304,16 +305,16 @@ function analyzeAllocation(current: Allocation, target: Allocation, tendency: Pr
     return { asset: asset.key, delta, action: (delta > 0 ? "확대" : "축소") as "확대" | "축소" };
   }).filter((item) => Math.abs(item.delta) >= 5).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
   const signals: string[] = [];
-  if (growth > 65) signals.push("성장자산 비중이 높아 성장성과 변동성이 모두 높은 구조");
-  if (growth < 35) signals.push("성장자산 비중이 낮아 장기 성장성이 제한될 수 있음");
-  if (defense < 30) signals.push("방어자산(채권+현금) 비중이 낮음");
-  if (defense > 60) signals.push("방어자산 비중이 높아 하락장 방어력은 좋으나 성장성이 제한될 수 있음");
-  if (current.cash > 20) signals.push("현금 비중이 높아 유동성은 좋으나 성장성이 제한될 수 있음");
-  if (current.cash < 5) signals.push("현금 비중이 낮아 갑작스러운 자금 필요에 대응하기 어려울 수 있음");
-  if (maxWeight >= 50) signals.push(`특정 자산군(${ASSETS.find((asset) => current[asset.key] === maxWeight)?.label})에 집중되어 있음`);
-  if (heldClasses <= 2) signals.push(`보유 자산군이 ${heldClasses}종으로 적어 분산 효과가 제한적임`);
-  if (gap > 12) signals.push(`위험도가 진단된 ${profile} 성향과 차이가 큼`);
-  if (horizonFit < 50) signals.push("투자 기간에 비해 위험도 수준이 맞지 않음");
+  if (growth > 65) signals.push("성장자산 비중이 높아 성장성과 변동성이 모두 높을 수 있어요.");
+  if (growth < 35) signals.push("성장자산 비중이 낮아 장기 성장성이 제한될 수 있어요.");
+  if (defense < 30) signals.push("방어자산(채권+현금) 비중이 낮아요.");
+  if (defense > 60) signals.push("방어자산 비중이 높아 하락장 방어력은 좋지만 성장성이 제한될 수 있어요.");
+  if (current.cash > 20) signals.push("현금 비중이 높아 유동성은 좋지만 성장성이 제한될 수 있어요.");
+  if (current.cash < 5) signals.push("현금 비중이 낮아 갑작스러운 자금 필요에 대응하기 어려울 수 있어요.");
+  if (maxWeight >= 50) signals.push(`특정 자산군(${ASSETS.find((asset) => current[asset.key] === maxWeight)?.label})에 집중되어 있어요.`);
+  if (heldClasses <= 2) signals.push(`보유 자산군이 ${heldClasses}종으로 적어 분산 효과가 제한적이에요.`);
+  if (gap > 12) signals.push(`위험도가 진단된 ${profile} 성향과 큰 차이가 있어요.`);
+  if (horizonFit < 50) signals.push("투자 기간에 비해 위험도 수준이 맞지 않아요.");
   const strengths: string[] = [];
   if (diversification >= 75) strengths.push("여섯 자산군에 고르게 분산되어 있어요.");
   if (defense >= 30 && defense <= 60) strengths.push("채권과 현금성자산의 방어 비중이 균형 범위에 있어요.");
@@ -360,7 +361,11 @@ export default function Home() {
   const [goal, setGoal] = useState("장기 자산 증식");
   const [horizon, setHorizon] = useState("5년 이상");
   const [portfolioResult, setPortfolioResult] = useState<PortfolioResult | null>(null);
+  const [aiFeedback, setAiFeedback] = useState<AIFeedback | null>(null);
+  const [aiFeedbackLoading, setAiFeedbackLoading] = useState(false);
+  const [aiFeedbackError, setAiFeedbackError] = useState("");
   const [portfolioTab, setPortfolioTab] = useState<"summary" | "rebalance" | "detail" | "coach">("summary");
+  const [activeAssetHelp, setActiveAssetHelp] = useState<AssetKey | null>(null);
   const [activeCategoryName, setActiveCategoryName] = useState("");
   const [account, setAccount] = useState<Account | null>(null);
   const [accountError, setAccountError] = useState("");
@@ -384,11 +389,13 @@ export default function Home() {
       conceptReviews: savedProgress.conceptReviews || {},
       pendingRetries: savedProgress.pendingRetries || [],
     });
-    setAllocation(savedPortfolio.allocation || EMPTY_ALLOCATION);
+    setAllocation(normalizeAllocation(savedPortfolio.allocation));
     setAmount(typeof savedPortfolio.amount === "number" ? savedPortfolio.amount : 10000000);
     setGoal(savedPortfolio.goal || "장기 자산 증식");
     setHorizon(savedPortfolio.horizon || "5년 이상");
-    setPortfolioResult(savedPortfolio.result || null);
+    setPortfolioResult(savedPortfolio.ruleVersion === PORTFOLIO_RULE_VERSION ? savedPortfolio.result || null : null);
+    setAiFeedback(null);
+    setAiFeedbackError("");
     setAccountStateReady(true);
     setSaveState("idle");
   };
@@ -400,6 +407,8 @@ export default function Home() {
     setGoal("장기 자산 증식");
     setHorizon("5년 이상");
     setPortfolioResult(null);
+    setAiFeedback(null);
+    setAiFeedbackError("");
     setResult(null);
     setSession(null);
     setView("home");
@@ -452,7 +461,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             progress,
-            portfolio: { allocation, amount, goal, horizon, result: portfolioResult },
+            portfolio: { allocation, amount, goal, horizon, result: portfolioResult, ruleVersion: PORTFOLIO_RULE_VERSION },
           }),
         });
         if (!response.ok) throw new Error("save failed");
@@ -667,12 +676,48 @@ export default function Home() {
     const target = targetFor(type);
     setAllocation(target);
     setPortfolioResult(null);
+    setAiFeedback(null);
+    setAiFeedbackError("");
+  };
+
+  const requestAiFeedback = async (analysis: PortfolioResult) => {
+    setAiFeedbackLoading(true);
+    setAiFeedbackError("");
+    try {
+      const response = await fetch("/api/portfolio-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          computed: analysis,
+          context: {
+            allocation,
+            assetLabels: Object.fromEntries(ASSETS.map((asset) => [asset.key, asset.label])),
+            portfolioRuleVersion: PORTFOLIO_RULE_VERSION,
+            tendency: progress.tendency === "진단 전" ? "중립형" : progress.tendency,
+            horizon,
+            goal,
+            weakTags: progress.weakTags,
+          },
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || "GPT 코칭을 불러오지 못했어요.");
+      setAiFeedback(payload.feedback as AIFeedback);
+    } catch (error) {
+      setAiFeedback(null);
+      setAiFeedbackError(error instanceof Error ? error.message : "GPT 코칭을 불러오지 못했어요.");
+    } finally {
+      setAiFeedbackLoading(false);
+    }
   };
 
   const runPortfolioAnalysis = () => {
     if (sumAllocation(allocation) !== 100) return;
     const target = targetFor(progress.tendency);
-    setPortfolioResult(analyzeAllocation(allocation, target, progress.tendency, horizon));
+    const analysis = analyzeAllocation(allocation, target, progress.tendency, horizon);
+    setPortfolioResult(analysis);
+    setAiFeedback(null);
+    void requestAiFeedback(analysis);
     setPortfolioTab("summary");
     window.setTimeout(() => document.getElementById("portfolio-result")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   };
@@ -863,11 +908,21 @@ export default function Home() {
                 <div className="preset-row"><span>성향 프리셋</span>{(["안정형", "중립형", "공격형"] as const).map((type) => <button key={type} className={progress.tendency === type ? "active" : ""} onClick={() => applyPreset(type)}>{type}</button>)}</div>
                 <div className="allocation-layout">
                   <div className="donut-wrap"><div className="allocation-donut" style={chartStyle}><span><b>{sumAllocation(allocation)}</b><small>%</small></span></div><p>현재 자산 구성</p></div>
-                  <div className="asset-inputs">{ASSETS.map((asset) => <label className="asset-row" key={asset.key}><span className="asset-dot" style={{ background: asset.color }}>{asset.icon}</span><strong>{asset.label}</strong><input type="range" min="0" max="100" value={allocation[asset.key]} onChange={(event) => { setAllocation({ ...allocation, [asset.key]: Number(event.target.value) }); setPortfolioResult(null); }} style={{ "--range-color": asset.color } as CSSProperties} /><span className="percent-input"><input aria-label={`${asset.label} 비중`} type="number" min="0" max="100" value={allocation[asset.key]} onChange={(event) => { setAllocation({ ...allocation, [asset.key]: clamp(Number(event.target.value)) }); setPortfolioResult(null); }} />%</span></label>)}</div>
+                  <div className="asset-inputs">
+                    {ASSETS.map((asset) => <div className="asset-item" key={asset.key}>
+                      <div className="asset-row">
+                        <span className="asset-dot" style={{ background: asset.color }}>{asset.icon}</span>
+                        <span className="asset-name"><strong>{asset.label}</strong><button type="button" className="asset-info-button" aria-label={`${asset.label} 입력 기준 보기`} aria-expanded={activeAssetHelp === asset.key} aria-controls={`asset-help-${asset.key}`} onClick={() => setActiveAssetHelp(activeAssetHelp === asset.key ? null : asset.key)}>ⓘ</button></span>
+                        <input aria-label={`${asset.label} 비중 슬라이더`} type="range" min="0" max="100" value={allocation[asset.key]} onChange={(event) => { setAllocation({ ...allocation, [asset.key]: Number(event.target.value) }); setPortfolioResult(null); }} style={{ "--range-color": asset.color } as CSSProperties} />
+                        <span className="percent-input"><input aria-label={`${asset.label} 비중`} type="number" min="0" max="100" value={allocation[asset.key]} onChange={(event) => { setAllocation({ ...allocation, [asset.key]: clamp(Number(event.target.value)) }); setPortfolioResult(null); }} />%</span>
+                      </div>
+                      {activeAssetHelp === asset.key && <div className="asset-help" id={`asset-help-${asset.key}`} role="note"><p>{asset.help}</p>{asset.key === "equityFund" && <small>혼합형 펀드는 공시된 주식·채권 비중에 따라 두 자산군으로 나누어 입력해 주세요.</small>}</div>}
+                    </div>)}
+                  </div>
                 </div>
               </section>
               <section className="portfolio-options card-block"><div><label>투자 목표<select value={goal} onChange={(event) => setGoal(event.target.value)}><option>장기 자산 증식</option><option>주택·목돈 마련</option><option>은퇴 준비</option><option>단기 여유자금 운용</option></select></label><label>투자 기간<select value={horizon} onChange={(event) => { setHorizon(event.target.value); setPortfolioResult(null); }}><option>1년 미만</option><option>1~3년</option><option>3~5년</option><option>5년 이상</option></select></label><label>총 투자금액<div className="money-input"><input type="number" min="0" step="100000" value={amount} onChange={(event) => setAmount(Number(event.target.value))} /><span>원</span></div></label></div><button className="primary-button" disabled={sumAllocation(allocation) !== 100} onClick={runPortfolioAnalysis}>{sumAllocation(allocation) === 100 ? "포트폴리오 분석하기" : `합계를 100%로 맞춰주세요 (${sumAllocation(allocation)}%)`}</button></section>
-              {portfolioResult && <PortfolioResults result={portfolioResult} allocation={allocation} amount={amount} tab={portfolioTab} setTab={setPortfolioTab} />}
+              {portfolioResult && <PortfolioResults result={portfolioResult} allocation={allocation} amount={amount} tab={portfolioTab} setTab={setPortfolioTab} aiFeedback={aiFeedback} aiFeedbackLoading={aiFeedbackLoading} aiFeedbackError={aiFeedbackError} retryAiFeedback={() => void requestAiFeedback(portfolioResult)} />}
             </div>
           )}
 
@@ -988,7 +1043,7 @@ function NavButton({ item, active, onClick }: { item: View; active: boolean; onC
   return <button className={active ? "active" : ""} onClick={onClick}><span>{meta[item].icon}</span><b>{meta[item].label}</b></button>;
 }
 
-function PortfolioResults({ result, allocation, amount, tab, setTab }: { result: PortfolioResult; allocation: Allocation; amount: number; tab: "summary" | "rebalance" | "detail" | "coach"; setTab: (tab: "summary" | "rebalance" | "detail" | "coach") => void }) {
+function PortfolioResults({ result, allocation, amount, tab, setTab, aiFeedback, aiFeedbackLoading, aiFeedbackError, retryAiFeedback }: { result: PortfolioResult; allocation: Allocation; amount: number; tab: "summary" | "rebalance" | "detail" | "coach"; setTab: (tab: "summary" | "rebalance" | "detail" | "coach") => void; aiFeedback: AIFeedback | null; aiFeedbackLoading: boolean; aiFeedbackError: string; retryAiFeedback: () => void }) {
   const targetChart = ASSETS.reduce<{ cursor: number; stops: string[] }>((state, asset) => {
     const end = state.cursor + result.target[asset.key];
     return { cursor: end, stops: [...state.stops, `${asset.color} ${state.cursor}% ${end}%`] };
@@ -998,9 +1053,9 @@ function PortfolioResults({ result, allocation, amount, tab, setTab }: { result:
     <div className="result-hero"><div><p>Portfolio Score</p><strong>{result.score}<small>점</small></strong><span>{result.scoreLabel}</span><div className="stars">{"★".repeat(Math.max(1, Math.round(result.score / 20)))}{"☆".repeat(5 - Math.max(1, Math.round(result.score / 20)))}</div></div><CharacterArt pose="wave" className="result-mascot-art" /></div>
     <div className="score-cards"><article><span>위험 점수</span><strong>{result.riskScore}점</strong><small>{result.portfolioType} 포트폴리오</small><div className="mini-gauge"><i style={{ left: `${result.riskScore}%` }} /></div></article><article><span>성향 일치도</span><strong>{result.fit}%</strong><small>{result.profileMatch.level} · {result.suitability}</small><div className="ring-score" style={{ "--score": `${result.fit * 3.6}deg` } as CSSProperties} /></article></div>
     <div className="portfolio-tabs"><button className={tab === "summary" ? "active" : ""} onClick={() => setTab("summary")}>요약</button><button className={tab === "rebalance" ? "active" : ""} onClick={() => setTab("rebalance")}>리밸런싱</button><button className={tab === "detail" ? "active" : ""} onClick={() => setTab("detail")}>상세 분석</button><button className={tab === "coach" ? "active" : ""} onClick={() => setTab("coach")}>AI 코치</button></div>
-    {tab === "summary" && <div className="tab-panel"><div className="coach-banner"><CharacterArt pose="reading" className="coach-mascot-art" /><div><b>투리니 코치의 한마디!</b><p>{result.coach}</p></div></div><div className="analysis-columns"><article className="good"><h3>강점</h3><ul>{result.strengths.map((item) => <li key={item}>{item}</li>)}</ul></article><article className="care"><h3>개선하면 좋은 점</h3>{result.cautions.length ? <ul>{result.cautions.map((item) => <li key={item}>{item}</li>)}</ul> : <p>현재 규칙에서 별도 주의 신호 없음</p>}</article></div></div>}
+    {tab === "summary" && <div className="tab-panel"><div className="coach-banner"><CharacterArt pose="reading" className="coach-mascot-art" /><div><b>투리니 코치의 한마디!</b><p>{result.coach}</p></div></div><div className="analysis-columns"><article className="good"><h3>강점</h3><ul>{result.strengths.map((item) => <li key={item}>{item}</li>)}</ul></article><article className="care"><h3>개선하면 좋은 점</h3>{result.cautions.length ? <ul>{result.cautions.map((item) => <li key={item}>{item}</li>)}</ul> : <p>현재 규칙에서 별도로 주의할 점이 없어요.</p>}</article></div></div>}
     {tab === "rebalance" && <div className="tab-panel"><div className="target-chart"><div className="allocation-donut small" style={targetChartStyle}><span>추천</span></div><div><h3>추천 비중으로 한 걸음 조정</h3><p>현재 비중과 성향별 목표의 50% 지점 · 총 {amount.toLocaleString("ko-KR")}원 기준</p></div></div>{result.rebalancingActions.length ? <div className="rebalance-table"><div className="table-head"><span>자산</span><span>현재</span><span>추천</span><span>조정</span></div>{result.rebalancingActions.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; const money = Math.round(amount * Math.abs(item.delta) / 100); return <div key={asset.key}><strong><i style={{ background: asset.color }} />{asset.label}</strong><span>{allocation[asset.key]}%</span><span>{result.target[asset.key]}%</span><b className={item.delta > 0 ? "buy" : "sell"}>{item.delta > 0 ? "+" : "-"}{money.toLocaleString("ko-KR")}원</b></div>; })}</div> : <p className="fine-print">5%p 이상 조정이 필요한 자산이 없어요.</p>}<p className="fine-print">수수료·세금·개별 상품 특성은 반영하지 않은 자산배분 학습용 계산이에요.</p></div>}
     {tab === "detail" && <div className="tab-panel detail-grid"><article><span>분산도</span><strong>{result.diversification}</strong><p>핵심 6개 자산군 기준 분산 정도</p></article><article><span>집중 페널티</span><strong>{result.concentrationPenalty ? `-${result.concentrationPenalty}` : "0"}</strong><p>한 자산이 50%를 넘은 만큼 직접 차감</p></article><article><span>성향 일치도</span><strong>{result.fit}</strong><p>위험점수와 진단 성향 중심의 거리</p></article><article><span>기간 적합도</span><strong>{result.horizonFit}</strong><p>위험점수와 투자기간 중심의 거리</p></article></div>}
-    {tab === "coach" && <div className="tab-panel ai-coach-panel"><CharacterArt pose="reading" className="ai-coach-art" /><div><p className="eyebrow">TURINI AI COACH</p><h3>{result.coach}</h3><p>한 번에 모두 바꾸기보다 새로 넣는 돈과 만기 자금을 활용해 목표 비중에 천천히 가까워지는 방법도 좋아요. 이후에는 6개월 또는 1년에 한 번 비중을 점검해 보세요.</p><button className="primary-button" onClick={() => setTab("rebalance")}>조정 금액 확인하기</button></div></div>}
+    {tab === "coach" && <div className="tab-panel ai-coach-panel"><CharacterArt pose="reading" className="ai-coach-art" /><div><p className="eyebrow">TURINI GPT COACH</p>{aiFeedbackLoading ? <><h3>GPT가 분석 결과를 읽고 있어요…</h3><p>잠시만 기다려 주세요.</p></> : aiFeedback ? <><h3>{aiFeedback.summary_ko}</h3>{aiFeedback.strengths.length > 0 && <section className="ai-feedback-section"><b>강점</b><ul>{aiFeedback.strengths.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.cautions.length > 0 && <section className="ai-feedback-section"><b>주의할 점</b><ul>{aiFeedback.cautions.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.improvements.length > 0 && <section className="ai-feedback-section"><b>개선 방향</b><ul>{aiFeedback.improvements.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.concept_refs.length > 0 && <p className="ai-concepts">함께 공부할 개념 · {aiFeedback.concept_refs.join(" · ")}</p>}<p className="fine-print">금융 학습을 위한 설명이며 특정 종목이나 상품의 매수·매도 추천이 아니에요.</p></> : <><h3>{result.coach}</h3><p>{aiFeedbackError || "규칙 분석 결과를 표시하고 있어요."}</p>{aiFeedbackError && <button className="primary-button" onClick={retryAiFeedback}>GPT 코칭 다시 받기</button>}</>}<button className="primary-button" onClick={() => setTab("rebalance")}>조정 금액 확인하기</button></div></div>}
   </section>;
 }
