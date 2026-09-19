@@ -1,0 +1,31 @@
+{
+  "name": "Turini Animation Atlas V2 (repacked from V1)",
+  "source": "turini-animation-atlas-v1.png",
+  "image": "turini-atlas-v2.png",
+  "canvas": {
+    "width": 1152,
+    "height": 1728
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 6
+  },
+  "frame": {
+    "width": 288,
+    "height": 288
+  },
+  "groundLineY": 266,
+  "rows": {
+    "idle": 0,
+    "thinking": 1,
+    "correct": 2,
+    "wrong": 3,
+    "celebrate": 4,
+    "reading": 5
+  },
+  "notes": [
+    "Frames are re-centred on a 224px source pitch and bottom-aligned to a shared ground line.",
+    "Artwork is untouched: pixels are copied, never redrawn, rescaled or warped.",
+    "Every cell keeps a safety margin so ears, horns and placards never touch the cell edge."
+  ]
+}
