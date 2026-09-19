@@ -1,0 +1,142 @@
+/* ==========================================================================
+   투리니 레이어 리그
+
+   - 캔버스는 정사각형이고, 모든 파츠는 같은 1200×1200 그림이라 겹치기만 하면
+     원래 캐릭터가 됩니다. 크기가 달라져도 어긋나지 않습니다.
+   - 위아래로 둥둥 뜨는 움직임은 쓰지 않습니다. 발은 바닥에 붙어 있고
+     가슴이 부풀고, 고개가 아주 조금 기울고, 팔다리가 따로 흔들립니다.
+   - 주기를 서로 다르게 두어 기계처럼 딱딱 맞지 않게 했습니다.
+   ========================================================================== */
+
+.turini-rig {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 160px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: visible;        /* 귀·뿔·모자가 잘리지 않도록 */
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  contain: layout;
+}
+
+/* 캔버스 안쪽으로 살짝 들여 놓아 높은 모자도 무대 밖으로 나가지 않습니다 */
+.turini-rig__canvas {
+  position: absolute;
+  inset: 3%;
+}
+
+.turini-rig__layer,
+.turini-rig__piece {
+  position: absolute;
+  display: block;
+}
+
+.turini-rig__layer {
+  inset: 0;
+}
+.turini-rig__layer img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.turini-rig__piece {
+  aspect-ratio: 1 / 1;
+}
+.turini-rig__piece picture,
+.turini-rig__piece img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ── 층 순서 ────────────────────────────────────────────────── */
+.turini-rig__shadow { z-index: 0; }
+.turini-rig__bag    { position: absolute; inset: 0; z-index: 1; }
+.turini-rig__body   { position: absolute; inset: 0; z-index: 2; }
+.turini-rig__straps { position: absolute; inset: 0; z-index: 3; }
+.turini-rig__arm    { z-index: 4; }
+.turini-rig__head   { position: absolute; inset: 0; z-index: 5; }
+
+/* ── 어깨끈 ────────────────────────────────────────────────── */
+/* 가방 본체는 등 뒤에 있으므로, 앞에서는 끈만 보이는 게 자연스럽습니다. */
+.turini-rig__straps i {
+  position: absolute;
+  top: 51.5%;
+  width: 4.2%;
+  height: 19%;
+  border-radius: 99px;
+  background:
+    linear-gradient(100deg, rgba(0, 0, 0, .22) 0%, rgba(255, 255, 255, .28) 40%, rgba(0, 0, 0, .26) 100%),
+    var(--strap);
+  box-shadow: 0 1px 2px rgba(20, 40, 28, .25);
+}
+.turini-rig__straps i:nth-child(1) { left: 43.2%; transform: rotate(3.5deg); }
+.turini-rig__straps i:nth-child(2) { left: 52.6%; transform: rotate(-3.5deg); }
+
+/* ── 움직임 ────────────────────────────────────────────────── */
+@keyframes turini-rig-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  50%      { transform: scale(.991, 1.014); }
+}
+@keyframes turini-rig-head {
+  0%, 100% { transform: rotate(-2.1deg) translateY(0); }
+  35%      { transform: rotate(1.4deg) translateY(-.35%); }
+  70%      { transform: rotate(2.4deg) translateY(.15%); }
+}
+@keyframes turini-rig-arm-left {
+  0%, 100% { transform: rotate(-5.5deg); }
+  50%      { transform: rotate(4.5deg); }
+}
+@keyframes turini-rig-arm-right {
+  0%, 100% { transform: rotate(6.5deg); }
+  50%      { transform: rotate(-4deg); }
+}
+@keyframes turini-rig-leg-left {
+  0%, 100% { transform: rotate(-1.1deg); }
+  50%      { transform: rotate(1deg); }
+}
+@keyframes turini-rig-leg-right {
+  0%, 100% { transform: rotate(1.2deg); }
+  50%      { transform: rotate(-.9deg); }
+}
+@keyframes turini-rig-shadow {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(.978); opacity: .9; }
+}
+
+/* 주기를 4.2s / 5.6s / 3.4s / 3.9s 로 다르게 둬서 동시에 맞아떨어지지 않습니다 */
+.turini-rig[data-live="true"] .turini-rig__body {
+  animation: turini-rig-breathe 4.2s ease-in-out infinite;
+}
+.turini-rig[data-live="true"] .turini-rig__head {
+  animation: turini-rig-head 5.6s ease-in-out infinite;
+}
+.turini-rig[data-live="true"] .turini-rig__arm--left {
+  animation: turini-rig-arm-left 3.4s ease-in-out infinite;
+}
+.turini-rig[data-live="true"] .turini-rig__arm--right {
+  animation: turini-rig-arm-right 3.9s ease-in-out infinite;
+}
+.turini-rig[data-live="true"] .turini-rig__leg--left {
+  animation: turini-rig-leg-left 4.6s ease-in-out infinite;
+}
+.turini-rig[data-live="true"] .turini-rig__leg--right {
+  animation: turini-rig-leg-right 5.1s ease-in-out infinite;
+}
+.turini-rig[data-live="true"] .turini-rig__shadow {
+  animation: turini-rig-shadow 4.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turini-rig * { animation: none !important; }
+}
+
+/* 리그 그림을 못 읽었을 때 쓰는 1단계 캐릭터 */
+.turini-rig--fallback { display: block; }
+.turini-rig__fallback { width: 100% !important; }

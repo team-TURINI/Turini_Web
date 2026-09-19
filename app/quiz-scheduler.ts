@@ -6,10 +6,44 @@ export type SchedulableQuestion = {
   type: string;
   category?: string;
   difficulty?: string;
+  /** 문항이 다루는 취약 개념 태그 */
+  weakness_tag?: string;
   choices?: string[];
   answer?: string;
   reviewKind?: ReviewKind;
 };
+
+/**
+ * 추천에 쓰는 사용자 상태.
+ * 없으면 예전과 똑같이 동작하므로, 기존 호출부를 바꾸지 않아도 됩니다.
+ */
+export type RecommendationContext = {
+  /** 진단·오답에서 모인 취약 태그 */
+  weakTags?: string[];
+  /** 지금 난이도 (초급·중급·고급) */
+  level?: string;
+  /** 너무 최근에 푼 문항 id — 바로 다시 내지 않습니다 */
+  recentIds?: string[];
+};
+
+/** 개념 묶음 하나의 추천 점수. 클수록 먼저 나옵니다. */
+export function conceptPriority<T extends SchedulableQuestion>(
+  variants: T[],
+  context: RecommendationContext | undefined,
+  review?: ConceptReview,
+) {
+  if (!context) return 0;
+  let score = 0;
+  const weak = new Set(context.weakTags || []);
+  if (weak.size && variants.some((item) => item.weakness_tag && weak.has(item.weakness_tag))) score += 4;
+  if (context.level && variants.some((item) => item.difficulty === context.level)) score += 2;
+  // 이미 충분히 익힌 개념은 뒤로 미룹니다.
+  if (review && review.correctStreak >= 3) score -= 3;
+  // 너무 최근에 푼 문제만 있는 개념도 뒤로 미룹니다.
+  const recent = new Set(context.recentIds || []);
+  if (recent.size && variants.every((item) => recent.has(item.id))) score -= 4;
+  return score;
+}
 
 export type ConceptReview = {
   seen: number;
@@ -90,6 +124,7 @@ export function planLearningQuestions<T extends SchedulableQuestion>(
   seed: number,
   reviews: Record<string, ConceptReview>,
   studySessions: number,
+  context?: RecommendationContext,
 ) {
   const groups = new Map<string, T[]>();
   seededShuffle(pool, seed).forEach((question) => {
@@ -97,21 +132,38 @@ export function planLearningQuestions<T extends SchedulableQuestion>(
     groups.set(key, [...(groups.get(key) || []), question]);
   });
   const entries = [...groups.entries()];
-  const newConcepts = seededShuffle(entries.filter(([key]) => !reviews[key]), seed + 11);
+  // 취약 태그·난이도·최근 학습을 반영해 순서를 정합니다.
+  // (섞은 뒤 점수로 다시 정렬하므로, 점수가 같으면 예전과 같은 순서입니다.)
+  const rank = (pair: [string, T[]]) => conceptPriority(pair[1], context, reviews[pair[0]]);
+  const byPriority = (list: [string, T[]][]) =>
+    context ? [...list].sort((a, b) => rank(b) - rank(a)) : list;
+
+  const newConcepts = byPriority(seededShuffle(entries.filter(([key]) => !reviews[key]), seed + 11));
   const dueReviews = entries
     .filter(([key]) => reviews[key] && reviews[key].nextDueSession <= studySessions)
     .sort(([a], [b]) => reviews[a].correctStreak - reviews[b].correctStreak || reviews[a].nextDueSession - reviews[b].nextDueSession);
+  const rankedDue = byPriority(dueReviews);
   const futureReviews = seededShuffle(entries.filter(([key]) => reviews[key] && reviews[key].nextDueSession > studySessions), seed + 23);
   const reviewTarget = newConcepts.length ? Math.min(dueReviews.length, dueReviews.length >= 3 ? 3 : 2, count) : count;
   const selected: [string, T[]][] = [];
   selected.push(...newConcepts.slice(0, Math.max(0, count - reviewTarget)));
-  selected.push(...dueReviews.slice(0, reviewTarget));
+  selected.push(...rankedDue.slice(0, reviewTarget));
   const selectedKeys = new Set(selected.map(([key]) => key));
-  const fill = [...newConcepts, ...dueReviews, ...futureReviews].filter(([key]) => !selectedKeys.has(key));
+  const fill = [...newConcepts, ...rankedDue, ...byPriority(futureReviews)].filter(([key]) => !selectedKeys.has(key));
   selected.push(...fill.slice(0, count - selected.length));
 
-  return seededShuffle(selected, seed + 37).slice(0, count).map(([key, variants], index) => {
+  // 너무 최근에 푼 문항은 같은 개념의 다른 변형으로 바꿔 냅니다.
+  // (변형이 하나뿐이면 그대로 냅니다 — 개념을 통째로 빼지는 않습니다)
+  const recent = new Set(context?.recentIds || []);
+  const freshVariants = (variants: T[]) => {
+    if (!recent.size) return variants;
+    const unseen = variants.filter((question) => !recent.has(question.id));
+    return unseen.length ? unseen : variants;
+  };
+
+  return seededShuffle(selected, seed + 37).slice(0, count).map(([key, group], index) => {
     const review = reviews[key];
+    const variants = freshVariants(group);
     const question = chooseVariant(variants, seed + index * 13, review?.lastType, !review);
     const prepared = prepareChoices(question, seed + index * 29);
     return review ? ({ ...prepared, reviewKind: "scheduled" } as T) : prepared;
@@ -214,6 +266,7 @@ export function planSessionQuestions<T extends SchedulableQuestion>(
   reviews: Record<string, ConceptReview>,
   studySessions: number,
   pendingRetries: PendingRetry[],
+  context?: RecommendationContext,
 ) {
   const activePending = pendingRetries.filter((pending) => pool.some((question) =>
     conceptKey(question) === pending.key
@@ -228,6 +281,7 @@ export function planSessionQuestions<T extends SchedulableQuestion>(
     seed,
     reviews,
     studySessions,
+    context,
   );
   const slots: Array<T | undefined> = Array.from({ length: count });
   const occupied = new Set<number>();

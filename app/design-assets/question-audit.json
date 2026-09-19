@@ -1,0 +1,1508 @@
+{
+  "report": {
+    "총문항": 720,
+    "중복": {
+      "exactSameText": 0,
+      "sameAfterNorm": 0,
+      "sameChoicesOrder": 0,
+      "similarWording": 3,
+      "sameExplanation": 174,
+      "sameConceptRepeat": 0,
+      "difficultyOnlyDiff": 0
+    },
+    "태그": {
+      "취약태그_종류": 170,
+      "상위태그_종류": 20,
+      "태그_비어있는_문항": 0,
+      "상위태그가_둘_이상인_취약태그": 0,
+      "기준표에_없는_상위태그": 0,
+      "기준표에만_있고_안_쓰이는_상위태그": 0,
+      "기준표에_없는_취약태그": 0,
+      "기준표에만_있고_문항이_없는_취약태그": 0,
+      "상위태그_연결이_기준표와_다른_문항": 0,
+      "오탈자_의심_묶음": 0
+    }
+  },
+  "buckets": {
+    "exactSameText": [],
+    "sameAfterNorm": [],
+    "sameChoicesOrder": [],
+    "similarWording": [
+      {
+        "ids": [
+          "DIV_B_004_OX",
+          "DIV_B_007_OX"
+        ],
+        "score": 0.83,
+        "a": "다음 설명이 맞으면 O, 틀리면 X를 선택하세요.\n여러 종목에 나누어 투자하면 특정 종목의 손실이 ",
+        "b": "다음 설명이 맞으면 O, 틀리면 X를 선택하세요.\n여러 종목과 산업에 나누어 투자하면 특정 기업의 "
+      },
+      {
+        "ids": [
+          "RET_I_002_BLANK_INPUT",
+          "RET_I_005_BLANK_INPUT"
+        ],
+        "score": 0.89,
+        "a": "10만원을 연 20% 복리로 5년 예치하면 잔액은 약 얼마인가요?",
+        "b": "10만원을 연 2% 복리로 5년 예치하면 잔액은 약 얼마인가요?"
+      },
+      {
+        "ids": [
+          "RET_A_001_BLANK_CHOICE",
+          "RET_A_002_BLANK_CHOICE"
+        ],
+        "score": 0.82,
+        "a": "다음 질문의 빈칸에 들어갈 알맞은 답을 고르세요.\n매월 말 50만원을 20년간 적립하고, 연 5% ",
+        "b": "다음 질문의 빈칸에 들어갈 알맞은 답을 고르세요.\n매월 말 10만원을 40년간 적립하고, 연 7% "
+      }
+    ],
+    "sameExplanation": [
+      {
+        "ids": [
+          "STK_B_001_MCQ",
+          "STK_B_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_002_MCQ",
+          "STK_B_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_003_MCQ",
+          "STK_B_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_004_MCQ",
+          "STK_B_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_005_MCQ",
+          "STK_B_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_006_MCQ",
+          "STK_B_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_007_MCQ",
+          "STK_B_007_BLANK_CHOICE",
+          "STK_B_007_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_008_MCQ",
+          "STK_B_008_BLANK_CHOICE",
+          "STK_B_008_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_009_MCQ",
+          "STK_B_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_010_MCQ",
+          "STK_B_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_001_MCQ",
+          "STK_I_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_002_MCQ",
+          "STK_I_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_003_MCQ",
+          "STK_I_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_004_MCQ",
+          "STK_I_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_005_MCQ",
+          "STK_I_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_006_MCQ",
+          "STK_I_006_BLANK_CHOICE",
+          "STK_I_006_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_007_MCQ",
+          "STK_I_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_008_MCQ",
+          "STK_I_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_009_MCQ",
+          "STK_I_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_010_MCQ",
+          "STK_I_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_001_MCQ",
+          "STK_A_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_002_MCQ",
+          "STK_A_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_003_MCQ",
+          "STK_A_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_004_MCQ",
+          "STK_A_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_005_MCQ",
+          "STK_A_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_006_MCQ",
+          "STK_A_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_007_MCQ",
+          "STK_A_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_008_MCQ",
+          "STK_A_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_009_MCQ",
+          "STK_A_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_010_MCQ",
+          "STK_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_001_MCQ",
+          "BND_B_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_002_MCQ",
+          "BND_B_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_003_MCQ",
+          "BND_B_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_004_MCQ",
+          "BND_B_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_005_MCQ",
+          "BND_B_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_006_MCQ",
+          "BND_B_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_007_MCQ",
+          "BND_B_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_008_MCQ",
+          "BND_B_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_009_MCQ",
+          "BND_B_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_010_MCQ",
+          "BND_B_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_001_MCQ",
+          "BND_I_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_002_MCQ",
+          "BND_I_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_003_MCQ",
+          "BND_I_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_004_MCQ",
+          "BND_I_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_005_MCQ",
+          "BND_I_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_006_MCQ",
+          "BND_I_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_007_MCQ",
+          "BND_I_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_008_MCQ",
+          "BND_I_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_009_MCQ",
+          "BND_I_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_010_MCQ",
+          "BND_I_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_001_MCQ",
+          "BND_A_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_002_MCQ",
+          "BND_A_002_BLANK_CHOICE",
+          "BND_A_002_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_003_MCQ",
+          "BND_A_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_004_MCQ",
+          "BND_A_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_005_MCQ",
+          "BND_A_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_006_MCQ",
+          "BND_A_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_007_MCQ",
+          "BND_A_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_008_MCQ",
+          "BND_A_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_009_MCQ",
+          "BND_A_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_010_MCQ",
+          "BND_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_001_MCQ",
+          "FND_B_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_002_MCQ",
+          "FND_B_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_003_BLANK_CHOICE",
+          "FND_B_003_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_004_MCQ",
+          "FND_B_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_005_MCQ",
+          "FND_B_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_006_MCQ",
+          "FND_B_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_009_MCQ",
+          "FND_B_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_010_BLANK_CHOICE",
+          "FND_B_010_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_001_MCQ",
+          "FND_I_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_002_MCQ",
+          "FND_I_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_003_MCQ",
+          "FND_I_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_004_MCQ",
+          "FND_I_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_005_BLANK_CHOICE",
+          "FND_I_005_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_006_MCQ",
+          "FND_I_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_009_MCQ",
+          "FND_I_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_010_MCQ",
+          "FND_I_010_BLANK_CHOICE",
+          "FND_I_010_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_001_MCQ",
+          "FND_A_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_002_MCQ",
+          "FND_A_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_004_MCQ",
+          "FND_A_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_006_MCQ",
+          "FND_A_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_007_MCQ",
+          "FND_A_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_008_MCQ",
+          "FND_A_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_009_MCQ",
+          "FND_A_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_010_MCQ",
+          "FND_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_001_MCQ",
+          "RSK_B_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_002_MCQ",
+          "RSK_B_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_003_MCQ",
+          "RSK_B_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_004_MCQ",
+          "RSK_B_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_005_MCQ",
+          "RSK_B_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_006_MCQ",
+          "RSK_B_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_007_MCQ",
+          "RSK_B_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_008_MCQ",
+          "RSK_B_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_009_MCQ",
+          "RSK_B_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_010_MCQ",
+          "RSK_B_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_001_MCQ",
+          "RSK_I_001_BLANK_CHOICE",
+          "RSK_I_001_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_002_MCQ",
+          "RSK_I_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_003_MCQ",
+          "RSK_I_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_004_MCQ",
+          "RSK_I_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_005_MCQ",
+          "RSK_I_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_006_MCQ",
+          "RSK_I_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_007_MCQ",
+          "RSK_I_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_008_MCQ",
+          "RSK_I_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_009_MCQ",
+          "RSK_I_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_010_MCQ",
+          "RSK_I_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_001_MCQ",
+          "RSK_A_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_002_MCQ",
+          "RSK_A_002_BLANK_CHOICE",
+          "RSK_A_002_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_003_MCQ",
+          "RSK_A_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_004_MCQ",
+          "RSK_A_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_005_MCQ",
+          "RSK_A_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_006_MCQ",
+          "RSK_A_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_007_MCQ",
+          "RSK_A_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_008_MCQ",
+          "RSK_A_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_009_MCQ",
+          "RSK_A_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_010_MCQ",
+          "RSK_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_001_MCQ",
+          "DIV_B_001_BLANK_CHOICE",
+          "DIV_B_001_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_002_MCQ",
+          "DIV_B_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_003_MCQ",
+          "DIV_B_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_004_MCQ",
+          "DIV_B_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_005_MCQ",
+          "DIV_B_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_006_MCQ",
+          "DIV_B_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_007_MCQ",
+          "DIV_B_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_008_MCQ",
+          "DIV_B_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_009_MCQ",
+          "DIV_B_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_010_MCQ",
+          "DIV_B_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_001_MCQ",
+          "DIV_I_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_002_MCQ",
+          "DIV_I_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_003_MCQ",
+          "DIV_I_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_004_MCQ",
+          "DIV_I_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_005_MCQ",
+          "DIV_I_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_006_MCQ",
+          "DIV_I_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_007_MCQ",
+          "DIV_I_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_008_MCQ",
+          "DIV_I_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_009_MCQ",
+          "DIV_I_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_010_MCQ",
+          "DIV_I_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_001_MCQ",
+          "DIV_A_001_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_002_MCQ",
+          "DIV_A_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_003_MCQ",
+          "DIV_A_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_004_MCQ",
+          "DIV_A_004_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_005_MCQ",
+          "DIV_A_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_006_MCQ",
+          "DIV_A_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_007_MCQ",
+          "DIV_A_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_008_MCQ",
+          "DIV_A_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_009_MCQ",
+          "DIV_A_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_010_MCQ",
+          "DIV_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_001_MCQ",
+          "RET_B_001_BLANK_CHOICE",
+          "RET_B_001_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_002_MCQ",
+          "RET_B_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_003_MCQ",
+          "RET_B_003_BLANK_CHOICE",
+          "RET_B_003_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_004_MCQ",
+          "RET_B_004_BLANK_CHOICE",
+          "RET_B_004_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_005_MCQ",
+          "RET_B_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_006_MCQ",
+          "RET_B_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_007_MCQ",
+          "RET_B_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_008_MCQ",
+          "RET_B_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_009_MCQ",
+          "RET_B_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_010_MCQ",
+          "RET_B_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_001_MCQ",
+          "RET_I_001_BLANK_CHOICE",
+          "RET_I_001_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_002_MCQ",
+          "RET_I_002_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_003_MCQ",
+          "RET_I_003_BLANK_CHOICE",
+          "RET_I_003_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_004_MCQ",
+          "RET_I_004_BLANK_CHOICE",
+          "RET_I_004_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_005_MCQ",
+          "RET_I_005_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_006_MCQ",
+          "RET_I_006_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_007_MCQ",
+          "RET_I_007_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_008_MCQ",
+          "RET_I_008_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_009_MCQ",
+          "RET_I_009_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_010_MCQ",
+          "RET_I_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_001_MCQ",
+          "RET_A_001_BLANK_CHOICE",
+          "RET_A_001_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_002_MCQ",
+          "RET_A_002_BLANK_CHOICE",
+          "RET_A_002_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_003_MCQ",
+          "RET_A_003_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_004_MCQ",
+          "RET_A_004_BLANK_CHOICE",
+          "RET_A_004_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_005_MCQ",
+          "RET_A_005_BLANK_CHOICE",
+          "RET_A_005_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_006_MCQ",
+          "RET_A_006_BLANK_CHOICE",
+          "RET_A_006_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_007_MCQ",
+          "RET_A_007_BLANK_CHOICE",
+          "RET_A_007_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_008_MCQ",
+          "RET_A_008_BLANK_CHOICE",
+          "RET_A_008_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_009_MCQ",
+          "RET_A_009_BLANK_CHOICE",
+          "RET_A_009_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_010_MCQ",
+          "RET_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      }
+    ],
+    "sameConceptRepeat": [],
+    "difficultyOnlyDiff": []
+  },
+  "tags": {
+    "multiParent": [],
+    "unknownParents": [],
+    "unusedParents": [],
+    "unknownWeak": [],
+    "unusedWeak": [],
+    "mismatchedLink": [],
+    "typoCandidates": [],
+    "missing": [],
+    "weakCounts": {
+      "주식의 본질": 4,
+      "증권 종류 구분": 4,
+      "주주 권리": 4,
+      "주식 종류": 8,
+      "국내 거래소": 4,
+      "수익 구조": 4,
+      "투자 의사결정": 4,
+      "주주 수익": 4,
+      "주주권": 4,
+      "주식 시장 구조": 4,
+      "주문 방식": 4,
+      "시장 상황 용어": 8,
+      "투자 시계": 4,
+      "매매 전략": 4,
+      "자산군 수익률": 4,
+      "가치 평가 지표": 8,
+      "기업 규모 측정": 4,
+      "신규 상장": 4,
+      "주식 분할": 4,
+      "배당·권리 일정": 4,
+      "증자 종류": 4,
+      "한국 결제 제도": 4,
+      "주식 거래 규제": 4,
+      "상장 유지": 4,
+      "위험 측정 지표": 4,
+      "한국 거래소 제도": 4,
+      "한국 신용거래 제도": 4,
+      "채권의 본질": 4,
+      "채권자 vs 주주": 4,
+      "채권 기본 용어": 12,
+      "채권 종류": 4,
+      "한국 국채": 4,
+      "회사채 위험": 4,
+      "채권 이자 구조": 4,
+      "채권 만기": 4,
+      "채권 가격 결정 원리": 4,
+      "채권 세제": 4,
+      "금융시장 분류": 4,
+      "채권 위험 분류": 4,
+      "신용평가": 4,
+      "채권 수익률 개념": 4,
+      "채권 펀드 vs 개별 채권": 4,
+      "단기금융상품": 8,
+      "한국은행 통화정책 수단": 4,
+      "채권 민감도 지표": 4,
+      "채권 가격 변동": 4,
+      "채권 시장 구조": 4,
+      "수익률곡선 형태": 4,
+      "신용 위험과 가격": 4,
+      "신용 위험": 4,
+      "하이브리드 채권": 4,
+      "하이브리드 채권 비교": 4,
+      "채권 평가 변수": 4,
+      "채권 수익률 지표": 4,
+      "펀드 종류": 8,
+      "펀드 원금 보장 여부": 4,
+      "상품 형태와 편입자산 구분": 4,
+      "펀드 운용 구조": 4,
+      "펀드 정의": 4,
+      "ETF 기본 특성": 4,
+      "기초자산별 ETF·펀드 유형": 4,
+      "주식형 ETF·펀드 범위": 4,
+      "펀드 선택 기준": 4,
+      "펀드 비용 비교": 4,
+      "액티브 펀드 단점": 4,
+      "펀드 평가 기준": 4,
+      "TDF 특성": 4,
+      "ETF·펀드 분류 기준": 4,
+      "ETF와 주식 비교": 4,
+      "섹터·테마 집중위험": 4,
+      "금 ETF·펀드 구조": 4,
+      "ETF 보호 범위": 4,
+      "국내 ETF·지수": 4,
+      "펀드 거래 차이": 4,
+      "파생형 ETF 위험": 4,
+      "혼합형 펀드 구성": 4,
+      "ETF 품질 지표": 4,
+      "기초지수·편입자산 확인": 4,
+      "방향성 베팅": 4,
+      "ETF 가격 메커니즘": 4,
+      "채권 ETF": 4,
+      "상장지수상품 비교": 4,
+      "신형 ETF": 4,
+      "안정성·수익성 트레이드오프": 4,
+      "투자 평가 기준": 4,
+      "위험-수익 관계": 4,
+      "재무 안전망": 4,
+      "위험 인식": 4,
+      "투자 사기 인지": 4,
+      "사기 식별": 8,
+      "금융 사기 대응": 4,
+      "위험 관리 전략": 4,
+      "레버리지 위험": 4,
+      "빚투(레버리지)": 4,
+      "위험 개념의 양면성": 4,
+      "레버리지 거래": 4,
+      "부채 vs 투자 우선순위": 4,
+      "투자 사기 유형": 4,
+      "사기 적신호": 4,
+      "사기 위장 전술": 4,
+      "무위험 고수익 약속": 4,
+      "투자 적신호 구분": 4,
+      "파산 위험": 4,
+      "파생상품 위험": 4,
+      "사기 자금 회수": 4,
+      "위험 종류": 8,
+      "위험 분류": 4,
+      "체계적 위험 측정": 4,
+      "위험 정량화": 4,
+      "해외 투자 위험": 4,
+      "채권 위험": 4,
+      "분산투자 기본": 4,
+      "분산투자 영어 용어": 4,
+      "분산의 효과": 4,
+      "분산 효과": 4,
+      "분산투자 직관": 4,
+      "분산투자 기본 원리": 4,
+      "위험 대응 전략": 4,
+      "분산투자 실무": 4,
+      "분산투자 효과의 한계": 4,
+      "분산의 폭": 4,
+      "자산배분 vs 종목 분산": 4,
+      "자산군 종류": 4,
+      "국가별 분산": 4,
+      "포트폴리오 관리": 4,
+      "분산투자 한계": 4,
+      "분산 효과의 한계점": 4,
+      "펀드 분산투자 장단점": 4,
+      "적립식 투자": 4,
+      "생애주기 분산": 4,
+      "포트폴리오 구조": 4,
+      "포트폴리오 이론": 4,
+      "극단적 분산 효과": 4,
+      "포트폴리오 이론 (MPT)": 4,
+      "분산 포트폴리오 측정": 4,
+      "고전적 자산배분": 4,
+      "글로벌 분산 필요성": 4,
+      "자산군 확장": 4,
+      "위험 관리 전략 구분": 4,
+      "해외 투자 환위험 관리": 4,
+      "자산배분 의사결정": 4,
+      "이자 기본 개념": 4,
+      "인플레이션 개념": 4,
+      "이자 계산 방식": 4,
+      "투자 수익 종류": 4,
+      "조기 저축 동기": 4,
+      "실질 구매력": 4,
+      "물가 상승 효과": 4,
+      "기본 계산 능력": 4,
+      "72의 법칙 정의": 4,
+      "금리 용어 구분": 4,
+      "이자 계산": 4,
+      "복리 누적 효과": 4,
+      "72의 법칙 계산": 8,
+      "단리 vs 복리 차이": 4,
+      "장기 복리 효과": 4,
+      "복리 주기": 4,
+      "장기 비용 영향": 4,
+      "72의 법칙 다양한 이자율": 4,
+      "복리 빈도와 이자율 비교": 4,
+      "장기 적립 효과": 4,
+      "장기 투자의 위력": 4,
+      "변동성 효과": 4,
+      "고이자 부채 위험": 4,
+      "복리 시간 효과": 4,
+      "세후 실질수익률": 4,
+      "장기 단복리 차이 체감": 4,
+      "채권 가격 결정": 4,
+      "실질수익률 정밀 계산": 4,
+      "현재가치 vs 미래가치": 4
+    },
+    "parentCounts": {
+      "주식의 개념": 72,
+      "주주의 권리·배당": 28,
+      "자산군별 장기 수익": 16,
+      "MDD(최대낙폭)": 20,
+      "채권의 개념": 68,
+      "채권 위험·신용위험": 24,
+      "금리와 채권 가격": 32,
+      "펀드의 개념": 52,
+      "ETF의 개념": 56,
+      "인덱스 ETF 분산효과": 16,
+      "위험-수익 관계": 32,
+      "레버리지·부채 위험": 24,
+      "투자 사기 판별": 40,
+      "원금 손실 위험": 12,
+      "분산투자 기본 원리": 48,
+      "분산투자 사례 판단": 36,
+      "리밸런싱 전략": 36,
+      "투자 수익률 계산": 28,
+      "실질수익률·물가상승률": 20,
+      "복리 개념": 60
+    }
+  }
+}

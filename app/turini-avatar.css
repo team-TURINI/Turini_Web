@@ -1,0 +1,425 @@
+/* ==========================================================================
+   공통 캐릭터(TuriniAvatar) + 꾸미기 화면
+
+   - globals.css 는 고치지 않았습니다. layout.tsx 에서 이 파일이 리그·스프라이트
+     다음에 불려 오므로 필요한 부분만 덮어씁니다.
+   - 자리별 크기(.turini-quiz, .turini-loading …)는 1단계에서 화면 크기별로
+     맞춰 둔 turini-character.css 규칙을 그대로 씁니다. 여기서는 속을 채웁니다.
+   ========================================================================== */
+
+.turini-avatar {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 160px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+}
+
+/* 겉 크기는 자리별 규칙이 정하고, 안쪽 캐릭터는 항상 꽉 채웁니다 */
+.turini-avatar .turini-avatar__figure {
+  width: 100%;
+  height: 100%;
+}
+
+/* 배경이 있는 무대 — 홈·마이페이지·꾸미기 */
+.turini-avatar--scene {
+  border-radius: 24px;
+  overflow: hidden;          /* 배경만 둥글게 자릅니다 */
+  background: #eef3f0;
+  isolation: isolate;
+}
+.turini-avatar__background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.turini-avatar__background img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.turini-avatar--scene .turini-avatar__figure {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* 자리별 크기 — 배경이 있는 무대는 정사각형 카드라 따로 잡습니다 */
+.turini-avatar--editor { width: min(320px, 100%); margin: 0 auto; }
+.turini-avatar--card { width: 64px; border-radius: 16px; }
+.profile-mascot-frame .turini-avatar { width: 142px; border-radius: 20px; }
+.hero-mascot .turini-avatar { width: 172px; border-radius: 22px; }
+
+@media (max-width: 620px) {
+  .profile-mascot-frame .turini-avatar { width: 120px; }
+  .hero-mascot .turini-avatar { width: 122px; }
+}
+@media (max-width: 390px) {
+  .profile-mascot-frame .turini-avatar { width: 106px; }
+  .hero-mascot .turini-avatar { width: 110px; }
+}
+
+/* 이미지를 못 읽었을 때 — 아무것도 없는 빈칸이면 기능이 고장 난 것처럼 보입니다.
+   깨진 아이콘 대신, 그림 파일이 없다는 걸 알 수 있는 흐린 자리표시를 둡니다. */
+.turini-dress__missing {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border: 1px dashed #cfd8d3;
+  border-radius: 10px;
+  background: repeating-linear-gradient(
+    45deg,
+    #f4f7f5 0 6px,
+    #eef2f0 6px 12px
+  );
+}
+.turini-dress__missing::after {
+  content: "그림 없음";
+  color: #9aa5a0;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+/* ── 회전 미리보기 ─────────────────────────────────────────── */
+.turini-avatar--turn { background: #eef3f0; border-radius: 24px; overflow: hidden; }
+.turini-dress__turn {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.turini-dress__turn img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* 완전 후면에서는 등 한가운데에 가방을 올립니다.
+   (뒷모습 그림 768px 기준 몸 중심 x≈384, 등 범위 y≈366~640 을 재서 맞춘 값) */
+.turini-dress__turn-bag {
+  position: absolute;
+  left: 27.5%;
+  top: 44%;
+  width: 45%;
+  aspect-ratio: 1 / 1;
+}
+.turini-dress__turn-bag img { width: 100%; height: 100%; object-fit: contain; }
+
+.turini-dress__stage { margin: 16px 0 4px; }
+
+.turini-dress__views {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.turini-dress__view {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.turini-dress__view[data-active="true"] {
+  border-color: var(--green);
+  background: var(--green-pale);
+  color: var(--green-dark);
+}
+.turini-dress__view-note {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+/* ── 꾸미기 카드 ───────────────────────────────────────────── */
+.turini-dress__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.turini-dress__head h2 { margin: 0; font-size: 19px; letter-spacing: -.01em; }
+.turini-dress__count {
+  flex: 0 0 auto;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--green-pale);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.turini-dress__tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.turini-dress__tabs::-webkit-scrollbar { display: none; }
+.turini-dress__tab {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 2px solid var(--line);
+  border-radius: 13px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.turini-dress__tab[data-active="true"] {
+  border-color: var(--green);
+  background: var(--green-pale);
+  color: var(--green-dark);
+}
+
+.turini-dress__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 12px 0 8px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.turini-dress__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.turini-dress__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+@media (min-width: 560px) {
+  .turini-dress__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.turini-dress__item {
+  width: 100%;
+  min-height: 44px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 9px 6px 10px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s;
+}
+.turini-dress__item:disabled { cursor: not-allowed; opacity: .78; }
+.turini-dress__item[data-state="selected"] { border-color: var(--green); background: var(--green-pale); }
+.turini-dress__item[data-state="owned"]:hover { transform: translateY(-1px); }
+.turini-dress__item b { font-size: 11.5px; color: var(--ink); text-align: center; overflow-wrap: anywhere; }
+
+.turini-dress__item-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: #f5f8f6;
+  overflow: hidden;
+}
+.turini-dress__item-art picture,
+.turini-dress__item-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.turini-dress__none-icon { width: 46%; height: 100%; margin: 0 auto; color: #a9b4ae; display: block; }
+
+.turini-dress__check,
+.turini-dress__lock {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+}
+.turini-dress__check { background: var(--green); color: #fff; }
+.turini-dress__lock { background: rgba(255,255,255,.92); color: #97a29c; }
+.turini-dress__check svg, .turini-dress__lock svg { width: 13px; height: 13px; }
+
+.turini-dress__need {
+  display: grid;
+  gap: 1px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.35;
+}
+.turini-dress__need i { font-style: normal; opacity: .8; }
+
+.turini-dress__empty,
+.turini-dress__notice {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turini-dress__item, .turini-dress__view { transition: none; }
+}
+
+/* ==========================================================================
+   포트폴리오 비중 입력 — 슬라이더·숫자·±버튼을 한 줄에서 함께 씁니다.
+   (globals.css 는 건드리지 않고 필요한 부분만 덮어씁니다)
+   ========================================================================== */
+
+/* 한 줄에 슬라이더와 ± 버튼을 다 넣으면 좁은 화면에서 버튼이 잘립니다.
+   그래서 좁을 때는 슬라이더를 아랫줄로 내립니다. */
+.asset-row {
+  display: grid;
+  grid-template-columns: 31px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "dot  name    stepper"
+    "rng  rng     rng";
+  gap: 8px;
+  align-items: center;
+}
+.asset-row > .asset-dot { grid-area: dot; }
+.asset-row > .asset-name { grid-area: name; }
+.asset-row > input[type="range"] { grid-area: rng; width: 100%; }
+.asset-row > .percent-stepper { grid-area: stepper; }
+
+@media (min-width: 620px) {
+  .asset-row {
+    grid-template-columns: 34px 118px minmax(0, 1fr) auto;
+    grid-template-areas: "dot name rng stepper";
+  }
+}
+
+.percent-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.percent-stepper > button {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 2px solid var(--line);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--green-dark);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+.percent-stepper > button:disabled { color: #b7c0ba; cursor: not-allowed; }
+.percent-stepper > button:active:not(:disabled) { transform: translateY(1px); }
+
+.asset-range {
+  margin: 4px 0 0 39px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.asset-range b { color: var(--red); font-weight: 800; }
+
+/* 합계 요약 — 화면 아래에 붙어 따라다닙니다 */
+.alloc-summary {
+  position: sticky;
+  bottom: 8px;
+  z-index: 9;
+  margin-top: 14px;
+  padding: 13px 14px 14px;
+  border: 2px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .97);
+  box-shadow: 0 8px 24px rgba(35, 70, 45, .1);
+  backdrop-filter: blur(8px);
+}
+.alloc-summary[data-ready="true"] { border-color: var(--green); }
+
+.alloc-summary__numbers {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+.alloc-summary__numbers span { display: grid; gap: 1px; min-width: 0; }
+.alloc-summary__numbers small { color: var(--muted); font-size: 10.5px; font-weight: 800; }
+.alloc-summary__numbers b { color: var(--ink); font-size: 15px; }
+.alloc-summary__numbers b.over { color: var(--red); }
+
+.alloc-summary__bar { margin: 9px 0 11px; }
+.alloc-summary[data-ready="true"] .alloc-summary__bar > span { background: var(--green); }
+.alloc-summary .primary-button { width: 100%; }
+
+@media (max-width: 390px) {
+  .percent-stepper > button { width: 31px; height: 31px; border-radius: 10px; }
+  .asset-range { margin-left: 0; }
+  .alloc-summary { padding: 11px 12px 12px; border-radius: 17px; }
+  .alloc-summary__numbers b { font-size: 14px; }
+}
+
+@media (max-width: 1100px) {
+  /* 모바일 하단 탭 바에 가리지 않도록 */
+  .alloc-summary { bottom: 82px; }
+}
+
+/* ── 안내·오류 화면 ────────────────────────────────────────── */
+.app-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 18px 0;
+  padding: 12px 14px;
+  border: 2px solid #ffd9d9;
+  border-radius: 16px;
+  background: #fff5f5;
+}
+.app-notice p { margin: 0; flex: 1 1 auto; color: #8f3b3b; font-size: 13px; line-height: 1.55; }
+.app-notice button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  background: #fff;
+  color: #8f3b3b;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.app-error {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 22px;
+  background: var(--background);
+  text-align: center;
+}
+.app-error h1 { margin: 4px 0 10px; font-size: 22px; color: var(--ink); }
+.app-error__copy { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.65; }

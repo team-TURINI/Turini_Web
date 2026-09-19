@@ -1,0 +1,386 @@
+/* ==========================================================================
+   투리니 금융 성장 지도 — 학습 화면
+
+   - globals.css 는 고치지 않았습니다. 이 파일은 layout.tsx 에서 마지막에
+     불려 오므로 필요한 부분만 덮어씁니다.
+   - 좌표는 전부 % 와 px 조합이고, 경로 SVG 는 viewBox 기반이라
+     320px 부터 데스크톱까지 같은 비율로 늘어납니다.
+   ========================================================================== */
+
+.learn-screen {
+  --map-accent: #2f9e4f;
+  --map-accent-dark: #1d7a39;
+  --map-accent-soft: #e6f7ea;
+  --map-sky-a: #f2fbf1;
+  --map-sky-b: #ffffff;
+  --map-band-1: rgba(96, 186, 112, .09);
+  --map-band-2: rgba(96, 186, 112, .2);
+  --map-band-3: rgba(96, 186, 112, .33);
+  --map-ink: #1d3b28;
+}
+.learn-screen[data-map-theme="purple"] {
+  --map-accent: #8663e9; --map-accent-dark: #5b3fbe; --map-accent-soft: #efeaff;
+  --map-sky-a: #f6f2ff; --map-sky-b: #ffffff;
+  --map-band-1: rgba(134, 99, 233, .08); --map-band-2: rgba(134, 99, 233, .19); --map-band-3: rgba(134, 99, 233, .31);
+  --map-ink: #2e2352;
+}
+.learn-screen[data-map-theme="orange"] {
+  --map-accent: #ef8a12; --map-accent-dark: #c26a05; --map-accent-soft: #fff1dd;
+  --map-sky-a: #fff7ea; --map-sky-b: #ffffff;
+  --map-band-1: rgba(239, 138, 18, .08); --map-band-2: rgba(239, 138, 18, .19); --map-band-3: rgba(239, 138, 18, .31);
+  --map-ink: #4a3212;
+}
+.learn-screen[data-map-theme="red"] {
+  --map-accent: #e8544f; --map-accent-dark: #b93832; --map-accent-soft: #ffeceb;
+  --map-sky-a: #fff3f2; --map-sky-b: #ffffff;
+  --map-band-1: rgba(232, 84, 79, .08); --map-band-2: rgba(232, 84, 79, .18); --map-band-3: rgba(232, 84, 79, .3);
+  --map-ink: #4d2220;
+}
+.learn-screen[data-map-theme="teal"] {
+  --map-accent: #12a8a2; --map-accent-dark: #087b77; --map-accent-soft: #e0f7f5;
+  --map-sky-a: #eefbfa; --map-sky-b: #ffffff;
+  --map-band-1: rgba(18, 168, 162, .08); --map-band-2: rgba(18, 168, 162, .19); --map-band-3: rgba(18, 168, 162, .31);
+  --map-ink: #11413f;
+}
+.learn-screen[data-map-theme="blue"] {
+  --map-accent: #2f8fe5; --map-accent-dark: #1b6ab3; --map-accent-soft: #e4f1ff;
+  --map-sky-a: #eff7ff; --map-sky-b: #ffffff;
+  --map-band-1: rgba(47, 143, 229, .08); --map-band-2: rgba(47, 143, 229, .19); --map-band-3: rgba(47, 143, 229, .31);
+  --map-ink: #1b3550;
+}
+
+/* 학습 배너도 같은 카테고리 색을 씁니다. */
+.learn-screen .learning-banner {
+  background: linear-gradient(135deg, var(--map-accent-soft), var(--map-sky-b) 70%, var(--map-sky-a));
+  border-color: color-mix(in srgb, var(--map-accent) 22%, #ffffff);
+}
+.learn-screen .learning-banner h2 { color: var(--map-accent-dark); }
+.learn-screen .learning-banner .progress-track > span { background: var(--map-accent); }
+
+
+/* ==========================================================================
+   세로형 금융 성장 로드맵
+   - 원형 노드가 좌우로 번갈아 나오는 징검다리 대신, 한 줄로 내려오는
+     타임라인과 직사각형 카드를 씁니다.
+   - 320px 에서도 가로 스크롤이 없고, 한 화면에 흐름이 보입니다.
+   ========================================================================== */
+
+.turini-road {
+  width: min(600px, 100%);
+  margin: 18px auto 0;
+}
+
+.turini-road__head {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+.turini-road__crest {
+  width: 42px; height: 42px;
+  display: grid; place-items: center;
+  border-radius: 14px;
+  background: var(--map-accent);
+  color: #fff;
+  font-size: 20px;
+  box-shadow: 0 4px 0 var(--map-accent-dark);
+}
+.turini-road__headline { min-width: 0; }
+.turini-road__eyebrow {
+  margin: 0;
+  color: var(--map-accent-dark);
+  font-size: 11px; font-weight: 900; letter-spacing: .02em;
+}
+.turini-road__headline h2 {
+  margin: 2px 0 0;
+  color: var(--map-ink);
+  font-size: 17px; letter-spacing: -.5px;
+  overflow-wrap: anywhere;
+}
+.turini-road__jump {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid color-mix(in srgb, var(--map-accent) 38%, #ffffff);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--map-accent-dark);
+  font-size: 11.5px; font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.turini-road__jump:hover { background: var(--map-accent-soft); }
+
+/* ── 난이도 탭 (화면 위에 붙어 따라다님) ───────────────────── */
+.turini-map__legend {
+  margin: 10px 0 0;
+  padding: 8px 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  position: sticky;
+  top: 68px;
+  z-index: 8;
+  background: linear-gradient(var(--background) 74%, rgba(255, 255, 255, 0));
+}
+.turini-map__legend li {
+  min-width: 0;
+  padding: 0;
+  border-radius: 14px;
+  background: var(--map-band-1);
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  transition: outline-color .2s, transform .2s;
+}
+.turini-map__legend li[data-terrain="growth"] { background: var(--map-band-2); }
+.turini-map__legend li[data-terrain="harvest"] { background: var(--map-band-3); }
+.turini-map__legend li[data-active="true"] { outline-color: var(--map-accent); transform: translateY(-1px); }
+.turini-map__legend-tab {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 9px 8px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.turini-map__legend b {
+  display: block;
+  color: var(--map-ink);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.turini-map__legend span {
+  display: block; margin-top: 1px;
+  color: var(--map-accent-dark);
+  font-size: 9px; font-weight: 800;
+}
+.turini-map__legend i {
+  display: block;
+  height: 5px; margin: 6px 0 4px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, .8);
+  overflow: hidden;
+  position: relative;
+}
+.turini-map__legend i::after {
+  content: "";
+  position: absolute; inset: 0 auto 0 0;
+  width: var(--fill, 0%);
+  background: var(--map-accent);
+  border-radius: inherit;
+}
+.turini-map__legend small { color: var(--map-ink); opacity: .65; font-size: 9px; font-weight: 800; }
+
+/* ── 구간(장) ──────────────────────────────────────────────── */
+.turini-road__track { display: grid; gap: 14px; margin-top: 6px; }
+
+.turini-road__band {
+  padding: 14px 13px 6px;
+  border-radius: 22px;
+  background: var(--map-band-1);
+  transition: box-shadow .2s;
+}
+.turini-road__band[data-terrain="growth"] { background: var(--map-band-2); }
+.turini-road__band[data-terrain="harvest"] { background: var(--map-band-3); }
+.turini-road__band[data-focus="true"] { box-shadow: 0 0 0 2px var(--map-accent); }
+
+.turini-road__band-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.turini-road__band-head p { margin: 0; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.turini-road__band-head b { color: var(--map-ink); font-size: 14px; }
+.turini-road__band-head p span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .85);
+  color: var(--map-accent-dark);
+  font-size: 10px; font-weight: 900;
+}
+.turini-road__band-head small { display: block; margin-top: 2px; color: var(--map-ink); opacity: .65; font-size: 11px; }
+.turini-road__band-head strong { color: var(--map-accent-dark); font-size: 14px; white-space: nowrap; }
+
+/* ── 단계 카드 ─────────────────────────────────────────────── */
+.turini-road__list { list-style: none; margin: 0; padding: 0; }
+
+.turini-road__step {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.turini-road__rail { position: relative; display: block; }
+.turini-road__line {
+  position: absolute;
+  left: 50%;
+  top: 0; bottom: 0;
+  width: 3px;
+  margin-left: -1.5px;
+  background: rgba(255, 255, 255, .85);
+}
+.turini-road__step:first-child .turini-road__line { top: 22px; }
+.turini-road__step:last-child .turini-road__line { bottom: calc(100% - 22px); }
+.turini-road__step[data-state="done"] .turini-road__line,
+.turini-road__step[data-state="current"] .turini-road__line { background: var(--map-accent); }
+
+.turini-road__marker {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: #dfe6e2;
+  color: #93a09a;
+  box-shadow: 0 2px 5px rgba(24, 72, 49, .12);
+}
+.turini-road__marker[data-state="done"] { background: var(--map-accent); color: #fff; }
+.turini-road__marker[data-state="current"] {
+  background: #fff;
+  border-color: var(--map-accent);
+  color: var(--map-accent-dark);
+  animation: turini-road-pulse 2.1s ease-in-out infinite;
+}
+.turini-map__star { font-size: 15px; line-height: 1; }
+.turini-map__lock { width: 15px; height: 15px; }
+.turini-road__level { font-size: 13px; font-weight: 900; }
+
+@keyframes turini-road-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--map-accent) 45%, transparent); }
+  55%      { box-shadow: 0 0 0 7px color-mix(in srgb, var(--map-accent) 0%, transparent); }
+}
+
+.turini-road__card {
+  margin-bottom: 12px;
+  padding: 13px 14px 14px;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(24, 72, 49, .06);
+}
+.turini-road__card[data-state="current"] {
+  border-color: var(--map-accent);
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--map-accent) 18%, transparent);
+}
+.turini-road__card[data-state="locked"] { background: rgba(255, 255, 255, .72); box-shadow: none; }
+.turini-road__card[data-state="locked"] h3 { color: #8b9791; }
+
+.turini-road__card-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.turini-road__chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--map-accent-soft);
+  color: var(--map-accent-dark);
+  font-size: 10.5px; font-weight: 900;
+}
+.turini-road__chip--kind { background: #f3f6f4; color: #6d7a73; }
+.turini-road__status {
+  margin-left: auto;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10.5px; font-weight: 900;
+}
+.turini-road__status[data-state="done"] { background: var(--green-pale); color: var(--green-dark); }
+.turini-road__status[data-state="current"] { background: var(--map-accent); color: #fff; }
+.turini-road__status[data-state="locked"] { background: #f1f4f2; color: #97a29c; }
+
+.turini-road__card h3 {
+  margin: 8px 0 0;
+  color: var(--map-ink);
+  font-size: 16px; letter-spacing: -.3px;
+  overflow-wrap: anywhere;
+}
+
+.turini-road__meta {
+  list-style: none;
+  margin: 9px 0 0;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.turini-road__meta li {
+  flex: 1 1 96px;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 12px;
+  background: #f6f9f7;
+}
+.turini-road__meta span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; }
+.turini-road__meta b { display: block; margin-top: 1px; color: var(--ink); font-size: 13px; }
+
+.turini-road__hint {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.turini-road__start {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 11px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--map-accent-dark);
+  font-size: 13.5px; font-weight: 900;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.turini-road__start:hover:not(:disabled) { background: var(--map-accent-soft); border-color: var(--map-accent); }
+.turini-road__start:disabled { background: #f1f4f2; border-color: transparent; color: #9aa5a0; cursor: not-allowed; }
+.turini-road__card[data-state="current"] .turini-road__start {
+  border: 0;
+  background: var(--map-accent);
+  color: #fff;
+  box-shadow: 0 5px 0 var(--map-accent-dark);
+}
+.turini-road__card[data-state="current"] .turini-road__start:active { transform: translateY(3px); box-shadow: none; }
+
+/* ── 넓은 화면: 카드 두 줄 정보 가로 배치 ──────────────────── */
+@media (min-width: 560px) {
+  .turini-road__step { grid-template-columns: 44px minmax(0, 1fr); }
+  .turini-road__card { padding: 15px 17px 16px; }
+  .turini-road__start { width: auto; min-width: 160px; padding: 0 22px; }
+}
+
+/* ── 좁은 화면 ─────────────────────────────────────────────── */
+@media (max-width: 420px) {
+  .turini-map__legend { gap: 5px; top: 60px; }
+  .turini-map__legend li { border-radius: 12px; }
+  .turini-map__legend-tab { padding: 7px 7px 6px; }
+  .turini-map__legend b { font-size: 10px; }
+  .turini-road__head { grid-template-columns: 38px minmax(0, 1fr) auto; gap: 9px; }
+  .turini-road__crest { width: 38px; height: 38px; font-size: 18px; }
+  .turini-road__headline h2 { font-size: 15px; }
+  .turini-road__jump { min-height: 32px; padding: 0 10px; font-size: 10.5px; }
+  .turini-road__band { padding: 12px 10px 4px; border-radius: 18px; }
+  .turini-road__step { grid-template-columns: 32px minmax(0, 1fr); gap: 8px; }
+  .turini-road__marker { width: 26px; height: 26px; border-width: 2.5px; }
+  .turini-road__card { padding: 11px 12px 12px; border-radius: 16px; }
+  .turini-road__card h3 { font-size: 15px; }
+}
+
+@media (max-width: 340px) {
+  .turini-map__legend { grid-template-columns: 1fr; }
+  .turini-map__legend-tab { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 6px; }
+  .turini-map__legend i { margin: 0; }
+  .turini-road__meta li { flex: 1 1 100%; }
+}
+
+/* ── 애니메이션을 줄이는 시스템 설정 ────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .turini-road__marker[data-state="current"] { animation: none !important; }
+  .turini-road__start, .turini-road__band, .turini-map__legend li { transition: none !important; }
+}

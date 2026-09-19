@@ -1,0 +1,194 @@
+/* ==========================================================================
+   난이도 선택 화면 (카테고리 → 난이도 → 징검다리 지도)
+
+   - globals.css 는 한 줄도 고치지 않았습니다. layout.tsx 에서 이 파일이
+     나중에 불려 오므로 같은 선택자는 이 파일이 적용됩니다.
+   - 색은 카드마다 --tone / --tone-dark / --tone-soft 로 들어옵니다.
+   - 320px 에서도 가로 스크롤이 생기지 않도록 최소 폭 기준으로 맞췄습니다.
+   ========================================================================== */
+
+.difficulty-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 0 26px;
+}
+
+/* ── 머리말 ─────────────────────────────────────────────────── */
+
+.difficulty-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.difficulty-back {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 14px 0 8px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--green-dark);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .15s;
+}
+.difficulty-back:hover { background: var(--green-pale); }
+.difficulty-back:active { transform: translateY(1px); }
+
+.difficulty-title {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.difficulty-title h1 {
+  margin: 0;
+  font-size: 25px;
+  line-height: 1.24;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+.difficulty-title .eyebrow { margin-bottom: 3px; }
+
+.difficulty-crest {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background: var(--green-pale);
+  border: 2px solid var(--line);
+  font-size: 26px;
+  line-height: 1;
+}
+
+.difficulty-lead {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+/* ── 카드 목록 ──────────────────────────────────────────────── */
+
+.difficulty-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.difficulty-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--card-radius);
+  border: 2px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--soft-shadow);
+  transition: border-color .18s, transform .18s;
+}
+.difficulty-card[data-state="started"] { border-color: color-mix(in srgb, var(--tone) 55%, var(--line)); }
+.difficulty-card[data-state="locked"] { opacity: .72; box-shadow: none; }
+.difficulty-card[data-state="locked"] .difficulty-card__icon { filter: grayscale(1); }
+
+.difficulty-card__top {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.difficulty-card__icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 17px;
+  background: var(--tone-soft);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.difficulty-card__name h2 {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: -.01em;
+  color: var(--tone-dark);
+}
+.difficulty-card__name p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.difficulty-card__lock {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: #a4b0aa;
+}
+.difficulty-card__lock svg { width: 20px; height: 20px; }
+
+/* 진행률 */
+.difficulty-card__meter { display: grid; gap: 7px; }
+.difficulty-card__meter .progress-track > span { background: var(--tone); }
+
+.difficulty-card__numbers {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.difficulty-card__numbers b { color: var(--ink); font-weight: 800; }
+.difficulty-card__numbers span { color: var(--muted); font-weight: 700; }
+
+.difficulty-card__hint {
+  margin: -4px 0 0;
+  padding: 10px 12px;
+  border-radius: 13px;
+  background: #f4f7f5;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.difficulty-card__start {
+  width: 100%;
+  background: var(--tone);
+  box-shadow: 0 5px 0 var(--tone-dark);
+}
+.difficulty-card__start:active { box-shadow: none; }
+.difficulty-card__start:disabled { background: #d8ded9; box-shadow: 0 4px 0 #c6ceca; }
+
+/* ── 넓은 화면에서는 세 장을 나란히 ─────────────────────────── */
+@media (min-width: 760px) {
+  .difficulty-list { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+  .difficulty-list > li { display: flex; }
+  .difficulty-card { flex: 1 1 auto; }
+  .difficulty-card__start { margin-top: auto; }
+}
+
+/* ── 작은 화면 ──────────────────────────────────────────────── */
+@media (max-width: 390px) {
+  .difficulty-title h1 { font-size: 22px; }
+  .difficulty-crest { width: 46px; height: 46px; border-radius: 15px; font-size: 22px; }
+  .difficulty-card { padding: 15px; gap: 12px; }
+  .difficulty-card__top { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; }
+  .difficulty-card__icon { width: 44px; height: 44px; border-radius: 14px; font-size: 21px; }
+  .difficulty-card__name h2 { font-size: 17px; }
+  .difficulty-card__name p { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .difficulty-card,
+  .difficulty-back { transition: none; }
+}

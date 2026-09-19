@@ -40,3 +40,18 @@ export function categoryLessonPool<
     .map(([, variants]) => variants.sort((left, right) => left.id.localeCompare(right.id))[variantIndex])
     .filter((question): question is T => Boolean(question));
 }
+
+/** 난이도 구간의 첫 레슨 번호 (1-4 초급 · 5-8 중급 · 9-12 고급) */
+export const BAND_START: Record<string, number> = { 초급: 1, 중급: 5, 고급: 9 };
+export const BAND_SIZE = 4;
+
+/**
+ * 그 난이도 구간에서 지금 들어가면 좋은 레슨 번호.
+ * 이미 지난 레슨은 건너뛰고, 구간을 벗어나지 않습니다.
+ */
+export function bandEntryLesson(difficulty: string, completedLessons: number, totalLessons = MAX_CATEGORY_LEVEL) {
+  const from = BAND_START[difficulty] ?? 1;
+  const to = Math.min(totalLessons, from + BAND_SIZE - 1);
+  const done = Number.isFinite(completedLessons) ? Math.max(0, Math.floor(completedLessons)) : 0;
+  return Math.min(to, Math.max(from, done + 1));
+}

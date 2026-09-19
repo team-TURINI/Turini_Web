@@ -1,0 +1,21 @@
+{
+  "name": "Turini Animation Atlas V1",
+  "image": "turini-animation-atlas-v1.png",
+  "canvas": { "width": 1024, "height": 1536 },
+  "grid": { "columns": 4, "rows": 6 },
+  "frame": { "width": 256, "height": 256 },
+  "animations": {
+    "idle": { "row": 0, "frames": 4, "durationMs": 1800, "loop": true },
+    "thinking": { "row": 1, "frames": 4, "durationMs": 1400, "loop": true },
+    "correct": { "row": 2, "frames": 4, "durationMs": 900, "loop": false },
+    "wrong": { "row": 3, "frames": 4, "durationMs": 1100, "loop": false },
+    "celebrate": { "row": 4, "frames": 4, "durationMs": 900, "loop": false },
+    "reading": { "row": 5, "frames": 4, "durationMs": 1800, "loop": true }
+  },
+  "notes": [
+    "Each animation runs left to right across one row.",
+    "Use image-rendering: auto; do not use pixelated rendering.",
+    "Keep the element aspect ratio at 1:1 and use overflow: visible around the mascot container.",
+    "Correct and wrong animations must preserve their check and X placards."
+  ]
+}

@@ -1,0 +1,333 @@
+/* ==========================================================================
+   투리니 캐릭터 애니메이션 (1단계)
+
+   - globals.css 는 한 줄도 고치지 않았습니다. 이 파일이 layout.tsx 에서
+     globals.css 다음에 불려 오므로, 같은 선택자는 이 파일 쪽이 적용됩니다.
+   - 모든 캐릭터 칸은 정사각형(aspect-ratio 1/1)이고 아틀라스 한 칸이 정확히
+     한 번 들어가므로 contain 과 같은 방식입니다. 늘어나거나 잘리지 않습니다.
+   - 아틀라스 칸 안에도 안전 여백이 들어 있습니다(좌우 최소 36px, 위 17px,
+     아래 19px / 288px 기준). 여기에 아래 컨테이너 규칙이 overflow: visible 을
+     보장하므로 320px 화면에서도 귀·뿔·팻말이 잘리지 않습니다.
+   ========================================================================== */
+
+:root {
+  --turini-atlas: url("/assets/turini-atlas-v2.png");
+  --turini-ground: 92.36%;      /* 아틀라스 안에서 발이 닿는 지면선 */
+}
+
+.turini {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 128px;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.turini__stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% var(--turini-ground);
+  animation: turini-appear .34s cubic-bezier(.34, 1.36, .64, 1) both;
+}
+
+.turini__sprite {
+  position: absolute;
+  inset: 0;
+  background-image: var(--turini-atlas);
+  background-repeat: no-repeat;
+  background-size: 400% 600%;   /* 4칸 × 6줄 — 한 칸이 요소 크기에 정확히 맞습니다 */
+  image-rendering: auto;
+  transform-origin: 50% var(--turini-ground);
+  will-change: transform;
+}
+
+/* 지면에 고정되는 그림자. 캐릭터가 떠오를 때만 작아지고 옅어져서 접지감을 만듭니다. */
+.turini__shadow {
+  position: absolute;
+  left: 50%;
+  top: var(--turini-ground);
+  width: 44%;
+  height: 8%;
+  transform: translate(-50%, -50%);
+  transform-origin: 50% 50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(36, 74, 48, .28), rgba(36, 74, 48, 0) 78%);
+}
+
+/* ── 공통 동작 ──────────────────────────────────────────────── */
+
+/* 위아래로 떠다니지 않고, 지면에 발을 붙인 채 가슴만 부푸는 호흡 */
+@keyframes turini-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  50%      { transform: scale(.988, 1.016); }
+}
+
+@keyframes turini-appear {
+  0%   { transform: scale(.93); opacity: .35; }
+  55%  { transform: scale(1.035); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes turini-shadow-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  50%      { transform: translate(-50%, -50%) scale(.975); opacity: .9; }
+}
+
+/* ── 생각 중: 고개를 살짝 기울이는 느낌 ─────────────────────── */
+@keyframes turini-ponder {
+  0%, 100% { transform: rotate(-1.5deg) scale(1, 1); }
+  45%      { transform: rotate(1.3deg) scale(.994, 1.012); }
+}
+
+/* ── 정답: 팻말을 든 채 몸이 튀어 오르는 기쁨 ───────────────── */
+@keyframes turini-cheer {
+  0%   { transform: translateY(4%) scale(1.04, .95); }
+  22%  { transform: translateY(-7%) scale(.97, 1.05); }
+  48%  { transform: translateY(-11%) scale(.98, 1.03); }
+  72%  { transform: translateY(1%) scale(1.04, .96); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes turini-shadow-cheer {
+  0%   { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+  35%  { transform: translate(-50%, -50%) scale(.74); opacity: .5; }
+  72%  { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* ── 오답: 뛰지 않고 고개가 아래로 처졌다가 돌아옵니다 ──────── */
+@keyframes turini-droop {
+  0%   { transform: translateY(-2%) rotate(0deg); }
+  35%  { transform: translateY(1.6%) rotate(-2.3deg) scale(1.012, .985); }
+  70%  { transform: translateY(1%) rotate(1.5deg) scale(1.006, .99); }
+  100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+}
+
+/* ── 학습 완료: 두 번 뛰면서 축하 ───────────────────────────── */
+@keyframes turini-jump {
+  0%   { transform: translateY(3%) scale(1.05, .94); }
+  14%  { transform: translateY(-9%) scale(.96, 1.06); }
+  30%  { transform: translateY(-14%) scale(.97, 1.04); }
+  46%  { transform: translateY(2%) scale(1.05, .95); }
+  60%  { transform: translateY(-8%) scale(.96, 1.05); }
+  76%  { transform: translateY(-13%) scale(.97, 1.04); }
+  92%  { transform: translateY(1%) scale(1.03, .97); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes turini-shadow-jump {
+  0%   { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+  22%  { transform: translate(-50%, -50%) scale(.66); opacity: .42; }
+  46%  { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+  68%  { transform: translate(-50%, -50%) scale(.68); opacity: .45; }
+  92%  { transform: translate(-50%, -50%) scale(1.04); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* ── 상태별 배정 ────────────────────────────────────────────── */
+.turini[data-state="idle"] .turini__sprite {
+  animation: turini-breathe 3.6s ease-in-out infinite;
+}
+.turini[data-state="reading"] .turini__sprite {
+  animation: turini-breathe 4.4s ease-in-out infinite;
+}
+.turini[data-state="thinking"] .turini__sprite {
+  animation: turini-ponder 3.2s ease-in-out infinite;
+}
+.turini[data-state="correct"] .turini__sprite {
+  animation:
+    turini-cheer .78s cubic-bezier(.3, .9, .4, 1) both,
+    turini-breathe 3.4s ease-in-out .78s infinite;
+}
+.turini[data-state="wrong"] .turini__sprite {
+  animation:
+    turini-droop 1.02s ease-in-out both,
+    turini-breathe 4.6s ease-in-out 1.02s infinite;
+}
+.turini[data-state="celebrate"] .turini__sprite {
+  animation:
+    turini-jump 1.21s cubic-bezier(.3, .85, .4, 1) both,
+    turini-breathe 3.2s ease-in-out 1.21s infinite;
+}
+
+.turini .turini__shadow {
+  animation: turini-shadow-breathe 3.6s ease-in-out infinite;
+}
+.turini[data-state="correct"] .turini__shadow {
+  animation:
+    turini-shadow-cheer .78s cubic-bezier(.3, .9, .4, 1) both,
+    turini-shadow-breathe 3.4s ease-in-out .78s infinite;
+}
+.turini[data-state="celebrate"] .turini__shadow {
+  animation:
+    turini-shadow-jump 1.21s cubic-bezier(.3, .85, .4, 1) both,
+    turini-shadow-breathe 3.2s ease-in-out 1.21s infinite;
+}
+
+/* 꾸미기 화면처럼 액세서리를 붙여야 할 때는 캐릭터를 멈춰 세웁니다. */
+.turini[data-frozen="true"] .turini__stage,
+.turini[data-frozen="true"] .turini__sprite,
+.turini[data-frozen="true"] .turini__shadow {
+  animation: none !important;
+}
+.turini[data-frozen="true"] .turini__sprite { transform: none !important; }
+.turini[data-frozen="true"] .turini__shadow { transform: translate(-50%, -50%) !important; }
+
+/* ── 애니메이션을 줄이는 시스템 설정 ────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .turini__stage,
+  .turini__sprite {
+    animation: none !important;
+    transform: none !important;
+  }
+  .turini__shadow {
+    animation: none !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+/* ==========================================================================
+   배치 — 화면마다 정사각형 칸을 잡아 주고, 캐릭터를 자르던 규칙을 되돌립니다.
+   ========================================================================== */
+
+/* 홈 히어로 */
+.hero-mascot {
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: visible;
+}
+.turini-hero { width: 172px; }
+
+/* 온보딩 · 로그인 · 로딩 */
+.turini-onboarding { width: 196px; margin: 0 auto -4px; }
+.turini-auth { width: 200px; margin: 0 auto; }
+.turini-loading { width: 184px; margin: 0 auto 6px; }
+
+/* 퀴즈 화면 */
+.quiz-mascot.waiting,
+.quiz-mascot.answered {
+  grid-template-columns: 140px minmax(0, 1fr);
+  align-items: end;
+  overflow: visible;
+}
+.quiz-mascot.waiting .speech { white-space: normal; }
+.turini-quiz { width: 140px; }
+
+/* 레슨 결과 */
+.result-card-page { overflow: visible; }
+.turini-lesson-result { width: 190px; margin: 0 auto -6px; }
+
+/* 미래 자산 배너 */
+.future-banner { grid-template-columns: minmax(0, 1fr) 132px; overflow: visible; }
+.turini-future { width: 130px; justify-self: end; }
+
+/* 학습 배너 */
+.learning-banner { overflow: visible; }
+.turini-learning { width: 152px; align-self: flex-end; }
+
+/* 포트폴리오 안내 */
+.portfolio-intro { overflow: visible; }
+.portfolio-mascot-frame {
+  width: auto;
+  height: auto;
+  flex: 0 0 auto;
+  padding: 0;
+  overflow: visible;
+  display: flex;
+  align-items: flex-end;
+}
+.turini-portfolio { width: 144px; }
+
+/* 포트폴리오 결과 · 코치 */
+.result-hero { overflow: visible; }
+.turini-score { width: 140px; margin-left: 10px; }
+.coach-banner { overflow: visible; }
+.turini-coach { width: 94px; }
+.ai-coach-panel { grid-template-columns: 132px 1fr; overflow: visible; }
+.turini-ai-coach { width: 132px; }
+
+/* 마이페이지 */
+.profile-hero { overflow: visible; }
+.profile-mascot-frame {
+  width: auto;
+  height: auto;
+  padding: 5px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.turini-profile { width: 142px; }
+
+/* 자산 플래너 · 돈 흐름 팁 */
+.asset-planner-mascot {
+  width: auto;
+  height: auto;
+  padding: 0;
+  overflow: visible;
+  display: grid;
+  place-items: center;
+}
+.turini-planner { width: 168px; }
+.coach-nudge { grid-template-columns: 88px 1fr; overflow: visible; }
+.turini-nudge { width: 88px; }
+
+/* ── 태블릿 이하 ────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  .auth-brand { overflow: visible; }
+  .turini-auth { width: 116px; margin: 0; }
+}
+
+@media (max-width: 620px) {
+  .turini-hero { width: 122px; }
+  .turini-onboarding { width: 180px; }
+  .turini-loading { width: 168px; }
+  .quiz-mascot.waiting,
+  .quiz-mascot.answered { grid-template-columns: 134px minmax(0, 1fr); }
+  .turini-quiz { width: 134px; }
+  .turini-lesson-result { width: 176px; }
+  .future-banner { grid-template-columns: minmax(0, 1fr) 112px; }
+  .turini-future { width: 110px; }
+  .turini-learning { width: 128px; }
+  .turini-portfolio { width: 122px; }
+  .turini-score { width: 122px; }
+  .turini-coach { width: 86px; }
+  .ai-coach-panel { grid-template-columns: 100px 1fr; }
+  .turini-ai-coach { width: 100px; }
+  .turini-profile { width: 120px; }
+  .turini-planner { width: 126px; }
+  .coach-nudge { grid-template-columns: 86px 1fr; }
+  .turini-nudge { width: 86px; }
+}
+
+/* ── 390px 이하 (그리고 최소 폭 320px) ──────────────────────── */
+@media (max-width: 390px) {
+  .turini-hero { width: 110px; }
+  .turini-onboarding { width: 156px; }
+  .turini-auth { width: 112px; }
+  .turini-loading { width: 148px; }
+  .quiz-mascot.waiting,
+  .quiz-mascot.answered { grid-template-columns: 122px minmax(0, 1fr); }
+  .turini-quiz { width: 122px; }
+  .turini-lesson-result { width: 154px; }
+  .future-banner { grid-template-columns: minmax(0, 1fr) 96px; }
+  .turini-future { width: 94px; }
+  .turini-learning { width: 112px; }
+  .turini-portfolio { width: 108px; }
+  .turini-score { width: 108px; margin-left: 6px; }
+  .turini-coach { width: 80px; }
+  .ai-coach-panel { grid-template-columns: 94px 1fr; }
+  .turini-ai-coach { width: 94px; }
+  .turini-profile { width: 106px; }
+  .turini-planner { width: 104px; }
+  .coach-nudge { grid-template-columns: 80px 1fr; }
+  .turini-nudge { width: 80px; }
+}
