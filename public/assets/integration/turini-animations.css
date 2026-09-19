@@ -1,0 +1,27 @@
+/* Turini 12-frame atlas. Change --turini-size to resize without clipping. */
+.turini-sprite {
+  --turini-size: 256px;
+  width: var(--turini-size);
+  height: var(--turini-size);
+  background-image: url("../animations/turini-animation-atlas-12f.png");
+  background-size: calc(var(--turini-size) * 12) calc(var(--turini-size) * 6);
+  background-repeat: no-repeat;
+  background-position-x: 0;
+  background-position-y: calc(var(--turini-size) * var(--turini-row) * -1);
+  overflow: visible;
+  flex: 0 0 auto;
+}
+
+.turini-idle { --turini-row: 0; animation: turini-loop 1.32s steps(11) infinite; }
+.turini-thinking { --turini-row: 1; animation: turini-loop 1.32s steps(11) infinite; }
+.turini-correct { --turini-row: 2; animation: turini-once 1.32s steps(11) 1 both; }
+.turini-wrong { --turini-row: 3; animation: turini-once 1.32s steps(11) 1 both; }
+.turini-celebrate { --turini-row: 4; animation: turini-once 1.32s steps(11) 1 both; }
+.turini-reading { --turini-row: 5; animation: turini-loop 1.32s steps(11) infinite; }
+
+@keyframes turini-loop { to { background-position-x: calc(var(--turini-size) * -11); } }
+@keyframes turini-once { to { background-position-x: calc(var(--turini-size) * -11); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .turini-sprite { animation: none !important; }
+}

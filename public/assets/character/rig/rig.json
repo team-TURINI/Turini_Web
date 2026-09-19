@@ -1,0 +1,47 @@
+{
+  "canvas": [
+    1200,
+    1200
+  ],
+  "pivots": {
+    "head": [
+      600,
+      617
+    ],
+    "arm_left": [
+      442,
+      648
+    ],
+    "arm_right": [
+      759,
+      648
+    ],
+    "leg_left": [
+      536,
+      930
+    ],
+    "leg_right": [
+      664,
+      930
+    ],
+    "body": [
+      600,
+      750
+    ]
+  },
+  "layerOrder": [
+    "shadow",
+    "bags/*",
+    "body",
+    "leg_left",
+    "leg_right",
+    "arm_left",
+    "arm_right",
+    "head",
+    "face/*",
+    "neck/*",
+    "glasses/*",
+    "hats/*",
+    "hand_props/*"
+  ]
+}

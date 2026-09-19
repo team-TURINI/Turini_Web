@@ -1,0 +1,45 @@
+{
+  "frame": {
+    "width": 256,
+    "height": 256
+  },
+  "framesPerAnimation": 12,
+  "animations": {
+    "idle": {
+      "row": 0,
+      "frames": 12,
+      "loop": true,
+      "durationMs": 1320
+    },
+    "thinking": {
+      "row": 1,
+      "frames": 12,
+      "loop": true,
+      "durationMs": 1320
+    },
+    "correct": {
+      "row": 2,
+      "frames": 12,
+      "loop": false,
+      "durationMs": 1320
+    },
+    "wrong": {
+      "row": 3,
+      "frames": 12,
+      "loop": false,
+      "durationMs": 1320
+    },
+    "celebrate": {
+      "row": 4,
+      "frames": 12,
+      "loop": false,
+      "durationMs": 1320
+    },
+    "reading": {
+      "row": 5,
+      "frames": 12,
+      "loop": true,
+      "durationMs": 1320
+    }
+  }
+}
