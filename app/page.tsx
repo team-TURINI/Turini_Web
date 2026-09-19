@@ -358,7 +358,7 @@ export default function Home() {
       try {
         setDataError("");
         const [quizResponse, diagnosisResponse, accountResponse] = await Promise.all([
-          fetch("/data/quizData_720_FINAL.json"),
+          fetch("/data/quizData_864_FINAL.json"),
           fetch("/data/diagnostic_quiz.json"),
           fetch("/api/account", { cache: "no-store" }),
         ]);
@@ -1010,7 +1010,7 @@ export default function Home() {
               <div className="category-list">{CATEGORIES.map((category) => {
                 const solved = categoryCounts[category.name] || 0;
                 const categoryLevel = categoryLevelForSolved(solved);
-                return <article className={`category-card ${category.color}`} key={category.name}><button className="category-main" onClick={() => openDifficulty(category.name)}><span className="category-icon">{category.icon}</span><div><div className="category-title-row"><h2>{category.name}</h2><span>Lv. {categoryLevel}</span></div><p>{category.copy}</p><div className="progress-track"><span style={{ width: `${solved / 120 * 100}%` }} /></div><small>{solved} / 120문항 완료 · 난이도 고르기</small></div><b>›</b></button><div className="difficulty-row">{(["초급", "중급", "고급"] as Difficulty[]).map((difficulty) => <button key={difficulty} onClick={() => startCategory(category.name, difficulty)}>{difficulty}</button>)}</div></article>;
+                return <article className={`category-card ${category.color}`} key={category.name}><button className="category-main" onClick={() => openDifficulty(category.name)}><span className="category-icon">{category.icon}</span><div><div className="category-title-row"><h2>{category.name}</h2><span>Lv. {categoryLevel}</span></div><p>{category.copy}</p><div className="progress-track"><span style={{ width: `${Math.min(100, solved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></div><small>{Math.min(solved, QUESTIONS_PER_CATEGORY)} / {QUESTIONS_PER_CATEGORY}문항 완료 · 난이도 고르기</small></div><b>›</b></button><div className="difficulty-row">{(["초급", "중급", "고급"] as Difficulty[]).map((difficulty) => <button key={difficulty} onClick={() => startCategory(category.name, difficulty)}>{difficulty}</button>)}</div></article>;
               })}</div>
             </div>
           )}

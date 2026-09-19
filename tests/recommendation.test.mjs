@@ -11,11 +11,11 @@ import {
 
 /**
  * 추천이 실제로 사용자 기록에 따라 달라지는지, 서로 다른 이력을 가진
- * 가상 사용자 6명으로 확인합니다. 실제 720문항을 그대로 씁니다.
+ * 가상 사용자 6명으로 확인합니다. 실제 864문항을 그대로 씁니다.
  */
 
 const pool = JSON.parse(
-  await readFile(new URL("../public/data/quizData_720_FINAL.json", import.meta.url), "utf8"),
+  await readFile(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"),
 );
 const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 

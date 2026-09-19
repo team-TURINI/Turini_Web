@@ -7,9 +7,10 @@ import {
   categoryLevelForSolved,
   completedCategoryLessonsForSolved,
   MAX_CATEGORY_LEVEL,
+  QUESTIONS_PER_CATEGORY_LEVEL,
 } from "../app/category-progress.ts";
 
-const quizData = JSON.parse(readFileSync(new URL("../public/data/quizData_720_FINAL.json", import.meta.url), "utf8"));
+const quizData = JSON.parse(readFileSync(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"));
 
 test("each category starts at level 1 and gains a level per 10 unique solved questions", () => {
   assert.equal(categoryLevelForSolved(0), 1);
@@ -42,17 +43,19 @@ test("each category's 12 lessons map to four lessons per difficulty", () => {
   assert.equal(categoryDifficultyForLesson(12), "고급");
 });
 
-test("every category lesson contains ten distinct concepts and covers all 120 variants", () => {
+test("every category lesson pool offers twelve distinct concepts and the twelve lessons cover all 144 variants", () => {
   const categories = [...new Set(quizData.map((question) => question.category))];
   for (const category of categories) {
     const ids = new Set();
     for (let lesson = 1; lesson <= MAX_CATEGORY_LEVEL; lesson += 1) {
       const pool = categoryLessonPool(quizData, category, lesson);
-      assert.equal(pool.length, 10, `${category} level ${lesson}`);
-      assert.equal(new Set(pool.map((question) => question.base_id)).size, 10, `${category} level ${lesson}`);
+      // 칸(카테고리×난이도)마다 개념 12개. 레슨은 이 중 10문항만 내고, 나머지는 자유 학습에서 나온다.
+      assert.equal(pool.length, 12, `${category} level ${lesson}`);
+      assert.ok(pool.length >= QUESTIONS_PER_CATEGORY_LEVEL, `${category} level ${lesson}`);
+      assert.equal(new Set(pool.map((question) => question.base_id)).size, 12, `${category} level ${lesson}`);
       pool.forEach((question) => ids.add(question.id));
     }
-    assert.equal(ids.size, 120, category);
+    assert.equal(ids.size, 144, category);
   }
 });
 

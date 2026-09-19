@@ -1,5 +1,5 @@
 /**
- * 720문항 중복·태그 점검 스크립트 (1회 실행)
+ * 864문항 중복·태그 점검 스크립트 (1회 실행)
  *   node scripts/audit-questions.mjs
  *
  * 문항을 지우거나 고치지 않습니다. 읽기만 하고 결과를 보고합니다.
@@ -7,7 +7,7 @@
  */
 import { readFile, writeFile } from "node:fs/promises";
 
-const data = JSON.parse(await readFile(new URL("../public/data/quizData_720_FINAL.json", import.meta.url), "utf8"));
+const data = JSON.parse(await readFile(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"));
 const parentIndex = JSON.parse(await readFile(new URL("../reference-data/parent_tag_index_FINAL.json", import.meta.url), "utf8"));
 
 /** 공백·기호·괄호를 없애고 비교용으로 만든 문자열 */
@@ -176,7 +176,7 @@ const report = {
 };
 
 console.log(JSON.stringify(report, null, 2));
-await writeFile(new URL("../design-assets/question-audit.json", import.meta.url),
+await writeFile(new URL("../app/design-assets/question-audit.json", import.meta.url),
   JSON.stringify({ report, buckets, tags: { multiParent, unknownParents, unusedParents, unknownWeak, unusedWeak, mismatchedLink, typoCandidates, missing,
     weakCounts: Object.fromEntries(weakCounts), parentCounts: Object.fromEntries(parentCounts) } }, null, 2));
-console.log("\n자세한 목록 → design-assets/question-audit.json");
+console.log("\n자세한 목록 → app/design-assets/question-audit.json");

@@ -10,19 +10,23 @@ import {
   scheduleRetry,
 } from "../app/quiz-scheduler.ts";
 
-const questions = JSON.parse(fs.readFileSync(new URL("../public/data/quizData_720_FINAL.json", import.meta.url), "utf8"));
+const questions = JSON.parse(fs.readFileSync(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"));
 const expectedTypes = new Set(["4지선다", "OX", "빈칸선택", "빈칸직접입력"]);
 const officialSourceDomains = new Set([
   "blogs.cfainstitute.org", "data.krx.co.kr", "files.stlouisfed.org", "global.krx.co.kr", "kind.krx.co.kr",
   "law.kofia.or.kr", "pdf.krx.co.kr", "www.bis.org", "www.bok.or.kr", "www.cfainstitute.org", "www.cftc.gov",
   "www.ecb.europa.eu", "www.finra.org", "www.fsc.go.kr", "www.imf.org", "www.investor.gov", "www.ishares.com",
   "www.kdic.or.kr", "www.oecd.org", "www.samsungfund.com",
+  // 864 확장(2026-09-20)에서 추가된 1차 출처
+  "app2.msci.com", "institutional.fidelity.com", "investor.vanguard.com", "rpc.cfainstitute.org", "service-manual.ons.gov.uk",
+  "syndication.finra.org", "workplace.schwab.com", "www.gipsstandards.org", "www.ifrs.org", "www.msci.com", "www.schwab.com",
+  "www.treasurydirect.gov",
 ]);
 
-test("all 720 learning questions are structurally usable", () => {
-  assert.equal(questions.length, 720);
-  assert.equal(new Set(questions.map((question) => question.id)).size, 720);
-  assert.equal(new Set(questions.map((question) => question.question.trim().replace(/\s+/gu, " "))).size, 720);
+test("all 864 learning questions are structurally usable", () => {
+  assert.equal(questions.length, 864);
+  assert.equal(new Set(questions.map((question) => question.id)).size, 864);
+  assert.equal(new Set(questions.map((question) => question.question.trim().replace(/\s+/gu, " "))).size, 864);
   const groups = new Map();
   for (const question of questions) {
     assert.ok(question.id && question.base_id && question.question && question.answer && question.explanation);
@@ -49,7 +53,7 @@ test("all 720 learning questions are structurally usable", () => {
       assert.ok(question.choices.includes(question.answer), question.id);
     }
   }
-  assert.equal(groups.size, 180);
+  assert.equal(groups.size, 216);
   for (const [baseId, variants] of groups) {
     assert.equal(variants.length, 4, baseId);
     assert.deepEqual(new Set(variants.map((question) => question.type)), expectedTypes, baseId);
@@ -59,7 +63,7 @@ test("all 720 learning questions are structurally usable", () => {
   }
 });
 
-test("tag crosswalk and parent index exactly match the 720-question dataset", () => {
+test("tag crosswalk and parent index exactly match the 864-question dataset", () => {
   const csv = fs.readFileSync(new URL("../reference-data/tag_crosswalk_FINAL.csv", import.meta.url), "utf8").replace(/^\uFEFF/u, "").trim();
   const [headerLine, ...lines] = csv.split(/\r?\n/u);
   const headers = headerLine.split(",");

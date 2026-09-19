@@ -5,7 +5,7 @@ import test from "node:test";
 const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 const feedbackRouteSource = await readFile(new URL("../app/api/portfolio-feedback/route.ts", import.meta.url), "utf8");
 const envExampleSource = await readFile(new URL("../.env.example", import.meta.url), "utf8");
-const quizData = JSON.parse(await readFile(new URL("../public/data/quizData_720_FINAL.json", import.meta.url), "utf8"));
+const quizData = JSON.parse(await readFile(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"));
 const spriteSource2 = await readFile(new URL("../app/turini-sprite.tsx", import.meta.url), "utf8");
 const avatarSource2 = await readFile(new URL("../app/turini-avatar.tsx", import.meta.url), "utf8");
 

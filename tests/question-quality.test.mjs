@@ -3,13 +3,13 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 /**
- * 720문항 중복·태그 점검을 테스트로 고정해 둡니다.
+ * 864문항 중복·태그 점검을 테스트로 고정해 둡니다.
  * 나중에 문항을 고치다가 중복이나 태그 오연결이 생기면 바로 걸립니다.
  * (자세한 목록은 `node scripts/audit-questions.mjs` 가 만드는 리포트에 있습니다)
  */
 
 const data = JSON.parse(
-  await readFile(new URL("../public/data/quizData_720_FINAL.json", import.meta.url), "utf8"),
+  await readFile(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"),
 );
 const parentIndex = JSON.parse(
   await readFile(new URL("../reference-data/parent_tag_index_FINAL.json", import.meta.url), "utf8"),
@@ -24,7 +24,7 @@ const norm = (value) =>
     .toLowerCase();
 
 test("문항 수와 id 는 그대로 유지된다", () => {
-  assert.equal(data.length, 720);
+  assert.equal(data.length, 864);
   const ids = data.map((item) => item.id);
   assert.equal(new Set(ids).size, ids.length, "문항 id 가 중복됩니다");
 });

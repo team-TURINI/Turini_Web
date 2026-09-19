@@ -26,10 +26,10 @@ test("question-specific accepted answers are honored", () => {
   assert.equal(isAnswerCorrect("주식보유자", "주주", ["기업의 일부 소유자"]), true);
 });
 
-test("all 180 direct-input official answers remain gradeable", () => {
-  const questions = JSON.parse(fs.readFileSync(new URL("../public/data/quizData_720_FINAL.json", import.meta.url), "utf8"));
+test("all 216 direct-input official answers remain gradeable", () => {
+  const questions = JSON.parse(fs.readFileSync(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"));
   const directAnswers = questions.filter((question) => question.type === "빈칸직접입력");
-  assert.equal(directAnswers.length, 180);
+  assert.equal(directAnswers.length, 216);
   for (const question of directAnswers) {
     assert.ok(normalizeAnswer(question.answer), question.id);
     assert.equal(isAnswerCorrect(question.answer, question.answer), true, question.id);

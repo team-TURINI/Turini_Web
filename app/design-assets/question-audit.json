@@ -1,17 +1,17 @@
 {
   "report": {
-    "총문항": 720,
+    "총문항": 864,
     "중복": {
       "exactSameText": 0,
       "sameAfterNorm": 0,
       "sameChoicesOrder": 0,
       "similarWording": 3,
-      "sameExplanation": 174,
+      "sameExplanation": 210,
       "sameConceptRepeat": 0,
       "difficultyOnlyDiff": 0
     },
     "태그": {
-      "취약태그_종류": 170,
+      "취약태그_종류": 204,
       "상위태그_종류": 20,
       "태그_비어있는_문항": 0,
       "상위태그가_둘_이상인_취약태그": 0,
@@ -131,6 +131,21 @@
       },
       {
         "ids": [
+          "STK_B_011_MCQ",
+          "STK_B_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_B_012_MCQ",
+          "STK_B_012_BLANK_CHOICE",
+          "STK_B_012_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
           "STK_I_001_MCQ",
           "STK_I_001_BLANK_CHOICE"
         ],
@@ -197,6 +212,20 @@
         "ids": [
           "STK_I_010_MCQ",
           "STK_I_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_011_MCQ",
+          "STK_I_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_I_012_MCQ",
+          "STK_I_012_BLANK_CHOICE"
         ],
         "acrossConcepts": false
       },
@@ -272,6 +301,21 @@
       },
       {
         "ids": [
+          "STK_A_011_MCQ",
+          "STK_A_011_BLANK_CHOICE",
+          "STK_A_011_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "STK_A_012_MCQ",
+          "STK_A_012_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
           "BND_B_001_MCQ",
           "BND_B_001_BLANK_CHOICE"
         ],
@@ -342,6 +386,14 @@
       },
       {
         "ids": [
+          "BND_B_011_MCQ",
+          "BND_B_011_BLANK_CHOICE",
+          "BND_B_011_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
           "BND_I_001_MCQ",
           "BND_I_001_BLANK_CHOICE"
         ],
@@ -407,6 +459,36 @@
         "ids": [
           "BND_I_010_MCQ",
           "BND_I_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_011_MCQ",
+          "BND_I_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_B_012_MCQ",
+          "BND_B_012_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_A_012_MCQ",
+          "BND_A_012_BLANK_CHOICE",
+          "BND_A_012_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "BND_I_014_MCQ",
+          "BND_I_014_BLANK_CHOICE",
+          "BND_I_014_BLANK_INPUT"
         ],
         "acrossConcepts": false
       },
@@ -483,6 +565,13 @@
       },
       {
         "ids": [
+          "BND_A_011_MCQ",
+          "BND_A_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
           "FND_B_001_MCQ",
           "FND_B_001_BLANK_CHOICE"
         ],
@@ -534,6 +623,20 @@
         "ids": [
           "FND_B_010_BLANK_CHOICE",
           "FND_B_010_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_011_MCQ",
+          "FND_B_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_B_012_MCQ",
+          "FND_B_012_BLANK_CHOICE"
         ],
         "acrossConcepts": false
       },
@@ -596,6 +699,21 @@
       },
       {
         "ids": [
+          "FND_I_011_MCQ",
+          "FND_I_011_BLANK_CHOICE",
+          "FND_I_011_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_I_012_MCQ",
+          "FND_I_012_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
           "FND_A_001_MCQ",
           "FND_A_001_BLANK_CHOICE"
         ],
@@ -647,6 +765,20 @@
         "ids": [
           "FND_A_010_MCQ",
           "FND_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_011_MCQ",
+          "FND_A_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "FND_A_012_MCQ",
+          "FND_A_012_BLANK_CHOICE"
         ],
         "acrossConcepts": false
       },
@@ -717,6 +849,20 @@
         "ids": [
           "RSK_B_010_MCQ",
           "RSK_B_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_013_MCQ",
+          "RSK_B_013_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_B_014_MCQ",
+          "RSK_B_014_BLANK_CHOICE"
         ],
         "acrossConcepts": false
       },
@@ -793,6 +939,21 @@
       },
       {
         "ids": [
+          "RSK_I_011_MCQ",
+          "RSK_I_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_I_012_MCQ",
+          "RSK_I_012_BLANK_CHOICE",
+          "RSK_I_012_BLANK_INPUT"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
           "RSK_A_001_MCQ",
           "RSK_A_001_BLANK_CHOICE"
         ],
@@ -859,6 +1020,21 @@
         "ids": [
           "RSK_A_010_MCQ",
           "RSK_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_011_MCQ",
+          "RSK_A_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RSK_A_012_MCQ",
+          "RSK_A_012_BLANK_CHOICE",
+          "RSK_A_012_BLANK_INPUT"
         ],
         "acrossConcepts": false
       },
@@ -1005,6 +1181,34 @@
       },
       {
         "ids": [
+          "DIV_B_011_MCQ",
+          "DIV_B_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_B_012_MCQ",
+          "DIV_B_012_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_013_MCQ",
+          "DIV_I_013_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_I_014_MCQ",
+          "DIV_I_014_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
           "DIV_A_001_MCQ",
           "DIV_A_001_BLANK_CHOICE"
         ],
@@ -1070,6 +1274,21 @@
         "ids": [
           "DIV_A_010_MCQ",
           "DIV_A_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_011_MCQ",
+          "DIV_A_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "DIV_A_012_MCQ",
+          "DIV_A_012_BLANK_CHOICE",
+          "DIV_A_012_BLANK_INPUT"
         ],
         "acrossConcepts": false
       },
@@ -1148,6 +1367,20 @@
       },
       {
         "ids": [
+          "RET_B_011_MCQ",
+          "RET_B_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_B_012_MCQ",
+          "RET_B_012_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
           "RET_I_001_MCQ",
           "RET_I_001_BLANK_CHOICE",
           "RET_I_001_BLANK_INPUT"
@@ -1216,6 +1449,20 @@
         "ids": [
           "RET_I_010_MCQ",
           "RET_I_010_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_011_MCQ",
+          "RET_I_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_I_012_MCQ",
+          "RET_I_012_BLANK_CHOICE"
         ],
         "acrossConcepts": false
       },
@@ -1296,6 +1543,20 @@
           "RET_A_010_BLANK_CHOICE"
         ],
         "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_011_MCQ",
+          "RET_A_011_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
+      },
+      {
+        "ids": [
+          "RET_A_012_MCQ",
+          "RET_A_012_BLANK_CHOICE"
+        ],
+        "acrossConcepts": false
       }
     ],
     "sameConceptRepeat": [],
@@ -1321,6 +1582,8 @@
       "주주 수익": 4,
       "주주권": 4,
       "주식 시장 구조": 4,
+      "매수·매도 호가 스프레드": 4,
+      "미국 주식 티커의 식별 기능": 4,
       "주문 방식": 4,
       "시장 상황 용어": 8,
       "투자 시계": 4,
@@ -1328,6 +1591,8 @@
       "자산군 수익률": 4,
       "가치 평가 지표": 8,
       "기업 규모 측정": 4,
+      "스톱리밋 주문의 미체결 가능성": 4,
+      "미국주식예탁증서의 기초 주식": 4,
       "신규 상장": 4,
       "주식 분할": 4,
       "배당·권리 일정": 4,
@@ -1338,6 +1603,8 @@
       "위험 측정 지표": 4,
       "한국 거래소 제도": 4,
       "한국 신용거래 제도": 4,
+      "희석주당이익과 잠재적 보통주": 4,
+      "유동주식 조정과 전략적 보유지분": 4,
       "채권의 본질": 4,
       "채권자 vs 주주": 4,
       "채권 기본 용어": 12,
@@ -1346,6 +1613,7 @@
       "회사채 위험": 4,
       "채권 이자 구조": 4,
       "채권 만기": 4,
+      "무이표채의 현금흐름": 4,
       "채권 가격 결정 원리": 4,
       "채권 세제": 4,
       "금융시장 분류": 4,
@@ -1355,6 +1623,10 @@
       "채권 펀드 vs 개별 채권": 4,
       "단기금융상품": 8,
       "한국은행 통화정책 수단": 4,
+      "미국 변동금리 국채의 기준금리와 스프레드": 4,
+      "콜옵션부 채권의 발행자 조기상환권": 4,
+      "채권 중도매매의 경과이자 정산": 4,
+      "미국 TIPS 원금의 물가 연동": 4,
       "채권 민감도 지표": 4,
       "채권 가격 변동": 4,
       "채권 시장 구조": 4,
@@ -1365,6 +1637,7 @@
       "하이브리드 채권 비교": 4,
       "채권 평가 변수": 4,
       "채권 수익률 지표": 4,
+      "동일 만기 기준 신용스프레드": 4,
       "펀드 종류": 8,
       "펀드 원금 보장 여부": 4,
       "상품 형태와 편입자산 구분": 4,
@@ -1374,6 +1647,8 @@
       "기초자산별 ETF·펀드 유형": 4,
       "주식형 ETF·펀드 범위": 4,
       "펀드 선택 기준": 4,
+      "펀드 1좌당 순자산가치 산출": 4,
+      "분배금 재투자와 보유좌수": 4,
       "펀드 비용 비교": 4,
       "액티브 펀드 단점": 4,
       "펀드 평가 기준": 4,
@@ -1384,6 +1659,8 @@
       "금 ETF·펀드 구조": 4,
       "ETF 보호 범위": 4,
       "국내 ETF·지수": 4,
+      "펀드 보유증권의 대여 수익": 4,
+      "펀드 포트폴리오 회전율": 4,
       "펀드 거래 차이": 4,
       "파생형 ETF 위험": 4,
       "혼합형 펀드 구성": 4,
@@ -1394,15 +1671,17 @@
       "채권 ETF": 4,
       "상장지수상품 비교": 4,
       "신형 ETF": 4,
+      "미국 ETF 설정·환매의 AP": 4,
+      "분배금 중 원금 반환과 이익의 구분": 4,
       "안정성·수익성 트레이드오프": 4,
       "투자 평가 기준": 4,
       "위험-수익 관계": 4,
       "재무 안전망": 4,
-      "위험 인식": 4,
+      "위험 인식": 8,
       "투자 사기 인지": 4,
       "사기 식별": 8,
       "금융 사기 대응": 4,
-      "위험 관리 전략": 4,
+      "위험 관리 전략": 8,
       "레버리지 위험": 4,
       "빚투(레버리지)": 4,
       "위험 개념의 양면성": 4,
@@ -1413,6 +1692,8 @@
       "사기 위장 전술": 4,
       "무위험 고수익 약속": 4,
       "투자 적신호 구분": 4,
+      "최근성 편향": 4,
+      "처분효과": 4,
       "파산 위험": 4,
       "파생상품 위험": 4,
       "사기 자금 회수": 4,
@@ -1422,6 +1703,8 @@
       "위험 정량화": 4,
       "해외 투자 위험": 4,
       "채권 위험": 4,
+      "인출 중 수익률 순서 위험": 4,
+      "스트레스 테스트의 가상 충격 시나리오": 4,
       "분산투자 기본": 4,
       "분산투자 영어 용어": 4,
       "분산의 효과": 4,
@@ -1442,6 +1725,10 @@
       "적립식 투자": 4,
       "생애주기 분산": 4,
       "포트폴리오 구조": 4,
+      "복수 펀드의 동일 종목 중복노출 합산": 4,
+      "근무회사 주식 보상의 집중 확인": 4,
+      "채권 래더의 만기 분산": 4,
+      "추가 납입금 활용 리밸런싱": 4,
       "포트폴리오 이론": 4,
       "극단적 분산 효과": 4,
       "포트폴리오 이론 (MPT)": 4,
@@ -1452,6 +1739,8 @@
       "위험 관리 전략 구분": 4,
       "해외 투자 환위험 관리": 4,
       "자산배분 의사결정": 4,
+      "리스크 패리티의 위험 기여도": 4,
+      "HHI 비중 제곱합 계산": 4,
       "이자 기본 개념": 4,
       "인플레이션 개념": 4,
       "이자 계산 방식": 4,
@@ -1462,6 +1751,8 @@
       "기본 계산 능력": 4,
       "72의 법칙 정의": 4,
       "금리 용어 구분": 4,
+      "퍼센트와 퍼센트포인트의 구분": 4,
+      "베이시스포인트 단위 환산": 4,
       "이자 계산": 4,
       "복리 누적 효과": 4,
       "72의 법칙 계산": 8,
@@ -1471,6 +1762,8 @@
       "장기 비용 영향": 4,
       "72의 법칙 다양한 이자율": 4,
       "복리 빈도와 이자율 비교": 4,
+      "배당을 포함한 보유기간 총수익률": 4,
+      "기초 비중을 이용한 포트폴리오 기간수익률": 4,
       "장기 적립 효과": 4,
       "장기 투자의 위력": 4,
       "변동성 효과": 4,
@@ -1480,27 +1773,29 @@
       "장기 단복리 차이 체감": 4,
       "채권 가격 결정": 4,
       "실질수익률 정밀 계산": 4,
-      "현재가치 vs 미래가치": 4
+      "현재가치 vs 미래가치": 4,
+      "입금 영향을 제거한 시간가중수익률": 4,
+      "납입 시점을 반영한 내부수익률": 4
     },
     "parentCounts": {
-      "주식의 개념": 72,
+      "주식의 개념": 92,
       "주주의 권리·배당": 28,
-      "자산군별 장기 수익": 16,
-      "MDD(최대낙폭)": 20,
-      "채권의 개념": 68,
-      "채권 위험·신용위험": 24,
+      "자산군별 장기 수익": 20,
+      "MDD(최대낙폭)": 24,
+      "채권의 개념": 88,
+      "채권 위험·신용위험": 28,
       "금리와 채권 가격": 32,
-      "펀드의 개념": 52,
-      "ETF의 개념": 56,
+      "펀드의 개념": 72,
+      "ETF의 개념": 60,
       "인덱스 ETF 분산효과": 16,
-      "위험-수익 관계": 32,
+      "위험-수익 관계": 44,
       "레버리지·부채 위험": 24,
       "투자 사기 판별": 40,
-      "원금 손실 위험": 12,
+      "원금 손실 위험": 20,
       "분산투자 기본 원리": 48,
-      "분산투자 사례 판단": 36,
-      "리밸런싱 전략": 36,
-      "투자 수익률 계산": 28,
+      "분산투자 사례 판단": 44,
+      "리밸런싱 전략": 52,
+      "투자 수익률 계산": 52,
       "실질수익률·물가상승률": 20,
       "복리 개념": 60
     }
