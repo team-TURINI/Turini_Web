@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "permanentSlots": [
+    "hat",
+    "glasses",
+    "neck",
+    "bag",
+    "background"
+  ],
+  "removedPermanentSlot": "handProp",
+  "viewRules": {
+    "bagCustomizer": "three-quarter-rear",
+    "default": "front",
+    "quizFeedback": "dedicated animation without permanent hand props"
+  },
+  "counts": {
+    "hats": 9,
+    "glasses": 9,
+    "neck": 9,
+    "bags": 9
+  }
+}
