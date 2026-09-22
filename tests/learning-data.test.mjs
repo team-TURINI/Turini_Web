@@ -123,8 +123,10 @@ test("actual four-choice answers are not tied to one display position", () => {
       if (question.type === "4지선다") positions[question.choices.indexOf(question.answer)] += 1;
     }
   }
-  assert.ok(positions.every((count) => count > 650), `positions=${positions.join(",")}`);
-  assert.ok(Math.max(...positions) - Math.min(...positions) < 180, `positions=${positions.join(",")}`);
+  const total = positions.reduce((sum, count) => sum + count, 0);
+  const expected = total / positions.length;
+  assert.ok(positions.every((count) => count > expected * 0.8), `positions=${positions.join(",")}`);
+  assert.ok(Math.max(...positions) - Math.min(...positions) < total * 0.1, `positions=${positions.join(",")}`);
 });
 
 test("real-data study runs keep retries 3-5 positions away across session boundaries", () => {

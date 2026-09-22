@@ -14,7 +14,7 @@ import {
 /**
  * 투리니 12프레임 스프라이트
  *
- * 자산: `public/assets/turini/animations/turini-animation-atlas-12f.png`
+ * 자산: `public/assets/animations/turini-animation-atlas-12f.png`
  *       3072×1536 = 12프레임 × 6동작, 한 칸 256×256.
  *
  * - 프레임은 자바스크립트로 넘깁니다. 한 번에 하나의 타이머만 돌기 때문에
@@ -26,9 +26,9 @@ import {
 
 export type TuriniMotion = "idle" | "thinking" | "correct" | "wrong" | "celebrate" | "reading";
 
-const ATLAS = "/assets/turini/animations/turini-animation-atlas-12f.png";
-const FRAME_ANCHORS = "/assets/turini/animations/turini-frame-anchors.json";
-const ATLAS_WEBP = "/assets/turini/optimized/animations/turini-animation-atlas-12f.webp";
+const ATLAS = "/assets/animations/turini-animation-atlas-12f.png";
+const FRAME_ANCHORS = "/assets/animations/turini-frame-anchors.json";
+const ATLAS_WEBP = "/assets/optimized/animations/turini-animation-atlas-12f.webp";
 
 const FRAMES = 12;
 const ROWS = 6;

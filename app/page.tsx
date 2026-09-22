@@ -1,6 +1,6 @@
 "use client";
 
-import { CSSProperties, ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import { CSSProperties, ChangeEvent, Dispatch, FormEvent, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   conceptKey,
   planSessionQuestions,
@@ -10,6 +10,7 @@ import {
   type PendingRetry,
 } from "./quiz-scheduler";
 import { isAnswerCorrect } from "./answer-utils";
+import { formalizeExplanation } from "./explanation-utils";
 import LearningMap, { bandEntryLesson } from "./learning-map";
 import DifficultySelect, { DIFFICULTY_COPY, type DifficultyCard } from "./difficulty-select";
 import TuriniAvatar, { TuriniAvatarProvider, TuriniDressUp } from "./turini-avatar";
@@ -143,6 +144,7 @@ type AIFeedback = {
 };
 
 type Account = { username: string };
+type PortfolioInputMode = "actual" | "practice";
 type AccountPayload = {
   account: Account;
   progress?: Partial<Progress>;
@@ -151,6 +153,7 @@ type AccountPayload = {
     amount?: number;
     goal?: string;
     horizon?: string;
+    inputMode?: PortfolioInputMode;
     result?: PortfolioResult | null;
     ruleVersion?: string;
     planner?: unknown;
@@ -200,6 +203,16 @@ const DIAG_POINTS: Record<string, number> = {
   D1: 1, D2: 3, D3: 5, C1: 2, C2: 4, C3: 3,
 };
 
+const DEFAULT_PORTFOLIO_HORIZON = "10년 이상";
+const PORTFOLIO_HORIZONS = ["1년 미만", "1~3년", "3~10년", "10년 이상"] as const;
+
+function normalizePortfolioHorizon(value: unknown) {
+  if (value === "3~5년" || value === "5~10년" || value === "5년 이상") return "3~10년";
+  return PORTFOLIO_HORIZONS.includes(value as typeof PORTFOLIO_HORIZONS[number])
+    ? value as typeof PORTFOLIO_HORIZONS[number]
+    : DEFAULT_PORTFOLIO_HORIZON;
+}
+
 const PROFILE_QUESTIONS: QuizQuestion[] = [
   {
     id: "PROFILE_P1", base_id: "PROFILE_P1", category: "투자 성향", difficulty: "초급", type: "성향 진단",
@@ -243,7 +256,7 @@ function buildDiagnosticQuestions(rows: DiagnosticQuestionRow[], learningQuestio
         answer: row.answer ? choices[row.answer - 1] || "" : "",
         explanation: row.explanation,
         weakness_tag: row.weakness_tag || "",
-        parent_tag: row.weakness_tag || undefined,
+        parent_tag: learningSource?.parent_tag || row.weakness_tag || undefined,
         source_name: source?.source_name || "OECD 금융이해력 조사 기반",
         source_url: source?.source_url || "https://www.oecd.org/financial/education/",
         verification_status: "verified",
@@ -265,6 +278,21 @@ function toPercent(value: number) {
   return Math.round(value * 1000) / 10;
 }
 
+function normalizeParentTags(tags: unknown, learningQuestions: QuizQuestion[]) {
+  if (!Array.isArray(tags)) return [];
+  const parentTags = new Set(learningQuestions.map((question) => question.parent_tag).filter((tag): tag is string => Boolean(tag)));
+  const parentByWeakness = new Map(
+    learningQuestions
+      .filter((question): question is QuizQuestion & { parent_tag: string } => Boolean(question.parent_tag))
+      .map((question) => [question.weakness_tag, question.parent_tag]),
+  );
+  return [...new Set(tags
+    .filter((tag): tag is string => typeof tag === "string")
+    .map((tag) => parentTags.has(tag) ? tag : parentByWeakness.get(tag))
+    .filter((tag): tag is string => Boolean(tag)))]
+    .slice(-20);
+}
+
 
 export default function Home() {
   const [view, setView] = useState<View>("home");
@@ -281,7 +309,8 @@ export default function Home() {
   const [allocation, setAllocation] = useState<Allocation>(EMPTY_ALLOCATION);
   const [amount, setAmount] = useState(10000000);
   const [goal, setGoal] = useState("장기 자산 증식");
-  const [horizon, setHorizon] = useState("5년 이상");
+  const [horizon, setHorizon] = useState(DEFAULT_PORTFOLIO_HORIZON);
+  const [portfolioInputMode, setPortfolioInputMode] = useState<PortfolioInputMode>("actual");
   const [portfolioResult, setPortfolioResult] = useState<PortfolioResult | null>(null);
   const [aiFeedback, setAiFeedback] = useState<AIFeedback | null>(null);
   const [aiFeedbackLoading, setAiFeedbackLoading] = useState(false);
@@ -306,7 +335,7 @@ export default function Home() {
   /** 난이도 선택 화면에서 고른 난이도. 지도에서 그 구간으로 자동 이동합니다. */
   const [focusDifficulty, setFocusDifficulty] = useState<Difficulty | null>(null);
 
-  const hydrateAccount = (payload: AccountPayload) => {
+  const hydrateAccount = useCallback((payload: AccountPayload, learningQuestions: QuizQuestion[]) => {
     const savedProgress = payload.progress || {};
     const savedPortfolio = payload.portfolio || {};
     setAccount(payload.account);
@@ -315,7 +344,7 @@ export default function Home() {
       ...savedProgress,
       completedIds: Array.isArray(savedProgress.completedIds) ? savedProgress.completedIds : [],
       completedLessons: Array.isArray(savedProgress.completedLessons) ? savedProgress.completedLessons : [],
-      weakTags: Array.isArray(savedProgress.weakTags) ? savedProgress.weakTags : [],
+      weakTags: normalizeParentTags(savedProgress.weakTags, learningQuestions),
       conceptReviews: savedProgress.conceptReviews || {},
       pendingRetries: savedProgress.pendingRetries || [],
       customization: normalizeCustomization(
@@ -327,21 +356,23 @@ export default function Home() {
     setAllocation(normalizeAllocation(savedPortfolio.allocation));
     setAmount(typeof savedPortfolio.amount === "number" ? savedPortfolio.amount : 10000000);
     setGoal(savedPortfolio.goal || "장기 자산 증식");
-    setHorizon(savedPortfolio.horizon || "5년 이상");
+    setHorizon(normalizePortfolioHorizon(savedPortfolio.horizon));
+    setPortfolioInputMode(savedPortfolio.inputMode === "practice" ? "practice" : "actual");
     setPlanner(normalizeWealthPlanner(savedPortfolio.planner));
     setPortfolioResult(savedPortfolio.ruleVersion === PORTFOLIO_RULE_VERSION ? savedPortfolio.result || null : null);
     setAiFeedback(null);
     setAiFeedbackError("");
     setAccountStateReady(true);
     setSaveState("idle");
-  };
+  }, []);
 
   const resetClientState = () => {
     setProgress({ ...DEFAULT_PROGRESS, completedIds: [], completedLessons: [], weakTags: [], conceptReviews: {}, pendingRetries: [], customization: { ...DEFAULT_CUSTOMIZATION } });
     setAllocation({ ...EMPTY_ALLOCATION });
     setAmount(10000000);
     setGoal("장기 자산 증식");
-    setHorizon("5년 이상");
+    setHorizon(DEFAULT_PORTFOLIO_HORIZON);
+    setPortfolioInputMode("actual");
     setPlanner({ ...DEFAULT_WEALTH_PLANNER });
     setPortfolioResult(null);
     setAiFeedback(null);
@@ -373,7 +404,7 @@ export default function Home() {
         localStorage.removeItem("turini-public-progress-v1");
         localStorage.removeItem("turini-public-portfolio-v1");
         if (accountResponse.ok) {
-          hydrateAccount(await accountResponse.json() as AccountPayload);
+          hydrateAccount(await accountResponse.json() as AccountPayload, quizItems);
         } else {
           setAccount(null);
           setAccountStateReady(false);
@@ -392,7 +423,7 @@ export default function Home() {
       }
     };
     void load();
-  }, [reloadKey]);
+  }, [hydrateAccount, reloadKey]);
 
   // 브라우저 뒤로가기와 앱 안의 '뒤로'를 한 곳에서 맞춥니다.
   //
@@ -425,7 +456,7 @@ export default function Home() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             progress,
-            portfolio: { allocation, amount, goal, horizon, result: portfolioResult, ruleVersion: PORTFOLIO_RULE_VERSION, planner },
+            portfolio: { allocation, amount, goal, horizon, inputMode: portfolioInputMode, result: portfolioResult, ruleVersion: PORTFOLIO_RULE_VERSION, planner },
           }),
         });
         if (!response.ok) throw new Error("save failed");
@@ -435,7 +466,7 @@ export default function Home() {
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [account, accountStateReady, allocation, amount, goal, horizon, loading, planner, portfolioResult, progress]);
+  }, [account, accountStateReady, allocation, amount, goal, horizon, loading, planner, portfolioInputMode, portfolioResult, progress]);
 
   const authenticate = async (mode: "login" | "register", username: string, pin: string) => {
     try {
@@ -447,7 +478,7 @@ export default function Home() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) return payload.error || "계정 정보를 확인해 주세요.";
-      hydrateAccount(payload as AccountPayload);
+      hydrateAccount(payload as AccountPayload, questions);
       setView("home");
       return null;
     } catch {
@@ -504,6 +535,14 @@ export default function Home() {
   const activeCategoryLevel = categoryLevelForSolved(activeCategorySolved);
   const activeCategoryCompletedLessons = completedCategoryLessonsForSolved(activeCategorySolved);
   const activeCategoryCurrentLesson = activeCategoryCompletedLessons < MAX_CATEGORY_LEVEL ? activeCategoryCompletedLessons + 1 : null;
+  const showActiveLearningContext = view === "learn" || view === "difficulty";
+  const generalContext: Record<Exclude<View, "learn" | "difficulty">, string> = {
+    home: "홈",
+    category: "금융 학습",
+    portfolio: "포트폴리오",
+    assets: "자산 플래너",
+    profile: "마이",
+  };
 
   const avatarStats = useMemo(
     () =>
@@ -529,7 +568,7 @@ export default function Home() {
     if (account) saveCustomizationCache(account.username, next);
   };
 
-  const openSession = (mode: QuizMode, title: string, pool: QuizQuestion[], count = 10, lesson?: number) => {
+  const openSession = (mode: QuizMode, title: string, pool: QuizQuestion[], count = 10, lesson?: number, focusTags?: string[]) => {
     if (!pool.length) {
       setSessionError("지금은 낼 수 있는 문제가 없어요. 다른 카테고리를 골라 보거나 잠시 뒤에 다시 시도해 주세요.");
       return;
@@ -538,7 +577,7 @@ export default function Home() {
     const seed = progress.studySessions * 997 + progress.attempts * 97 + (lesson || 0) + pool.length;
     // 추천 기준 — 취약 태그, 현재 난이도, 너무 최근에 푼 문제
     const recommendation = {
-      weakTags: progress.weakTags,
+      weakTags: focusTags?.length ? focusTags : progress.weakTags,
       level: progress.financeLevel === "진단 전" ? undefined : progress.financeLevel,
       recentIds: progress.completedIds.slice(-30),
     };
@@ -571,10 +610,9 @@ export default function Home() {
 
   const startDaily = () => openSession("daily", "오늘의 금융 퀴즈", questions, 10);
 
-  const startCategory = (category: string, difficulty?: Difficulty) => {
-    setActiveCategoryName(category);
-    const pool = questions.filter((question) => question.category === category && (!difficulty || question.difficulty === difficulty));
-    openSession("category", `${category} · ${difficulty || "전체"}`, pool, 10);
+  const startWeakTag = (tag: string) => {
+    setResult(null);
+    openSession("daily", `${tag} 맞춤 학습`, questions, 10, undefined, [tag]);
   };
 
   const startLesson = (category: string, lesson: number) => {
@@ -618,7 +656,9 @@ export default function Home() {
         rawScore: current.rawScore + point,
         profileScore: current.profileScore + profilePoint,
         hearts: correct ? current.hearts : Math.max(0, current.hearts - 1),
-        weakTags: !correct && question.weakness_tag ? [...new Set([...current.weakTags, question.weakness_tag])] : current.weakTags,
+        weakTags: !correct && (question.parent_tag || question.weakness_tag)
+          ? [...new Set([...current.weakTags, question.parent_tag || question.weakness_tag])]
+          : current.weakTags,
       };
       return retryPlan ? { ...updated, questions: retryPlan.session.questions } : updated;
     });
@@ -632,7 +672,10 @@ export default function Home() {
   };
 
   const finishSession = (finished: QuizSession) => {
-    const knowledgeQuestions = finished.questions.filter((question) => !question.isProfile);
+    // 진단 18문항은 학습 진도·푼 문제 수에 포함하지 않습니다.
+    const knowledgeQuestions = finished.mode === "diagnosis"
+      ? []
+      : finished.questions.filter((question) => !question.isProfile);
     const ids = knowledgeQuestions.map((question) => question.id);
     const xpGain = finished.mode === "diagnosis" ? finished.correct * 5 : finished.correct * 10;
     let financeLevel = progress.financeLevel;
@@ -657,7 +700,7 @@ export default function Home() {
         : advanceStreak({ streak: current.streak, lastStudyDate: current.lastStudyDate })),
       financeLevel,
       tendency,
-      weakTags: [...new Set([...current.weakTags, ...finished.weakTags])].slice(-10),
+      weakTags: [...new Set([...current.weakTags, ...finished.weakTags])].slice(-20),
     }));
     setResult(finished);
     setSession(null);
@@ -680,7 +723,7 @@ export default function Home() {
   /**
    * 자산 비중 입력 — 슬라이더·숫자 입력·＋/− 버튼이 모두 이 함수 하나를 부릅니다.
    * 그래서 세 방법이 항상 같은 값을 가리킵니다.
-   * 계산식(위험점수·성향 경계·목표 비중)은 건드리지 않고, 입력만 다듬습니다.
+   * 계산식(공분산 변동성·성향/기간 범위)은 건드리지 않고, 입력만 다듬습니다.
    */
   const setAssetPercent = (key: AssetKey, percent: number) => {
     const safe = Number.isFinite(percent) ? clamp(Math.round(percent * 10) / 10) : 0;
@@ -725,6 +768,7 @@ export default function Home() {
             portfolioRuleVersion: PORTFOLIO_RULE_VERSION,
             tendency: progress.tendency === "진단 전" ? "중립형" : progress.tendency,
             horizon,
+            inputMode: portfolioInputMode,
             weakTags: progress.weakTags,
           },
         }),
@@ -898,7 +942,7 @@ export default function Home() {
           {answered ? (
             <aside className={`feedback-card ${answerCorrect ? "success" : "error"}`}>
               <h2>{question.isProfile ? "성향 선택 완료" : answerCorrect ? "정답이에요!" : `정답: ${question.answer}`}</h2>
-              <p>{question.explanation}</p>
+              <p>{formalizeExplanation(question.explanation)}</p>
               {/* 출처는 데이터에 그대로 보관하고(question.source_url·source_name) 사용자 화면에는 보여 주지 않습니다. */}
             </aside>
           ) : null}
@@ -922,9 +966,9 @@ export default function Home() {
           <h1>{result.mode === "diagnosis" ? `${progress.financeLevel} · ${progress.tendency}` : percent >= 80 ? "완벽해요, 레벨 업!" : "오늘도 한 걸음 성장!"}</h1>
           <p>{result.mode === "diagnosis" ? `수준 점수 ${result.rawScore}/54점 · 성향 점수 ${result.profileScore}/9점` : `${total}문제 중 ${result.correct}문제를 맞혔어요.`}</p>
           <div className="result-stats"><div><span>정답률</span><strong>{percent}%</strong></div><div><span>획득 XP</span><strong>+{result.mode === "diagnosis" ? result.correct * 5 : result.correct * 10}</strong></div><div><span>연속 학습</span><strong>{progress.streak}일</strong></div></div>
-          {result.weakTags.length ? <div className="weak-box"><span>다음 추천 학습</span><div>{result.weakTags.slice(0, 3).map((tag) => <button key={tag} onClick={() => { setResult(null); navigate("category"); }}>{tag}</button>)}</div></div> : null}
+          {result.weakTags.length ? <div className="weak-box"><span>취약 상위 태그 · 눌러서 맞춤 학습</span><div>{result.weakTags.slice(0, 3).map((tag) => <button key={tag} onClick={() => startWeakTag(tag)}>{tag}</button>)}</div></div> : null}
           <button className="primary-button" onClick={() => { setResult(null); navigate("home"); }}>홈으로</button>
-          <button className="secondary-button" onClick={() => { setResult(null); startDaily(); }}>10문제 더 풀기</button>
+          {result.mode !== "diagnosis" ? <button className="secondary-button" onClick={() => { setResult(null); startDaily(); }}>10문제 더 풀기</button> : null}
         </section>
       </main>
       </TuriniAvatarProvider>
@@ -936,7 +980,7 @@ export default function Home() {
     <main className="app-bg">
       <div className="app-shell">
         <section className="app-main">
-          <header className="top-status"><button className="learning-context" onClick={() => navigate("category")} aria-label={`현재 학습 ${activeCategory.name}, 레벨 ${activeCategoryLevel}`}><span className="top-category-icon" style={{ background: CATEGORY_COLORS[activeCategory.color] }}>{activeCategory.icon}</span><span className="top-learning-copy"><small>{activeCategory.name}</small><b>Lv. {activeCategoryLevel}</b></span></button><div><span>🔥 <b>{progress.streak}</b></span><span>💎 <b>{progress.xp}</b></span><span>♥ <b>5</b></span></div></header>
+          <header className="top-status">{showActiveLearningContext ? <button className="learning-context" onClick={() => navigate("category")} aria-label={`현재 학습 ${activeCategory.name}, 레벨 ${activeCategoryLevel}`}><span className="top-category-icon" style={{ background: CATEGORY_COLORS[activeCategory.color] }}>{activeCategory.icon}</span><span className="top-learning-copy"><small>{activeCategory.name}</small><b>Lv. {activeCategoryLevel}</b></span></button> : <div className="learning-context" aria-label={`${generalContext[view as Exclude<View, "learn" | "difficulty">]} 화면`}><span className="top-category-icon" style={{ background: "#31b66a" }}>T</span><span className="top-learning-copy"><small>TURINI</small><b>{generalContext[view as Exclude<View, "learn" | "difficulty">]}</b></span></div>}<div><span>🔥 <b>{progress.streak}</b></span><span>💎 <b>{progress.xp}</b></span><span>♥ <b>5</b></span></div></header>
 
           {dataError ? (
             <div className="app-notice" role="alert">
@@ -954,12 +998,12 @@ export default function Home() {
             <div className="screen home-screen">
               <section className="welcome-row">
                 <div><p className="eyebrow">좋은 하루예요</p><h1>안녕하세요, {account.username}님 👋</h1><p>오늘도 투리니와 금융 지식을 키워볼까요?</p></div>
-                <button className="round-notice" aria-label="알림">♧<span /></button>
               </section>
               <section className="hero-card">
-                <div className="hero-copy"><span className="pill">오늘의 추천</span><h2>하루 10문제로<br /><em>금융 레벨 업!</em></h2><p>완료하면 최대 100 XP와 연속 학습 기록을 받아요.</p><button className="primary-button" onClick={startDaily} disabled={!questions.length}>지금 시작하기 <span>→</span></button></div>
+                <div className="hero-copy"><span className="pill">오늘의 맞춤 추천</span><h2>{progress.weakTags.length ? <><em>취약 태그</em>부터<br />집중 학습해요!</> : <>하루 10문제로<br /><em>금융 레벨 업!</em></>}</h2><p>{progress.weakTags.length ? `${progress.weakTags.slice(0, 2).join(" · ")} 문제를 우선 추천해요.` : "완료하면 최대 100 XP와 연속 학습 기록을 받아요."}</p><button className="primary-button" onClick={startDaily} disabled={!questions.length}>{progress.weakTags.length ? "맞춤 학습 시작" : "지금 시작하기"} <span>→</span></button></div>
                 <div className="hero-mascot"><TuriniAvatar scene label="나의 투리니" /><span className="spark spark-one">✦</span><span className="spark spark-two">◆</span></div>
               </section>
+              {progress.weakTags.length ? <section className="card-block weak-tag-card"><div className="section-heading"><div><p className="eyebrow">PERSONALIZED LEARNING</p><h2>내 취약 상위 태그</h2></div><span>20개 상위 태그 기준</span></div><p>진단과 오답에서 확인된 태그예요. 태그를 누르면 관련 문제가 먼저 나와요.</p><div>{progress.weakTags.map((tag) => <button key={tag} onClick={() => startWeakTag(tag)}>{tag}</button>)}</div></section> : null}
               <button className="future-banner" onClick={() => navigate("assets")}>
                 <div><span className="future-banner-kicker">새로운 자산 플래너</span><strong>지금 습관 그대로라면<br />10년 뒤 내 자산은?</strong><small>미래 자산과 목표 달성 시점을 확인해요 <b>→</b></small></div>
                 <TuriniAvatar motion="thinking" className="turini-future" decorative />
@@ -969,7 +1013,7 @@ export default function Home() {
                 <article className="tendency-card"><span>투자 성향</span><h2>{progress.tendency}</h2><p>{progress.tendency === "안정형" ? "원금 보전을 중요하게 생각해요." : progress.tendency === "공격형" ? "성장을 위해 변동성을 감수해요." : "안정성과 수익의 균형을 추구해요."}</p><small className="diagnosis-complete">✓ 최초 진단 완료</small></article>
               </section>
               <section className="mission-card"><div><span className="mission-icon">🎁</span><div><p className="eyebrow">이번 주 학습 미션</p><h3>퀴즈 5회 완료하기</h3></div></div><strong>{Math.min(5, progress.studySessions)} / 5</strong><div className="progress-track"><span style={{ width: `${Math.min(100, progress.studySessions * 20)}%` }} /></div></section>
-              <section className="content-section"><div className="section-heading"><div><p className="eyebrow">빠른 학습</p><h2>어떤 주제부터 시작할까요?</h2></div><button onClick={() => navigate("category")}>전체 보기 →</button></div><div className="quick-categories">{CATEGORIES.slice(0, 3).map((category) => <button key={category.name} className={`quick-card ${category.color}`} onClick={() => startCategory(category.name)}><span>{category.icon}</span><div><strong>{category.name}</strong><small>{category.copy}</small></div><b>→</b></button>)}</div></section>
+              <section className="content-section"><div className="section-heading"><div><p className="eyebrow">빠른 학습</p><h2>어떤 주제부터 시작할까요?</h2></div><button onClick={() => navigate("category")}>전체 보기 →</button></div><div className="quick-categories">{CATEGORIES.slice(0, 3).map((category) => <button key={category.name} className={`quick-card ${category.color}`} onClick={() => openDifficulty(category.name)}><span>{category.icon}</span><div><strong>{category.name}</strong><small>{category.copy}</small></div><b>→</b></button>)}</div></section>
             </div>
           )}
 
@@ -1010,7 +1054,7 @@ export default function Home() {
               <div className="category-list">{CATEGORIES.map((category) => {
                 const solved = categoryCounts[category.name] || 0;
                 const categoryLevel = categoryLevelForSolved(solved);
-                return <article className={`category-card ${category.color}`} key={category.name}><button className="category-main" onClick={() => openDifficulty(category.name)}><span className="category-icon">{category.icon}</span><div><div className="category-title-row"><h2>{category.name}</h2><span>Lv. {categoryLevel}</span></div><p>{category.copy}</p><div className="progress-track"><span style={{ width: `${Math.min(100, solved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></div><small>{Math.min(solved, QUESTIONS_PER_CATEGORY)} / {QUESTIONS_PER_CATEGORY}문항 완료 · 난이도 고르기</small></div><b>›</b></button><div className="difficulty-row">{(["초급", "중급", "고급"] as Difficulty[]).map((difficulty) => <button key={difficulty} onClick={() => startCategory(category.name, difficulty)}>{difficulty}</button>)}</div></article>;
+                return <article className={`category-card ${category.color}`} key={category.name}><button className="category-main" onClick={() => openDifficulty(category.name)}><span className="category-icon">{category.icon}</span><div><div className="category-title-row"><h2>{category.name}</h2><span>Lv. {categoryLevel}</span></div><p>{category.copy}</p><div className="progress-track"><span style={{ width: `${Math.min(100, solved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></div><small>{Math.min(solved, QUESTIONS_PER_CATEGORY)} / {QUESTIONS_PER_CATEGORY}문항 완료 · 난이도 고르기</small></div><b>›</b></button></article>;
               })}</div>
             </div>
           )}
@@ -1018,6 +1062,7 @@ export default function Home() {
           {view === "portfolio" && (
             <div className="screen portfolio-screen">
               <PageTitle eyebrow="MY PORTFOLIO" title="내 포트폴리오 설계" copy="여섯 자산의 현재 비중을 입력하면 성향 적합도와 조정 방향을 바로 알려드려요." />
+              <aside className="portfolio-model-notice" role="note"><b>분석 기준 안내</b><p>v11 문서의 6개 자산 변동성과 상관계수로 서비스용 위험등급·성향 적합·기간 적합을 각각 계산합니다. 종합점수는 만들지 않으며, 원시 시장자료 재현 검증 전인 문서 스냅샷입니다.</p></aside>
               <section className="portfolio-intro"><div><span className="pill">핵심 기능</span><h2>비중을 입력하고<br />투리니의 코칭 받기</h2><p>개별 종목 추천이 아닌 자산배분 학습용 분석이에요.</p></div><div className="portfolio-mascot-frame"><TuriniAvatar motion="idle" className="turini-portfolio" /></div></section>
               <section className="portfolio-builder card-block">
                 <div className="builder-header"><div><p className="eyebrow">STEP 1</p><h2>현재 자산 비중</h2></div><div className={`sum-badge ${validateAllocation(allocation) ? "valid" : ""}`}><span>합계</span><strong>{sumAllocation(allocation)}%</strong></div></div>
@@ -1042,7 +1087,7 @@ export default function Home() {
                   </div>
                 </div>
               </section>
-              <section className="portfolio-options card-block"><div><label>투자 목적 <small>(기록용)</small><select value={goal} onChange={(event) => setGoal(event.target.value)}><option>장기 자산 증식</option><option>주택·목돈 마련</option><option>은퇴 준비</option><option>단기 여유자금 운용</option></select><em>현재 점수·조정 계산에는 반영되지 않아요.</em></label><label>투자 기간<select value={horizon} onChange={(event) => { setHorizon(event.target.value); setPortfolioResult(null); }}><option>1년 미만</option><option>1~3년</option><option>3~5년</option><option>5년 이상</option></select></label></div></section>
+              <section className="portfolio-options card-block"><div><label>입력 구분<select value={portfolioInputMode} onChange={(event) => setPortfolioInputMode(event.target.value as PortfolioInputMode)}><option value="actual">실제 자산</option><option value="practice">가상 연습</option></select><em>분석 기록의 성격만 구분하며 계산식은 같습니다.</em></label><label>투자 목적 <small>(기록용)</small><select value={goal} onChange={(event) => setGoal(event.target.value)}><option>장기 자산 증식</option><option>주택·목돈 마련</option><option>은퇴 준비</option><option>단기 여유자금 운용</option></select><em>현재 판정·조정 계산에는 반영되지 않아요.</em></label><label>투자 기간<select value={horizon} onChange={(event) => { setHorizon(event.target.value); setPortfolioResult(null); }}>{PORTFOLIO_HORIZONS.map((option) => <option key={option}>{option}</option>)}</select></label></div></section>
               {/* 합계 요약 — 화면 아래에 붙어 따라다녀서 어디서 입력하든 바로 보입니다 */}
               <div className="alloc-summary" data-ready={allocationReady ? "true" : undefined} role="status" aria-live="polite">
                 <div className="alloc-summary__numbers">
@@ -1074,6 +1119,7 @@ export default function Home() {
               </section>
               <section className="profile-stats"><article><span>🔥</span><strong>{progress.streak}일</strong><small>연속 학습</small></article><article><span>💎</span><strong>{progress.xp}</strong><small>총 XP</small></article><article><span>🏆</span><strong>Lv. {progress.level}</strong><small>현재 레벨</small></article><article><span>✓</span><strong>{progress.completedIds.length}</strong><small>푼 문제</small></article></section>
               <section className="card-block growth-card"><div className="section-heading"><div><p className="eyebrow">학습 현황</p><h2>나의 성장 기록</h2></div><span className="diagnosis-complete">✓ 최초 진단 완료</span></div><div className="growth-summary"><article><span>금융 수준</span><strong>{progress.financeLevel}</strong><small>진단 결과에 맞춰 학습 중</small></article><article><span>투자 성향</span><strong>{progress.tendency}</strong><small>나에게 맞는 자산배분 기준</small></article></div></section>
+              <section className="card-block weak-tag-card"><div className="section-heading"><div><p className="eyebrow">WEAKNESS TAGS</p><h2>내 취약 상위 태그</h2></div><span>20개 상위 태그 기준</span></div>{progress.weakTags.length ? <><p>진단과 학습 오답에서 확인된 태그예요. 태그를 누르면 관련 문제를 먼저 학습해요.</p><div>{progress.weakTags.map((tag) => <button key={tag} onClick={() => startWeakTag(tag)}>{tag}</button>)}</div></> : <p>아직 저장된 취약 태그가 없어요. 학습을 시작하면 오답을 기준으로 맞춤 추천이 만들어져요.</p>}</section>
               <TuriniDressUp
                 customization={progress.customization}
                 stats={avatarStats}
@@ -1386,21 +1432,27 @@ function NavButton({ item, active, onClick }: { item: View; active: boolean; onC
 }
 
 function PortfolioResults({ result, allocation, tab, setTab, aiFeedback, aiFeedbackLoading, aiFeedbackError, retryAiFeedback }: { result: PortfolioResult; allocation: Allocation; tab: "summary" | "rebalance" | "detail" | "coach"; setTab: (tab: "summary" | "rebalance" | "detail" | "coach") => void; aiFeedback: AIFeedback | null; aiFeedbackLoading: boolean; aiFeedbackError: string; retryAiFeedback: () => void }) {
+  const shownTarget = result.nearTarget?.allocation ?? result.baseTarget.allocation;
   const targetChart = ASSETS.reduce<{ cursor: number; stops: string[] }>((state, asset) => {
-    const end = state.cursor + toPercent(result.target[asset.key]);
+    const end = state.cursor + toPercent(shownTarget[asset.key]);
     return { cursor: end, stops: [...state.stops, `${asset.color} ${state.cursor}% ${end}%`] };
   }, { cursor: 0, stops: [] });
   const targetChartStyle = { background: `conic-gradient(${targetChart.stops.join(", ")})` } as CSSProperties;
-  const starCount = Math.max(1, Math.min(5, Math.round(result.score / result.scoreMax * 5)));
-  const gaugePosition = Math.max(0, Math.min(100, (result.riskScore - 5) / 60 * 100));
+  const riskPosition = Math.max(0, Math.min(100, result.riskLevel * 100));
+  const fitPercent = Math.round(result.fit * 100);
+  const horizonFitPercent = Math.round(result.horizonFit * 100);
+  const statusTitle: Record<PortfolioResult["recommendationStatus"], string> = {
+    hold: "현재 비중 유지", recommended: "학습용 조정안", horizon_below_reference: "위험 상향 제안 안 함",
+    constraint_conflict: "성향·기간 기준 충돌", no_feasible_target: "격자 조정안 없음",
+  };
   return <section id="portfolio-result" className="portfolio-result card-block">
-    <div className="result-hero"><div><p>내부 종합점수 · {result.scoreMax}점 만점</p><strong>{result.score}<small>점</small></strong><span>{result.scoreLabel}</span><div className="stars">{"★".repeat(starCount)}{"☆".repeat(5 - starCount)}</div></div><TuriniAvatar motion="celebrate" className="turini-score" replayKey={result.score} /></div>
-    <div className="score-cards"><article><span>위험 점수</span><strong>{result.riskScore}점</strong><small>{result.portfolioType} 포트폴리오</small><div className="mini-gauge"><i style={{ left: `${gaugePosition}%` }} /></div></article><article><span>성향 일치도</span><strong>{result.fit}%</strong><small>{result.profileMatch.level} · {result.suitability}</small><div className="ring-score" style={{ "--score": `${result.fit * 3.6}deg` } as CSSProperties} /></article></div>
+    <div className="result-hero"><div><p>서비스 변동성 위험등급</p><strong>{result.riskGrade}<small>등급</small></strong><span>{result.riskGradeName} · 연환산 {result.riskScore}%</span></div><TuriniAvatar motion="celebrate" className="turini-score" replayKey={result.riskGrade} /></div>
+    <div className="score-cards"><article><span>위험 수준</span><strong>{Math.round(result.riskLevel * 100)}<small>%</small></strong><small>6개 자산 중 최대 변동성 대비 · 공식 상품등급 아님</small><div className="mini-gauge"><i style={{ left: `${riskPosition}%` }} /></div></article><article><span>성향 적합</span><strong>{fitPercent}<small>%</small></strong><small>{result.typeFitLabel}</small><div className="ring-score" style={{ "--score": `${fitPercent * 3.6}deg` } as CSSProperties} /></article><article><span>기간 적합</span><strong>{horizonFitPercent}<small>%</small></strong><small>{result.horizonFitLabel}</small><div className="ring-score" style={{ "--score": `${horizonFitPercent * 3.6}deg` } as CSSProperties} /></article></div>
     <div className="portfolio-tabs"><button className={tab === "summary" ? "active" : ""} onClick={() => setTab("summary")}>요약</button><button className={tab === "rebalance" ? "active" : ""} onClick={() => setTab("rebalance")}>리밸런싱</button><button className={tab === "detail" ? "active" : ""} onClick={() => setTab("detail")}>상세 분석</button><button className={tab === "coach" ? "active" : ""} onClick={() => setTab("coach")}>AI 코치</button></div>
-    {tab === "summary" && <div className="tab-panel"><div className="coach-banner"><TuriniAvatar motion="reading" className="turini-coach" decorative /><div><b>투리니 코치의 한마디!</b><p>{result.coach}</p></div></div><div className="analysis-columns"><article className="good"><h3>강점</h3>{result.strengths.length ? <ul>{result.strengths.map((item) => <li key={item}>{item}</li>)}</ul> : <p>현재 강점 기준을 충족한 항목이 없어요.</p>}</article><article className="care"><h3>개선하면 좋은 점</h3>{result.cautions.length ? <ul>{result.cautions.map((item) => <li key={item}>{item}</li>)}</ul> : <p>현재 규칙에서 별도로 주의할 점이 없어요.</p>}</article></div></div>}
-    {tab === "rebalance" && <div className="tab-panel"><div className="target-chart"><div className="allocation-donut small" style={targetChartStyle}><span>예시</span></div><div><h3>학습용 조정 방향</h3><p>현재 비중과 성향별 목표의 50% 지점을 비교한 비율이에요.</p></div></div>{result.rebalancingActions.length ? <div className="rebalance-table"><div className="table-head"><span>자산</span><span>현재</span><span>목표</span><span>차이 · 방향</span></div>{result.rebalancingActions.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; return <div key={asset.key}><strong><i style={{ background: asset.color }} />{asset.label}</strong><span>{toPercent(allocation[asset.key])}%</span><span>{toPercent(result.target[asset.key])}%</span><b className={item.delta > 0 ? "buy" : "sell"}>{item.delta > 0 ? "+" : ""}{item.delta}%p · {item.delta > 0 ? "늘리기" : "줄이기"}</b></div>; })}</div> : <p className="fine-print">5%p 이상 차이가 나는 자산군이 없어요. 지금 비중을 유지해도 괜찮아요.</p>}{result.residualItems.length ? <div className="residual-list"><b>표에 표시되지 않은 작은 차이 · 유지</b>{result.residualItems.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; return <span key={item.asset}>{asset.label} {item.delta > 0 ? "+" : ""}{item.delta}%p</span>; })}</div> : null}<p className="fine-print">비율 차이와 방향만 보여 드려요. 얼마를 사고팔지는 알려드리지 않아요.</p></div>}
-    {tab === "detail" && <div className="tab-panel detail-grid"><article><span>분산도</span><strong>{result.diversification}</strong><p>자산군 사이의 분산만 평가하며 종목·업종 내부 집중은 평가하지 않음</p></article><article><span>집중 페널티</span><strong>{result.concentrationPenalty ? `-${result.concentrationPenalty}` : "0"}</strong><p>주식·주식형 ETF·펀드·금이 50%를 넘은 만큼 직접 차감</p></article><article><span>성향 일치도</span><strong>{result.fit}</strong><p>위험점수와 진단 성향 중심의 거리</p></article><article><span>기간 적합도</span><strong>{result.horizonFit}</strong><p>위험점수와 투자기간 중심의 거리</p></article></div>}
-    {tab === "coach" && <div className="tab-panel ai-coach-panel"><TuriniAvatar motion="reading" className="turini-ai-coach" decorative /><div><p className="eyebrow">TURINI GPT COACH</p>{aiFeedbackLoading ? <><h3>GPT가 분석 결과를 읽고 있어요…</h3><p>잠시만 기다려 주세요.</p></> : aiFeedback ? <><h3>{aiFeedback.summary_ko}</h3>{aiFeedback.strengths.length > 0 && <section className="ai-feedback-section"><b>강점</b><ul>{aiFeedback.strengths.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.cautions.length > 0 && <section className="ai-feedback-section"><b>주의할 점</b><ul>{aiFeedback.cautions.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.improvements.length > 0 && <section className="ai-feedback-section"><b>개선 방향</b><ul>{aiFeedback.improvements.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.concept_refs.length > 0 && <p className="ai-concepts">함께 공부할 개념 · {aiFeedback.concept_refs.join(" · ")}</p>}</> : <><h3>{result.coach}</h3><p>{aiFeedbackError || "규칙 분석 결과를 표시하고 있어요."}</p>{aiFeedbackError && <button className="primary-button" onClick={retryAiFeedback}>GPT 코칭 다시 받기</button>}</>}<button className="primary-button" onClick={() => setTab("rebalance")}>조정 방향 보기</button></div></div>}
-    <p className="result-disclaimer">본 결과는 금융 학습을 위한 자산배분 예시이며 특정 금융상품의 추천이나 매수·매도 권유가 아니에요. 세금·수수료·계좌 유형·상품별 위험·종목 내부 집중위험은 반영하지 않았어요.</p>
+    {tab === "summary" && <div className="tab-panel"><div className="coach-banner"><TuriniAvatar motion="reading" className="turini-coach" decorative /><div><b>투리니 코치의 한마디</b><p>{result.coach}</p></div></div><div className="analysis-columns"><article className="good"><h3>강점 · {result.strengths.length}개</h3>{result.strengths.length ? <ul>{result.strengths.map((item) => <li key={item}>{item}</li>)}</ul> : <p>세 가지 검증 축에서 확정할 수 있는 강점이 없습니다.</p>}</article><article className="care"><h3>확인할 점</h3>{result.cautions.length ? <ul>{result.cautions.map((item) => <li key={item}>{item}</li>)}</ul> : <p>현재 규칙에서 별도로 확인할 점이 없습니다.</p>}</article></div></div>}
+    {tab === "rebalance" && <div className="tab-panel"><div className="target-chart"><div className="allocation-donut small" style={targetChartStyle}><span>{result.nearTarget ? "조정안" : "비교"}</span></div><div><h3>{statusTitle[result.recommendationStatus]}</h3><p>{result.coach}</p></div></div>{result.recommendationStatus === "recommended" && result.nearTarget && result.rebalancingActions.length ? <div className="rebalance-table"><div className="table-head"><span>자산</span><span>현재</span><span>조정안</span><span>차이 · 방향</span></div>{result.rebalancingActions.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; return <div key={asset.key}><strong><i style={{ background: asset.color }} />{asset.label}</strong><span>{toPercent(allocation[asset.key])}%</span><span>{toPercent(result.nearTarget!.allocation[asset.key])}%</span><b className={item.delta > 0 ? "buy" : "sell"}>{item.delta > 0 ? "+" : ""}{item.delta}%p · {item.delta > 0 ? "늘리기" : "줄이기"}</b></div>; })}</div> : <p className="fine-print">이 상태에서는 실행 항목을 만들지 않습니다.</p>}{result.residualItems.length ? <div className="residual-list"><b>5%p 미만 잔차 · 실행 항목 아님</b>{result.residualItems.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; return <span key={item.asset}>{asset.label} {item.delta > 0 ? "+" : ""}{item.delta}%p</span>; })}</div> : null}<p className="fine-print">성향별 기본 배분은 비교 기준일 뿐, 조정 목표로 그대로 사용하지 않습니다. 비율 차이와 방향만 표시하며 금액·상품은 제안하지 않습니다.</p></div>}
+    {tab === "detail" && <div className="tab-panel detail-grid"><article><span>연환산 변동성</span><strong>{result.riskScore}%</strong><p>공분산 기반 · 기준일 {result.sigmaAsof}</p></article><article><span>6개월 하방 참고값</span><strong>{result.downside6m}%</strong><p>정규분포 가정의 교육용 값이며 손실 예측이 아닙니다.</p></article><article><span>분산효과 감소율</span><strong>{result.diversificationReduction === null ? "산출 불가" : `${Math.round(result.diversificationReduction * 100)}%`}</strong><p>{result.diversificationStatus} · 단일 자산에는 강점을 부여하지 않습니다.</p></article><article><span>기준 범위</span><strong>{result.profileRange[0].toFixed(2)}~{result.profileRange[1].toFixed(2)}%</strong><p>기간 범위 {result.horizonRange[0].toFixed(2)}~{result.horizonRange[1].toFixed(2)}%</p></article></div>}
+    {tab === "coach" && <div className="tab-panel ai-coach-panel"><TuriniAvatar motion="reading" className="turini-ai-coach" decorative /><div><p className="eyebrow">TURINI GPT COACH</p>{aiFeedbackLoading ? <><h3>GPT가 규칙 결과를 설명하고 있습니다…</h3><p>잠시만 기다려 주세요.</p></> : aiFeedback ? <><h3>{aiFeedback.summary_ko}</h3>{aiFeedback.strengths.length > 0 && <section className="ai-feedback-section"><b>강점</b><ul>{aiFeedback.strengths.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.cautions.length > 0 && <section className="ai-feedback-section"><b>주의할 점</b><ul>{aiFeedback.cautions.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.improvements.length > 0 && <section className="ai-feedback-section"><b>개선 방향</b><ul>{aiFeedback.improvements.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.concept_refs.length > 0 && <p className="ai-concepts">함께 공부할 개념 · {aiFeedback.concept_refs.join(" · ")}</p>}</> : <><h3>{result.coach}</h3><p>{aiFeedbackError || "규칙 분석 결과를 표시하고 있습니다."}</p>{aiFeedbackError && <button className="primary-button" onClick={retryAiFeedback}>GPT 코칭 다시 받기</button>}</>}<button className="primary-button" onClick={() => setTab("rebalance")}>조정 방향 보기</button></div></div>}
+    <p className="result-disclaimer">본 결과는 과거 약 3년의 문서화된 변동성 스냅샷을 사용한 금융 학습용 자산배분 예시입니다. 공식 금융상품 위험등급, 특정 상품 추천, 매수·매도 권유 또는 미래 손실 예측이 아닙니다. 원시 시계열 재현 검증 전이며 세금·수수료·상품별 위험은 반영하지 않습니다.</p>
   </section>;
 }

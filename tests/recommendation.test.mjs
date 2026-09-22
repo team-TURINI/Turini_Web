@@ -92,6 +92,18 @@ test("취약 태그에 해당하는 문제가 먼저 나온다", () => {
   assert.ok(withContext >= 3, "취약 태그 문항이 너무 적습니다");
 });
 
+test("20개 상위 태그도 맞춤 추천 기준으로 동작한다", () => {
+  const parentTag = pool[0].parent_tag;
+  const focused = plan({
+    name: "상위 태그 사용자",
+    context: { weakTags: [parentTag], level: undefined, recentIds: [] },
+  });
+  const matched = focused.filter((item) => item.parent_tag === parentTag).length;
+  const baseline = plan(신규).filter((item) => item.parent_tag === parentTag).length;
+  assert.ok(matched > baseline, `상위 태그 추천 ${matched}개 vs 기본 ${baseline}개`);
+  assert.ok(matched >= 3, `상위 태그 관련 문항이 ${matched}개뿐입니다`);
+});
+
 test("현재 난이도에 맞는 문제가 먼저 나온다", () => {
   const 초급사용자 = plan(초급);
   const 고급사용자 = plan(고급);
