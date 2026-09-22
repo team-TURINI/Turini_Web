@@ -62,6 +62,8 @@ test("portfolio screen exposes the revised asset classification help", () => {
 
 test("진단·학습 화면이 요청한 사용자 흐름을 지킨다", () => {
   assert.match(pageSource, /finished\.mode === "diagnosis"\s*\? \[\]/);
+  assert.match(pageSource, /correct: current\.correct \+ \(finished\.mode === "diagnosis" \? 0 : finished\.correct\)/);
+  assert.match(pageSource, /correct: Math\.min\(savedCorrect, savedAttempts\)/);
   assert.match(pageSource, /result\.mode !== "diagnosis" \? <button className="secondary-button"/);
   assert.match(pageSource, /question\.parent_tag \|\| question\.weakness_tag/);
   assert.match(pageSource, /취약 상위 태그/);

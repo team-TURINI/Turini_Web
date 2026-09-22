@@ -338,10 +338,15 @@ export default function Home() {
   const hydrateAccount = useCallback((payload: AccountPayload, learningQuestions: QuizQuestion[]) => {
     const savedProgress = payload.progress || {};
     const savedPortfolio = payload.portfolio || {};
+    const savedAttempts = typeof savedProgress.attempts === "number" ? Math.max(0, Math.floor(savedProgress.attempts)) : 0;
+    const savedCorrect = typeof savedProgress.correct === "number" ? Math.max(0, Math.floor(savedProgress.correct)) : 0;
     setAccount(payload.account);
     setProgress({
       ...DEFAULT_PROGRESS,
       ...savedProgress,
+      // 진단 정답이 과거 학습 정답 수에 섞여 저장된 계정도 학습 시도 수 범위로 복구합니다.
+      attempts: savedAttempts,
+      correct: Math.min(savedCorrect, savedAttempts),
       completedIds: Array.isArray(savedProgress.completedIds) ? savedProgress.completedIds : [],
       completedLessons: Array.isArray(savedProgress.completedLessons) ? savedProgress.completedLessons : [],
       weakTags: normalizeParentTags(savedProgress.weakTags, learningQuestions),
@@ -535,6 +540,16 @@ export default function Home() {
   const activeCategoryLevel = categoryLevelForSolved(activeCategorySolved);
   const activeCategoryCompletedLessons = completedCategoryLessonsForSolved(activeCategorySolved);
   const activeCategoryCurrentLesson = activeCategoryCompletedLessons < MAX_CATEGORY_LEVEL ? activeCategoryCompletedLessons + 1 : null;
+  const learningAccuracy = progress.attempts > 0
+    ? Math.round((Math.min(progress.correct, progress.attempts) / progress.attempts) * 100)
+    : null;
+  const levelXp = progress.xp % 100;
+  const resumableCategories = CATEGORIES.filter((category) => (categoryCounts[category.name] || 0) < QUESTIONS_PER_CATEGORY);
+  const resumeCategory = (resumableCategories.length ? resumableCategories : [...CATEGORIES]).reduce((best, category) =>
+    (categoryCounts[category.name] || 0) > (categoryCounts[best.name] || 0) ? category : best,
+  (resumableCategories.length ? resumableCategories : [...CATEGORIES])[0]);
+  const resumeSolved = categoryCounts[resumeCategory.name] || 0;
+  const resumeLevel = categoryLevelForSolved(resumeSolved);
   const showActiveLearningContext = view === "learn" || view === "difficulty";
   const generalContext: Record<Exclude<View, "learn" | "difficulty">, string> = {
     home: "홈",
@@ -690,7 +705,7 @@ export default function Home() {
       level: Math.max(current.level, Math.floor((current.xp + xpGain) / 100) + 1),
       completedIds: [...new Set([...current.completedIds, ...ids])],
       completedLessons: finished.lesson ? [...new Set([...current.completedLessons, finished.lesson])] : current.completedLessons,
-      correct: current.correct + finished.correct,
+      correct: current.correct + (finished.mode === "diagnosis" ? 0 : finished.correct),
       attempts: current.attempts + knowledgeQuestions.length,
       studySessions: current.studySessions + (finished.mode === "diagnosis" ? 0 : 1),
       // 연속 학습은 한국 시간 기준 하루에 한 번만 올라갑니다.
@@ -999,20 +1014,30 @@ export default function Home() {
               <section className="welcome-row">
                 <div><p className="eyebrow">좋은 하루예요</p><h1>안녕하세요, {account.username}님 👋</h1><p>오늘도 투리니와 금융 지식을 키워볼까요?</p></div>
               </section>
-              <section className="hero-card">
-                <div className="hero-copy"><span className="pill">오늘의 맞춤 추천</span><h2>{progress.weakTags.length ? <><em>취약 태그</em>부터<br />집중 학습해요!</> : <>하루 10문제로<br /><em>금융 레벨 업!</em></>}</h2><p>{progress.weakTags.length ? `${progress.weakTags.slice(0, 2).join(" · ")} 문제를 우선 추천해요.` : "완료하면 최대 100 XP와 연속 학습 기록을 받아요."}</p><button className="primary-button" onClick={startDaily} disabled={!questions.length}>{progress.weakTags.length ? "맞춤 학습 시작" : "지금 시작하기"} <span>→</span></button></div>
-                <div className="hero-mascot"><TuriniAvatar scene label="나의 투리니" /><span className="spark spark-one">✦</span><span className="spark spark-two">◆</span></div>
+              <section className="home-overview" aria-label="나의 학습 요약">
+                <article><span>레벨</span><strong>Lv. {progress.level}</strong><small>{levelXp} / 100 XP</small></article>
+                <article><span>학습 정답률</span><strong>{learningAccuracy === null ? "—" : `${learningAccuracy}%`}</strong><small>{progress.attempts ? `${progress.attempts}문항 기준` : "첫 학습 전"}</small></article>
+                <article><span>투자 성향</span><strong>{progress.tendency}</strong><small>{progress.financeLevel}</small></article>
               </section>
+              <button type="button" className="daily-learning-card" onClick={startDaily} disabled={!questions.length} aria-label={progress.weakTags.length ? "취약 태그 중심 오늘의 10문제 시작" : "오늘의 10문제 시작"}>
+                <div className="daily-learning-copy"><span>오늘의 맞춤 학습</span><strong>{progress.weakTags.length ? "취약 태그부터 10문제" : "오늘의 10문제"}</strong><small>{progress.weakTags.length ? `${progress.weakTags.slice(0, 2).join(" · ")} 우선 추천` : "최대 100 XP · 약 5분"}</small></div>
+                <TuriniAvatar motion="reading" className="turini-daily" decorative />
+                <span className="daily-play" aria-hidden="true">→</span>
+              </button>
               {progress.weakTags.length ? <section className="card-block weak-tag-card"><div className="section-heading"><div><p className="eyebrow">PERSONALIZED LEARNING</p><h2>내 취약 상위 태그</h2></div><span>20개 상위 태그 기준</span></div><p>진단과 오답에서 확인된 태그예요. 태그를 누르면 관련 문제가 먼저 나와요.</p><div>{progress.weakTags.map((tag) => <button key={tag} onClick={() => startWeakTag(tag)}>{tag}</button>)}</div></section> : null}
+              <section className="continue-section">
+                <div className="section-heading"><div><p className="eyebrow">이어서 학습하기</p><h2>멈춘 곳에서 계속해요</h2></div></div>
+                <button type="button" className="continue-learning-card" onClick={() => openDifficulty(resumeCategory.name)} style={{ "--category-color": CATEGORY_COLORS[resumeCategory.color] } as CSSProperties}>
+                  <span className="continue-icon">{resumeCategory.icon}</span>
+                  <span className="continue-copy"><strong>{resumeCategory.name} · Lv. {resumeLevel}</strong><small>{resumeSolved ? `${resumeSolved}문항 완료` : "첫 레슨을 시작해요"}</small><span className="progress-track"><span style={{ width: `${Math.min(100, resumeSolved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></span></span>
+                  <b>{Math.min(resumeSolved, QUESTIONS_PER_CATEGORY)}/{QUESTIONS_PER_CATEGORY}</b>
+                </button>
+              </section>
               <button className="future-banner" onClick={() => navigate("assets")}>
                 <div><span className="future-banner-kicker">새로운 자산 플래너</span><strong>지금 습관 그대로라면<br />10년 뒤 내 자산은?</strong><small>미래 자산과 목표 달성 시점을 확인해요 <b>→</b></small></div>
                 <TuriniAvatar motion="thinking" className="turini-future" decorative />
               </button>
-              <section className="summary-grid">
-                <article className="level-card"><div className="section-title"><div><span>나의 금융 레벨</span><h2>{progress.financeLevel === "진단 전" ? `Lv. ${progress.level}` : progress.financeLevel}</h2></div><div className="level-ring">{progress.level}</div></div><div className="progress-track"><span style={{ width: `${Math.min(100, (progress.xp % 1000) / 10)}%` }} /></div><small>{progress.xp} / {Math.ceil((progress.xp + 1) / 1000) * 1000} XP</small></article>
-                <article className="tendency-card"><span>투자 성향</span><h2>{progress.tendency}</h2><p>{progress.tendency === "안정형" ? "원금 보전을 중요하게 생각해요." : progress.tendency === "공격형" ? "성장을 위해 변동성을 감수해요." : "안정성과 수익의 균형을 추구해요."}</p><small className="diagnosis-complete">✓ 최초 진단 완료</small></article>
-              </section>
-              <section className="mission-card"><div><span className="mission-icon">🎁</span><div><p className="eyebrow">이번 주 학습 미션</p><h3>퀴즈 5회 완료하기</h3></div></div><strong>{Math.min(5, progress.studySessions)} / 5</strong><div className="progress-track"><span style={{ width: `${Math.min(100, progress.studySessions * 20)}%` }} /></div></section>
+              <section className="mission-card"><div><span className="mission-icon">🎁</span><div><p className="eyebrow">학습 미션</p><h3>퀴즈 5회 완료하기</h3></div></div><strong>{Math.min(5, progress.studySessions)} / 5</strong><div className="progress-track"><span style={{ width: `${Math.min(100, progress.studySessions * 20)}%` }} /></div></section>
               <section className="content-section"><div className="section-heading"><div><p className="eyebrow">빠른 학습</p><h2>어떤 주제부터 시작할까요?</h2></div><button onClick={() => navigate("category")}>전체 보기 →</button></div><div className="quick-categories">{CATEGORIES.slice(0, 3).map((category) => <button key={category.name} className={`quick-card ${category.color}`} onClick={() => openDifficulty(category.name)}><span>{category.icon}</span><div><strong>{category.name}</strong><small>{category.copy}</small></div><b>→</b></button>)}</div></section>
             </div>
           )}
@@ -1054,7 +1079,7 @@ export default function Home() {
               <div className="category-list">{CATEGORIES.map((category) => {
                 const solved = categoryCounts[category.name] || 0;
                 const categoryLevel = categoryLevelForSolved(solved);
-                return <article className={`category-card ${category.color}`} key={category.name}><button className="category-main" onClick={() => openDifficulty(category.name)}><span className="category-icon">{category.icon}</span><div><div className="category-title-row"><h2>{category.name}</h2><span>Lv. {categoryLevel}</span></div><p>{category.copy}</p><div className="progress-track"><span style={{ width: `${Math.min(100, solved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></div><small>{Math.min(solved, QUESTIONS_PER_CATEGORY)} / {QUESTIONS_PER_CATEGORY}문항 완료 · 난이도 고르기</small></div><b>›</b></button></article>;
+                return <article className={`category-card ${category.color}`} style={{ "--category-color": CATEGORY_COLORS[category.color] } as CSSProperties} key={category.name}><button className="category-main" onClick={() => openDifficulty(category.name)}><span className="category-icon">{category.icon}</span><div><div className="category-title-row"><h2>{category.name}</h2><span>Lv. {categoryLevel}</span></div><p>{category.copy}</p><div className="progress-track"><span style={{ width: `${Math.min(100, solved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></div><small>{Math.min(solved, QUESTIONS_PER_CATEGORY)} / {QUESTIONS_PER_CATEGORY}문항 완료 · 난이도 고르기</small></div><b>›</b></button></article>;
               })}</div>
             </div>
           )}
@@ -1111,7 +1136,7 @@ export default function Home() {
 
           {view === "profile" && (
             <div className="screen profile-screen">
-              <section className="profile-hero"><div className="profile-mascot-frame"><TuriniAvatar scene label="나의 투리니" /></div><div><p className="eyebrow">MY PROFILE</p><h1>{account.username}</h1><span>나만의 금융 학습 기록</span></div></section>
+              <section className="profile-hero"><div className="profile-mascot-frame"><TuriniAvatar scene label="나의 투리니" /></div><div><p className="eyebrow">MY PROFILE</p><h1>{account.username}</h1><span>{progress.financeLevel} · {progress.tendency}</span><div className="profile-level-progress"><div><b>Lv. {progress.level}</b><small>다음 레벨까지 {100 - levelXp} XP</small></div><div className="progress-track"><span style={{ width: `${levelXp}%` }} /></div></div></div></section>
               <section className="card-block account-card">
                 <div className="account-identity"><TuriniAvatar className="turini-avatar--card" label="프로필 캐릭터" /><div><p className="eyebrow">ACCOUNT</p><h2>{account.username}</h2><small className={`save-state ${saveState}`}>{saveState === "saving" ? "기록 저장 중…" : saveState === "error" ? "저장 실패 · 인터넷 연결을 확인해 주세요" : "학습 기록이 계정에 저장돼요"}</small></div></div>
                 <div className="account-actions"><button onClick={logout}>로그아웃</button><button className="danger-link" onClick={() => { setResetConfirm(true); setResetError(""); }}>계정 초기화</button></div>
@@ -1119,6 +1144,7 @@ export default function Home() {
               </section>
               <section className="profile-stats"><article><span>🔥</span><strong>{progress.streak}일</strong><small>연속 학습</small></article><article><span>💎</span><strong>{progress.xp}</strong><small>총 XP</small></article><article><span>🏆</span><strong>Lv. {progress.level}</strong><small>현재 레벨</small></article><article><span>✓</span><strong>{progress.completedIds.length}</strong><small>푼 문제</small></article></section>
               <section className="card-block growth-card"><div className="section-heading"><div><p className="eyebrow">학습 현황</p><h2>나의 성장 기록</h2></div><span className="diagnosis-complete">✓ 최초 진단 완료</span></div><div className="growth-summary"><article><span>금융 수준</span><strong>{progress.financeLevel}</strong><small>진단 결과에 맞춰 학습 중</small></article><article><span>투자 성향</span><strong>{progress.tendency}</strong><small>나에게 맞는 자산배분 기준</small></article></div></section>
+              <section className="card-block category-growth-card"><div className="section-heading"><div><p className="eyebrow">CATEGORY GROWTH</p><h2>주제별 성장 기록</h2></div><span>{progress.completedIds.length}문항 완료</span></div><div className="category-growth-list">{CATEGORIES.map((category) => { const solved = Math.min(categoryCounts[category.name] || 0, QUESTIONS_PER_CATEGORY); const percent = Math.round(solved / QUESTIONS_PER_CATEGORY * 100); return <div className="category-growth-row" style={{ "--category-color": CATEGORY_COLORS[category.color] } as CSSProperties} key={category.name}><strong>{category.name}</strong><div className="progress-track"><span style={{ width: `${percent}%` }} /></div><b>{percent}%</b></div>; })}</div></section>
               <section className="card-block weak-tag-card"><div className="section-heading"><div><p className="eyebrow">WEAKNESS TAGS</p><h2>내 취약 상위 태그</h2></div><span>20개 상위 태그 기준</span></div>{progress.weakTags.length ? <><p>진단과 학습 오답에서 확인된 태그예요. 태그를 누르면 관련 문제를 먼저 학습해요.</p><div>{progress.weakTags.map((tag) => <button key={tag} onClick={() => startWeakTag(tag)}>{tag}</button>)}</div></> : <p>아직 저장된 취약 태그가 없어요. 학습을 시작하면 오답을 기준으로 맞춤 추천이 만들어져요.</p>}</section>
               <TuriniDressUp
                 customization={progress.customization}
