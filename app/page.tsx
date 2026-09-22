@@ -13,7 +13,7 @@ import { isAnswerCorrect } from "./answer-utils";
 import { formalizeExplanation } from "./explanation-utils";
 import LearningMap, { bandEntryLesson } from "./learning-map";
 import DifficultySelect, { DIFFICULTY_COPY, type DifficultyCard } from "./difficulty-select";
-import TuriniAvatar, { TuriniAvatarProvider, TuriniDressUp } from "./turini-avatar";
+import TuriniAvatar, { BasicReadingTurini, TuriniAvatarProvider, TuriniDressUp } from "./turini-avatar";
 import {
   DEFAULT_CUSTOMIZATION,
   avatarStatsFrom,
@@ -195,6 +195,15 @@ const DEFAULT_PROGRESS: Progress = {
   conceptReviews: {},
   pendingRetries: [],
   customization: DEFAULT_CUSTOMIZATION,
+};
+
+/** 저장된 꾸미기와 무관하게 안내 화면에서 사용하는 투리니 기본 모습입니다. */
+const BASIC_DISPLAY_CUSTOMIZATION: TuriniCustomization = {
+  hat: null,
+  glasses: null,
+  neck: null,
+  bag: null,
+  background: null,
 };
 
 const DIAG_POINTS: Record<string, number> = {
@@ -1035,7 +1044,7 @@ export default function Home() {
               </section>
               <button className="future-banner" onClick={() => navigate("assets")}>
                 <div><span className="future-banner-kicker">새로운 자산 플래너</span><strong>지금 습관 그대로라면<br />10년 뒤 내 자산은?</strong><small>미래 자산과 목표 달성 시점을 확인해요 <b>→</b></small></div>
-                <TuriniAvatar motion="thinking" className="turini-future" decorative />
+                <TuriniAvatar customization={BASIC_DISPLAY_CUSTOMIZATION} motion="idle" className="turini-future" decorative />
               </button>
               <section className="mission-card"><div><span className="mission-icon">🎁</span><div><p className="eyebrow">학습 미션</p><h3>퀴즈 5회 완료하기</h3></div></div><strong>{Math.min(5, progress.studySessions)} / 5</strong><div className="progress-track"><span style={{ width: `${Math.min(100, progress.studySessions * 20)}%` }} /></div></section>
               <section className="content-section"><div className="section-heading"><div><p className="eyebrow">빠른 학습</p><h2>어떤 주제부터 시작할까요?</h2></div><button onClick={() => navigate("category")}>전체 보기 →</button></div><div className="quick-categories">{CATEGORIES.slice(0, 3).map((category) => <button key={category.name} className={`quick-card ${category.color}`} onClick={() => openDifficulty(category.name)}><span>{category.icon}</span><div><strong>{category.name}</strong><small>{category.copy}</small></div><b>→</b></button>)}</div></section>
@@ -1045,7 +1054,7 @@ export default function Home() {
           {view === "learn" && (
             <div className="screen learn-screen" data-map-theme={activeCategory.color}>
               <PageTitle eyebrow="LEARNING PATH" title="금융 지식, 한 단계씩" copy="각 레벨은 10문항이에요. 초급부터 고급까지 차근차근 올라가요." />
-              <section className="learning-banner"><div><span>{activeCategory.name} 레벨</span><h2>Lv. {activeCategoryLevel}</h2><div className="progress-track"><span style={{ width: `${Math.min(100, activeCategorySolved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></div><small>{activeCategoryCompletedLessons} / {MAX_CATEGORY_LEVEL} 레슨 완료</small></div><TuriniAvatar motion="reading" className="turini-learning" /></section>
+              <section className="learning-banner"><div><span>{activeCategory.name} 레벨</span><h2>Lv. {activeCategoryLevel}</h2><div className="progress-track"><span style={{ width: `${Math.min(100, activeCategorySolved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></div><small>{activeCategoryCompletedLessons} / {MAX_CATEGORY_LEVEL} 레슨 완료</small></div><BasicReadingTurini className="turini-learning" /></section>
               <LearningMap
                 categoryName={activeCategory.name}
                 theme={activeCategory.color}
@@ -1087,7 +1096,6 @@ export default function Home() {
           {view === "portfolio" && (
             <div className="screen portfolio-screen">
               <PageTitle eyebrow="MY PORTFOLIO" title="내 포트폴리오 설계" copy="여섯 자산의 현재 비중을 입력하면 성향 적합도와 조정 방향을 바로 알려드려요." />
-              <aside className="portfolio-model-notice" role="note"><b>분석 기준 안내</b><p>v11 문서의 6개 자산 변동성과 상관계수로 서비스용 위험등급·성향 적합·기간 적합을 각각 계산합니다. 종합점수는 만들지 않으며, 원시 시장자료 재현 검증 전인 문서 스냅샷입니다.</p></aside>
               <section className="portfolio-intro"><div><span className="pill">핵심 기능</span><h2>비중을 입력하고<br />투리니의 코칭 받기</h2><p>개별 종목 추천이 아닌 자산배분 학습용 분석이에요.</p></div><div className="portfolio-mascot-frame"><TuriniAvatar motion="idle" className="turini-portfolio" /></div></section>
               <section className="portfolio-builder card-block">
                 <div className="builder-header"><div><p className="eyebrow">STEP 1</p><h2>현재 자산 비중</h2></div><div className={`sum-badge ${validateAllocation(allocation) ? "valid" : ""}`}><span>합계</span><strong>{sumAllocation(allocation)}%</strong></div></div>
@@ -1475,7 +1483,7 @@ function PortfolioResults({ result, allocation, tab, setTab, aiFeedback, aiFeedb
     <div className="result-hero"><div><p>서비스 변동성 위험등급</p><strong>{result.riskGrade}<small>등급</small></strong><span>{result.riskGradeName} · 연환산 {result.riskScore}%</span></div><TuriniAvatar motion="celebrate" className="turini-score" replayKey={result.riskGrade} /></div>
     <div className="score-cards"><article><span>위험 수준</span><strong>{Math.round(result.riskLevel * 100)}<small>%</small></strong><small>6개 자산 중 최대 변동성 대비 · 공식 상품등급 아님</small><div className="mini-gauge"><i style={{ left: `${riskPosition}%` }} /></div></article><article><span>성향 적합</span><strong>{fitPercent}<small>%</small></strong><small>{result.typeFitLabel}</small><div className="ring-score" style={{ "--score": `${fitPercent * 3.6}deg` } as CSSProperties} /></article><article><span>기간 적합</span><strong>{horizonFitPercent}<small>%</small></strong><small>{result.horizonFitLabel}</small><div className="ring-score" style={{ "--score": `${horizonFitPercent * 3.6}deg` } as CSSProperties} /></article></div>
     <div className="portfolio-tabs"><button className={tab === "summary" ? "active" : ""} onClick={() => setTab("summary")}>요약</button><button className={tab === "rebalance" ? "active" : ""} onClick={() => setTab("rebalance")}>리밸런싱</button><button className={tab === "detail" ? "active" : ""} onClick={() => setTab("detail")}>상세 분석</button><button className={tab === "coach" ? "active" : ""} onClick={() => setTab("coach")}>AI 코치</button></div>
-    {tab === "summary" && <div className="tab-panel"><div className="coach-banner"><TuriniAvatar motion="reading" className="turini-coach" decorative /><div><b>투리니 코치의 한마디</b><p>{result.coach}</p></div></div><div className="analysis-columns"><article className="good"><h3>강점 · {result.strengths.length}개</h3>{result.strengths.length ? <ul>{result.strengths.map((item) => <li key={item}>{item}</li>)}</ul> : <p>세 가지 검증 축에서 확정할 수 있는 강점이 없습니다.</p>}</article><article className="care"><h3>확인할 점</h3>{result.cautions.length ? <ul>{result.cautions.map((item) => <li key={item}>{item}</li>)}</ul> : <p>현재 규칙에서 별도로 확인할 점이 없습니다.</p>}</article></div></div>}
+    {tab === "summary" && <div className="tab-panel"><div className="coach-banner"><BasicReadingTurini className="turini-coach" decorative /><div><b>투리니 코치의 한마디</b><p>{result.coach}</p></div></div><div className="analysis-columns"><article className="good"><h3>강점 · {result.strengths.length}개</h3>{result.strengths.length ? <ul>{result.strengths.map((item) => <li key={item}>{item}</li>)}</ul> : <p>세 가지 검증 축에서 확정할 수 있는 강점이 없습니다.</p>}</article><article className="care"><h3>확인할 점</h3>{result.cautions.length ? <ul>{result.cautions.map((item) => <li key={item}>{item}</li>)}</ul> : <p>현재 규칙에서 별도로 확인할 점이 없습니다.</p>}</article></div></div>}
     {tab === "rebalance" && <div className="tab-panel"><div className="target-chart"><div className="allocation-donut small" style={targetChartStyle}><span>{result.nearTarget ? "조정안" : "비교"}</span></div><div><h3>{statusTitle[result.recommendationStatus]}</h3><p>{result.coach}</p></div></div>{result.recommendationStatus === "recommended" && result.nearTarget && result.rebalancingActions.length ? <div className="rebalance-table"><div className="table-head"><span>자산</span><span>현재</span><span>조정안</span><span>차이 · 방향</span></div>{result.rebalancingActions.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; return <div key={asset.key}><strong><i style={{ background: asset.color }} />{asset.label}</strong><span>{toPercent(allocation[asset.key])}%</span><span>{toPercent(result.nearTarget!.allocation[asset.key])}%</span><b className={item.delta > 0 ? "buy" : "sell"}>{item.delta > 0 ? "+" : ""}{item.delta}%p · {item.delta > 0 ? "늘리기" : "줄이기"}</b></div>; })}</div> : <p className="fine-print">이 상태에서는 실행 항목을 만들지 않습니다.</p>}{result.residualItems.length ? <div className="residual-list"><b>5%p 미만 잔차 · 실행 항목 아님</b>{result.residualItems.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; return <span key={item.asset}>{asset.label} {item.delta > 0 ? "+" : ""}{item.delta}%p</span>; })}</div> : null}<p className="fine-print">성향별 기본 배분은 비교 기준일 뿐, 조정 목표로 그대로 사용하지 않습니다. 비율 차이와 방향만 표시하며 금액·상품은 제안하지 않습니다.</p></div>}
     {tab === "detail" && <div className="tab-panel detail-grid"><article><span>연환산 변동성</span><strong>{result.riskScore}%</strong><p>공분산 기반 · 기준일 {result.sigmaAsof}</p></article><article><span>6개월 하방 참고값</span><strong>{result.downside6m}%</strong><p>정규분포 가정의 교육용 값이며 손실 예측이 아닙니다.</p></article><article><span>분산효과 감소율</span><strong>{result.diversificationReduction === null ? "산출 불가" : `${Math.round(result.diversificationReduction * 100)}%`}</strong><p>{result.diversificationStatus} · 단일 자산에는 강점을 부여하지 않습니다.</p></article><article><span>기준 범위</span><strong>{result.profileRange[0].toFixed(2)}~{result.profileRange[1].toFixed(2)}%</strong><p>기간 범위 {result.horizonRange[0].toFixed(2)}~{result.horizonRange[1].toFixed(2)}%</p></article></div>}
     {tab === "coach" && <div className="tab-panel ai-coach-panel"><TuriniAvatar motion="reading" className="turini-ai-coach" decorative /><div><p className="eyebrow">TURINI GPT COACH</p>{aiFeedbackLoading ? <><h3>GPT가 규칙 결과를 설명하고 있습니다…</h3><p>잠시만 기다려 주세요.</p></> : aiFeedback ? <><h3>{aiFeedback.summary_ko}</h3>{aiFeedback.strengths.length > 0 && <section className="ai-feedback-section"><b>강점</b><ul>{aiFeedback.strengths.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.cautions.length > 0 && <section className="ai-feedback-section"><b>주의할 점</b><ul>{aiFeedback.cautions.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.improvements.length > 0 && <section className="ai-feedback-section"><b>개선 방향</b><ul>{aiFeedback.improvements.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.concept_refs.length > 0 && <p className="ai-concepts">함께 공부할 개념 · {aiFeedback.concept_refs.join(" · ")}</p>}</> : <><h3>{result.coach}</h3><p>{aiFeedbackError || "규칙 분석 결과를 표시하고 있습니다."}</p>{aiFeedbackError && <button className="primary-button" onClick={retryAiFeedback}>GPT 코칭 다시 받기</button>}</>}<button className="primary-button" onClick={() => setTab("rebalance")}>조정 방향 보기</button></div></div>}
