@@ -206,6 +206,12 @@ const BASIC_DISPLAY_CUSTOMIZATION: TuriniCustomization = {
   background: null,
 };
 
+/** 자산 안내 화면에서만 사용하는 새싹·기본 초록 가방 프리셋입니다. */
+const BASIC_BACKPACK_CUSTOMIZATION: TuriniCustomization = {
+  ...BASIC_DISPLAY_CUSTOMIZATION,
+  bag: "bag:green_original",
+};
+
 const DIAG_POINTS: Record<string, number> = {
   S1: 2, S2: 3, S3: 4, B1: 1, B2: 3, B3: 5,
   F1: 2, F2: 3, F3: 4, R1: 1, R2: 3, R3: 5,
@@ -1030,7 +1036,7 @@ export default function Home() {
               </section>
               <button type="button" className="daily-learning-card" onClick={startDaily} disabled={!questions.length} aria-label={progress.weakTags.length ? "취약 태그 중심 오늘의 10문제 시작" : "오늘의 10문제 시작"}>
                 <div className="daily-learning-copy"><span>오늘의 맞춤 학습</span><strong>{progress.weakTags.length ? "취약 태그부터 10문제" : "오늘의 10문제"}</strong><small>{progress.weakTags.length ? `${progress.weakTags.slice(0, 2).join(" · ")} 우선 추천` : "최대 100 XP · 약 5분"}</small></div>
-                <TuriniAvatar motion="reading" className="turini-daily" decorative />
+                <TuriniAvatar scene motion="idle" className="turini-daily" label="나의 투리니" />
                 <span className="daily-play" aria-hidden="true">→</span>
               </button>
               {progress.weakTags.length ? <section className="card-block weak-tag-card"><div className="section-heading"><div><p className="eyebrow">PERSONALIZED LEARNING</p><h2>내 취약 상위 태그</h2></div><span>20개 상위 태그 기준</span></div><p>진단과 오답에서 확인된 태그예요. 태그를 누르면 관련 문제가 먼저 나와요.</p><div>{progress.weakTags.map((tag) => <button key={tag} onClick={() => startWeakTag(tag)}>{tag}</button>)}</div></section> : null}
@@ -1399,7 +1405,7 @@ function WealthPlanner({ state, setState }: { state: WealthPlannerState; setStat
   return <>
     <section className="asset-planner-hero">
       <div><span>투리니 자산 플래너</span><h2>오늘의 선택을<br />미래의 숫자로</h2><p>저축 습관을 바꾸면 목표가 얼마나 가까워지는지 바로 비교해요.</p></div>
-      <div className="asset-planner-mascot"><TuriniAvatar motion="thinking" className="turini-planner" /></div>
+      <div className="asset-planner-mascot"><TuriniAvatar customization={BASIC_BACKPACK_CUSTOMIZATION} motion="idle" className="turini-planner" decorative /></div>
     </section>
     <div className="planner-switch" role="tablist" aria-label="자산 플래너 메뉴">
       <button role="tab" aria-selected={tab === "future"} className={tab === "future" ? "active" : ""} onClick={() => setTab("future")}><span>↗</span>내 돈의 미래</button>
@@ -1442,7 +1448,7 @@ function WealthPlanner({ state, setState }: { state: WealthPlannerState; setStat
         <div className="asset-rate"><div><span>수입 중 저축·투자 비율</span><b>{flow.assetRate.toFixed(1)}%</b></div><div className="progress-track"><span style={{ width: `${Math.min(100, flow.assetRate)}%` }} /></div></div>
         <button className="primary-button apply-flow" disabled={flow.buildingAssets <= 0} onClick={() => { setField("monthlyContribution", flow.buildingAssets); setTab("future"); }}>저축·투자 금액으로 미래 보기 <span>→</span></button>
       </section>
-      <div className="coach-nudge"><TuriniAvatar motion="reading" className="turini-nudge" decorative /><p><b>투리니 팁</b> 적금과 투자는 소비가 아니라 내 자산으로 옮긴 돈이에요. 생활지출과 분리해서 보면 이번 달의 성장이 더 잘 보여요.</p></div>
+      <div className="coach-nudge"><BasicReadingTurini className="turini-nudge" decorative /><p><b>투리니 팁</b> 적금과 투자는 소비가 아니라 내 자산으로 옮긴 돈이에요. 생활지출과 분리해서 보면 이번 달의 성장이 더 잘 보여요.</p></div>
     </>}
   </>;
 }
