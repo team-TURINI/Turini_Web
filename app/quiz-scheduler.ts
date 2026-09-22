@@ -24,6 +24,8 @@ export type RecommendationContext = {
   weakTags?: string[];
   /** 지금 난이도 (초급·중급·고급) */
   level?: string;
+  /** 지금까지 실제로 완료한 학습 문항 id — 새로 추가된 문항을 먼저 보여 줍니다 */
+  completedIds?: string[];
   /** 너무 최근에 푼 문항 id — 바로 다시 내지 않습니다 */
   recentIds?: string[];
 };
@@ -42,6 +44,13 @@ export function conceptPriority<T extends SchedulableQuestion>(
     || (item.weakness_tag && weak.has(item.weakness_tag)),
   )) score += 4;
   if (context.level && variants.some((item) => item.difficulty === context.level)) score += 2;
+  const completed = new Set(context.completedIds || []);
+  if (completed.size) {
+    const completedCount = variants.filter((item) => completed.has(item.id)).length;
+    // 기존 720문항을 이미 학습한 계정도 864 확장 문항을 먼저 만날 수 있게 합니다.
+    if (completedCount === 0) score += 3;
+    else if (completedCount < variants.length) score += 1;
+  }
   // 이미 충분히 익힌 개념은 뒤로 미룹니다.
   if (review && review.correctStreak >= 3) score -= 3;
   // 너무 최근에 푼 문제만 있는 개념도 뒤로 미룹니다.
@@ -174,10 +183,13 @@ export function planLearningQuestions<T extends SchedulableQuestion>(
   // 너무 최근에 푼 문항은 같은 개념의 다른 변형으로 바꿔 냅니다.
   // (변형이 하나뿐이면 그대로 냅니다 — 개념을 통째로 빼지는 않습니다)
   const recent = new Set(context?.recentIds || []);
+  const completed = new Set(context?.completedIds || []);
   const freshVariants = (variants: T[]) => {
-    if (!recent.size) return variants;
-    const unseen = variants.filter((question) => !recent.has(question.id));
-    return unseen.length ? unseen : variants;
+    const notCompleted = completed.size ? variants.filter((question) => !completed.has(question.id)) : variants;
+    const completionFiltered = notCompleted.length ? notCompleted : variants;
+    if (!recent.size) return completionFiltered;
+    const notRecent = completionFiltered.filter((question) => !recent.has(question.id));
+    return notRecent.length ? notRecent : completionFiltered;
   };
 
   const chosenGroups = seededShuffle(selected, seed + 37).slice(0, count);
