@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import TuriniRig from "./turini-rig";
 import TuriniSprite, { type TuriniMotion } from "./turini-sprite";
@@ -137,6 +138,31 @@ export default function TuriniAvatar({
       </span>
       {body}
     </div>
+  );
+}
+
+/**
+ * 학습·코칭 안내에서 사용하는 고정 기본 프리셋입니다.
+ * 사용자 꾸미기와 섞이지 않고 새싹, 초록 가방, 책만 보여 줍니다.
+ */
+export function BasicReadingTurini({
+  className = "",
+  decorative = false,
+}: {
+  className?: string;
+  decorative?: boolean;
+}) {
+  return (
+    <span className={`turini-reading-preset ${className}`.trim()} aria-hidden={decorative || undefined}>
+      <Image
+        src="/assets/turini-reading-transparent.png"
+        alt={decorative ? "" : "새싹과 초록 가방을 메고 책을 읽는 투리니"}
+        width={1254}
+        height={1254}
+        sizes="(max-width: 600px) 34vw, 152px"
+        draggable={false}
+      />
+    </span>
   );
 }
 
