@@ -58,6 +58,11 @@ test("portfolio screen exposes the revised asset classification help", () => {
   assert.match(pageSource, /학습용 조정안/);
   assert.match(pageSource, /3~10년/);
   assert.match(pageSource, /PORTFOLIO_HORIZONS = \["1년 미만", "1~3년", "3~10년", "10년 이상"\]/);
+  assert.match(pageSource, /연환산 변동성/);
+  assert.match(pageSource, /성향 판정/);
+  assert.match(pageSource, /기간 판정/);
+  assert.doesNotMatch(pageSource, /<span>성향 적합<\/span><strong>\{fitPercent\}/);
+  assert.doesNotMatch(pageSource, /<span>기간 적합<\/span><strong>\{horizonFitPercent\}/);
 });
 
 test("안내 화면 캐릭터는 저장된 모자와 안경 대신 요청한 기본 프리셋을 쓴다", () => {
@@ -84,6 +89,7 @@ test("진단·학습 화면이 요청한 사용자 흐름을 지킨다", () => {
   assert.match(pageSource, /question\.parent_tag \|\| question\.weakness_tag/);
   assert.match(pageSource, /취약 상위 태그/);
   assert.match(pageSource, /startWeakTag\(tag\)/);
+  assert.match(pageSource, /completedIds: progress\.completedIds/);
   assert.doesNotMatch(pageSource, /className="difficulty-row"/);
   assert.doesNotMatch(pageSource, /onClick=\{\(\) => startCategory\(category\.name\)\}/);
   assert.match(pageSource, /showActiveLearningContext/);
