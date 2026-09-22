@@ -71,6 +71,10 @@ test("three independent axes replace the old composite score", () => {
   assert.equal(result.recommendationStatus, "hold");
   assert.deepEqual(result.strengthAxes.map((item) => item.axis), ["type_fit", "diversification", "horizon_fit"]);
   assert.equal(result.strengths.length, 3);
+  assert.ok(result.strengths.every((sentence) => /\d/.test(sentence)), "강점마다 계산 근거 숫자가 있어야 합니다");
+  assert.match(result.strengths[0], /중립형 기준 범위/);
+  assert.match(result.strengths[1], /분산 효과가 계산됩니다/);
+  assert.match(result.strengths[2], /3~10년 기간 기준 범위/);
 });
 
 test("single asset does not receive a diversification strength", () => {
