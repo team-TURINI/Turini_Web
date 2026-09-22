@@ -38,7 +38,9 @@ test("GPT portfolio coaching is called through a server-only API route", () => {
   assert.match(feedbackRouteSource, /브라우저가 보낸 computed는 신뢰하지 않고/);
   assert.match(feedbackRouteSource, /RATE_LIMIT_REQUESTS/);
   assert.match(feedbackRouteSource, /금광기업 주식형 ETF는 금이 아니라/);
-  assert.match(feedbackRouteSource, /내부 상대위험.*\/65/);
+  assert.match(feedbackRouteSource, /서비스 변동성 위험/);
+  assert.match(feedbackRouteSource, /recommendationStatus가 recommended가 아니면/);
+  assert.match(feedbackRouteSource, /종합점수나 공식 규제 위험등급을 만들지 말고/);
   assert.doesNotMatch(pageSource, /sk-[A-Za-z0-9_-]{20,}/);
   assert.match(envExampleSource, /OPENAI_API_KEY=your_api_key_here/);
 });
@@ -48,12 +50,14 @@ test("portfolio screen exposes the revised asset classification help", () => {
   assert.doesNotMatch(pageSource, /asset-classification-note/);
   assert.match(pageSource, /portfolioRuleVersion: PORTFOLIO_RULE_VERSION/);
   assert.doesNotMatch(pageSource, /분석 가중치/);
-  assert.match(pageSource, /종목·업종 내부 집중은 평가하지 않음/);
-  assert.match(pageSource, /scoreMax\}점 만점/);
-  assert.match(pageSource, /내부 상대위험/);
-  assert.match(pageSource, /0~100%/);
-  assert.match(pageSource, /v9\.1 내부 상대척도/);
-  assert.match(pageSource, /학습용 조정 방향/);
+  assert.doesNotMatch(pageSource, /scoreMax\}점 만점/);
+  assert.doesNotMatch(pageSource, /내부 종합점수/);
+  assert.match(pageSource, /서비스 변동성 위험등급/);
+  assert.match(pageSource, /종합점수는 만들지 않으며/);
+  assert.match(pageSource, /원시 시장자료 재현 검증 전/);
+  assert.match(pageSource, /학습용 조정안/);
+  assert.match(pageSource, /3~10년/);
+  assert.match(pageSource, /PORTFOLIO_HORIZONS = \["1년 미만", "1~3년", "3~10년", "10년 이상"\]/);
 });
 
 test("진단·학습 화면이 요청한 사용자 흐름을 지킨다", () => {

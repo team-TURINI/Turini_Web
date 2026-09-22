@@ -100,21 +100,22 @@ export async function POST(request: Request) {
   const assetLabels = Object.fromEntries(ASSETS.map((asset) => [asset.key, asset.label]));
   const deterministicImprovements = computed.rebalancingActions.map((action) => {
     const label = assetLabels[action.asset];
-    return `${label} 비중을 ${Math.abs(action.delta)}%p ${action.action === "확대" ? "늘리는" : "줄이는"} 방향을 살펴보세요.`;
+    return `${label} 비중을 ${Math.abs(action.delta)}%p ${action.action === "확대" ? "늘리는" : "줄이는"} 방향입니다.`;
   });
   const weakTags = stringArray(context.weakTags).filter((tag) => CONCEPT_TAGS.includes(tag as typeof CONCEPT_TAGS[number]));
-  const fallbackSummary = `내부 종합점수는 ${computed.score}/${computed.scoreMax}점(${computed.scoreLabel})이고 내부 상대위험은 ${computed.riskScore}/65예요.`;
+  const fallbackSummary = `서비스 변동성 위험은 ${computed.riskGrade}등급(${computed.riskGradeName})이며, 연환산 변동성은 ${computed.riskScore}%입니다. 성향은 ${computed.typeFitLabel}, 기간은 ${computed.horizonFitLabel}입니다.`;
   const allocationPercent = Object.fromEntries(
     ASSETS.map((asset) => [asset.key, Math.round((context.allocation as Allocation)[asset.key] * 1000) / 10]),
   );
-  const targetPercent = Object.fromEntries(
-    ASSETS.map((asset) => [asset.key, Math.round(computed.target[asset.key] * 1000) / 10]),
-  );
+  const targetPercent = computed.nearTarget ? Object.fromEntries(
+    ASSETS.map((asset) => [asset.key, Math.round(computed.nearTarget!.allocation[asset.key] * 1000) / 10]),
+  ) : null;
   const allowedNumbers = [
-    computed.score, computed.scoreMax, computed.riskScore, computed.fit, computed.horizonFit, 65,
-    computed.diversification, computed.concentrationPenalty, computed.profileMatch.gap, ASSETS.length,
+    computed.riskGrade, computed.riskScore, Math.round(computed.riskLevel * 100), Math.round(computed.fit * 100), Math.round(computed.horizonFit * 100),
+    computed.downside6m, computed.profileCenter, computed.horizonCenter, ASSETS.length,
+    ...computed.profileRange, ...computed.horizonRange,
     ...Object.values(allocationPercent),
-    ...Object.values(targetPercent),
+    ...(targetPercent ? Object.values(targetPercent) : []),
     ...computed.rebalancingActions.map((action) => Math.abs(action.delta)),
   ];
 
@@ -136,13 +137,15 @@ export async function POST(request: Request) {
         store: false,
         instructions: [
           "당신은 Turini 금융 학습 앱의 포트폴리오 설명 코치입니다.",
-          "서버가 계산한 computed와 context만 근거로 쉽고 친절한 한국어를 사용하세요.",
+          "서버가 계산한 computed와 context만 근거로 쉽고 친절한 한국어 ~입니다체를 사용하세요.",
           "strengths와 cautions는 computed의 같은 배열을 문장 변경 없이 그대로 반환하세요.",
           "improvements는 context.allowedImprovements를 순서와 문장 변경 없이 그대로 반환하세요.",
           "입력에 없는 숫자, 금액, 자산, 종목, 상품, 회사, 티커, 수익률을 만들지 마세요.",
           "금광기업 주식형 ETF는 금이 아니라 주식형 ETF·펀드로 해석하세요.",
           "특정 종목·상품 추천, 직접적인 매수·매도 지시, 미래 수익률 예측, 원금·수익 보장을 하지 마세요.",
           "강점 근거가 없으면 strengths는 빈 배열로 반환하세요.",
+          "종합점수나 공식 규제 위험등급을 만들지 말고, 서비스 변동성 등급이라는 표현만 사용하세요.",
+          "recommendationStatus가 recommended가 아니면 improvements는 빈 배열로 반환하세요.",
         ].join("\n"),
         input: `다음 JSON만 근거로 피드백을 작성하세요.\n${JSON.stringify({
           computed,
@@ -151,6 +154,7 @@ export async function POST(request: Request) {
             portfolioRuleVersion: PORTFOLIO_RULE_VERSION,
             tendency,
             horizon,
+            inputMode: context.inputMode === "practice" ? "practice" : "actual",
             allocation_percent: allocationPercent,
             recommended_allocation_percent: targetPercent,
             weakTags,
@@ -176,7 +180,8 @@ export async function POST(request: Request) {
 
     const parsed = JSON.parse(outputText) as Record<string, unknown>;
     const returnedRefs = stringArray(parsed.concept_refs).filter((tag) => CONCEPT_TAGS.includes(tag as typeof CONCEPT_TAGS[number]));
-    const conceptRefs = (weakTags.length ? weakTags : returnedRefs).slice(0, 3);
+    const unlocked = computed.unlockTags.filter((tag) => CONCEPT_TAGS.includes(tag as typeof CONCEPT_TAGS[number]));
+    const conceptRefs = (unlocked.length ? unlocked : weakTags.length ? weakTags : returnedRefs).slice(0, 3);
     return NextResponse.json({
       feedback: {
         summary_ko: safeSummary(parsed.summary_ko, allowedNumbers, fallbackSummary),
