@@ -122,6 +122,7 @@ test("난이도 선택 화면이 카테고리와 로드맵 사이에 들어간�
   assert.match(pageSource, /focusDifficulty=\{focusDifficulty\}/);
   // 세 난이도는 여전히 하나로 이어진 12단계 경로를 공유합니다.
   assert.match(pageSource, /totalLessons=\{MAX_CATEGORY_LEVEL\}/);
+  assert.doesNotMatch(pageSource, /className="difficulty-row"/);
 });
 
 test("현재 레슨 카드에 제목·문제 수·XP·시작 버튼이 모두 있다", () => {

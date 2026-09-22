@@ -5,7 +5,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 
 const audit = JSON.parse(
-  await readFile(new URL("../design-assets/question-audit.json", import.meta.url), "utf8"),
+  await readFile(new URL("../app/design-assets/question-audit.json", import.meta.url), "utf8"),
 );
 const { report, buckets, tags } = audit;
 
@@ -41,7 +41,7 @@ const AMBIGUOUS = [
 ];
 
 const lines = [];
-lines.push("# 720문항 중복·태그 점검 결과", "");
+lines.push(`# ${report.총문항}문항 중복·태그 점검 결과`, "");
 lines.push("`node scripts/audit-questions.mjs` 로 다시 만들 수 있습니다.");
 lines.push("문항을 지우거나 고치지 않고 읽기만 합니다. 결과는 `tests/question-quality.test.mjs` 가 계속 지킵니다.", "");
 
@@ -61,8 +61,8 @@ STEPS.forEach(([key, label], index) => {
 lines.push("");
 
 lines.push("### 확실한 중복: 0건", "");
-lines.push("교체할 문항이 없었습니다. 문항 수 720개와 기존 id 를 그대로 유지했습니다.", "");
-lines.push("한 개념(`base_id`)을 4가지 유형(4지선다·OX·빈칸선택·빈칸직접입력)으로 묻는 구조라 해설이 겹치는 묶음이 174개 나오지만,");
+lines.push(`교체할 문항이 없었습니다. 문항 수 ${report.총문항}개와 기존 id 를 그대로 유지했습니다.`, "");
+lines.push(`한 개념(\`base_id\`)을 4가지 유형(4지선다·OX·빈칸선택·빈칸직접입력)으로 묻는 구조라 해설이 겹치는 묶음이 ${buckets.sameExplanation.length}개 나오지만,`);
 lines.push("**서로 다른 개념끼리 해설이 겹친 경우는 0건**이라 설계대로 동작하고 있습니다.", "");
 
 lines.push("### 판단이 애매해 자동으로 건드리지 않은 항목: 3건", "");
@@ -76,7 +76,7 @@ for (const [key, value] of Object.entries(report.태그)) {
   lines.push(`| ${key.replace(/_/g, " ")} | ${value} |`);
 }
 lines.push("");
-lines.push("취약 태그 170종과 상위 태그 20종이 `reference-data/parent_tag_index_FINAL.json` 기준표와 **정확히 일치**했습니다.");
+lines.push(`취약 태그 ${report.태그.취약태그_종류}종과 상위 태그 ${report.태그.상위태그_종류}종이 \`reference-data/parent_tag_index_FINAL.json\` 기준표와 **정확히 일치**했습니다.`);
 lines.push("오탈자, 안 쓰이는 태그, 잘못 연결된 태그, 태그가 빈 문항이 모두 0건입니다.", "");
 
 lines.push("## 3. 상위 태그별 문항 수", "");
@@ -86,5 +86,5 @@ for (const [tag, count] of Object.entries(tags.parentCounts).sort((a, b) => b[1]
 }
 lines.push("");
 
-await writeFile(new URL("../design-assets/QUESTION_AUDIT.md", import.meta.url), `${lines.join("\n")}\n`);
-console.log("design-assets/QUESTION_AUDIT.md 작성 완료");
+await writeFile(new URL("../app/design-assets/QUESTION_AUDIT.md", import.meta.url), `${lines.join("\n")}\n`);
+console.log("app/design-assets/QUESTION_AUDIT.md 작성 완료");

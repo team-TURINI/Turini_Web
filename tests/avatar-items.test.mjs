@@ -39,7 +39,7 @@ const fullStats = avatarStatsFrom({
   xp: 5000,
   level: 12,
   streak: 40,
-  solved: 720,
+  solved: 864,
   categoryLessons: {
     주식: 12, 채권: 12, "펀드/ETF": 12, "위험 관리": 12, "분산 투자": 12, "수익률 계산": 12,
   },
@@ -290,7 +290,7 @@ test("결제 기능은 들어 있지 않다", () => {
 test("프레임별 머리 기준점 표가 72프레임 모두 들어 있다", async () => {
   const anchors = JSON.parse(
     await readFile(
-      new URL("../public/assets/turini/animations/turini-frame-anchors.json", import.meta.url),
+      new URL("../public/assets/animations/turini-frame-anchors.json", import.meta.url),
       "utf8",
     ),
   );

@@ -12,7 +12,7 @@ import {
 } from "../app/portfolio-rules.ts";
 
 const PROFILES = ["안정형", "중립형", "공격형"];
-const HORIZONS = ["1년 미만", "1~3년", "3~5년", "5년 이상"];
+const HORIZONS = ["1년 미만", "1~3년", "3~5년", "5~10년", "10년 이상"];
 
 function randomGenerator(seed) {
   let state = seed >>> 0;

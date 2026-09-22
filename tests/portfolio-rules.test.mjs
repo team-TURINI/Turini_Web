@@ -83,13 +83,13 @@ test("period cautions have exclusive low-risk and high-risk directions", () => {
   const highRiskShort = analyzeAllocation({ domestic: 0, overseas: 1, bond: 0, equityFund: 0, cash: 0, gold: 0 }, "공격형", "1년 미만");
   assert.ok(highRiskShort.signals.some((signal) => signal.id === 11));
   assert.ok(!highRiskShort.signals.some((signal) => signal.id === 10));
-  const lowRiskLong = analyzeAllocation({ domestic: 0, overseas: 0, bond: 0, equityFund: 0, cash: 1, gold: 0 }, "중립형", "5년 이상");
+  const lowRiskLong = analyzeAllocation({ domestic: 0, overseas: 0, bond: 0, equityFund: 0, cash: 1, gold: 0 }, "중립형", "10년 이상");
   assert.ok(lowRiskLong.signals.some((signal) => signal.id === 10));
   assert.ok(!lowRiskLong.signals.some((signal) => signal.id === 11));
 });
 
-test("five-year horizon uses the documented center 70 and bond/cash are concentration-penalty exemptions", () => {
-  const longRisk = analyzeAllocation({ domestic: 0, overseas: 1, bond: 0, equityFund: 0, cash: 0, gold: 0 }, "공격형", "5년 이상");
+test("ten-year horizon uses the documented center 70 and bond/cash are concentration-penalty exemptions", () => {
+  const longRisk = analyzeAllocation({ domestic: 0, overseas: 1, bond: 0, equityFund: 0, cash: 0, gold: 0 }, "공격형", "10년 이상");
   assert.equal(longRisk.horizonFit, 92.5);
   const bondHeavy = analyzeAllocation({ domestic: 0, overseas: 0, bond: 1, equityFund: 0, cash: 0, gold: 0 }, "안정형", "1~3년");
   assert.equal(bondHeavy.concentrationPenalty, 0);
@@ -98,7 +98,7 @@ test("five-year horizon uses the documented center 70 and bond/cash are concentr
 });
 
 test("strengths use only A>=80, B>=85 and C>=80 without fallback", () => {
-  const poor = analyzeAllocation({ domestic: 0, overseas: 0, bond: 0.4, equityFund: 0, cash: 0.6, gold: 0 }, "공격형", "5년 이상");
+  const poor = analyzeAllocation({ domestic: 0, overseas: 0, bond: 0.4, equityFund: 0, cash: 0.6, gold: 0 }, "공격형", "10년 이상");
   assert.deepEqual(poor.strengths, []);
   const balanced = analyzeAllocation(targetFor("중립형"), "중립형", "1~3년");
   assert.ok(balanced.strengths.some((line) => /진단 성향/.test(line)));

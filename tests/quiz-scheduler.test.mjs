@@ -27,6 +27,16 @@ test("a normal ten-question session contains ten distinct concepts", () => {
   assert.equal(session.length, 10);
   assert.equal(new Set(session.map(conceptKey)).size, 10);
   assert.equal(session.filter((question) => question.reviewKind).length, 0);
+  const counts = TYPES.map((type) => session.filter((question) => question.type === type).length).sort((a, b) => a - b);
+  assert.deepEqual(counts, [2, 2, 3, 3]);
+});
+
+test("ten-question sessions never collapse into one question type", () => {
+  for (let seed = 1; seed <= 100; seed += 1) {
+    const session = planLearningQuestions(makePool(), 10, seed, {}, 0);
+    const counts = TYPES.map((type) => session.filter((question) => question.type === type).length);
+    assert.ok(counts.every((count) => count >= 2 && count <= 3), `seed ${seed}: ${counts.join(",")}`);
+  }
 });
 
 test("the next session mixes seven new concepts with three due reviews", () => {
@@ -62,6 +72,18 @@ test("a wrong concept returns three to five positions later in a different form"
   const secondWrong = retried.questions[1];
   const twiceRetried = insertRetry({ ...retried, index: 1 }, secondWrong, pool);
   assert.equal(twiceRetried.questions.filter((question) => question.reviewKind === "retry").length, 2);
+});
+
+test("in-session retries preserve the balanced question-type counts", () => {
+  const pool = makePool(40);
+  for (let seed = 1; seed <= 100; seed += 1) {
+    let session = { questions: planLearningQuestions(pool, 10, seed, {}, 0), index: 0 };
+    for (let index = 0; index < session.questions.length; index += 1) {
+      session = scheduleRetry({ ...session, index }, session.questions[index], pool, []).session;
+    }
+    const counts = TYPES.map((type) => session.questions.filter((question) => question.type === type).length).sort((a, b) => a - b);
+    assert.deepEqual(counts, [2, 2, 3, 3], `seed ${seed}: ${counts.join(",")}`);
+  }
 });
 
 test("a retry answered incorrectly is scheduled again in another form", () => {
@@ -129,9 +151,13 @@ test("an aliased retry stays inside the source category", () => {
   const sessionQuestions = [source, ...makePool(9).filter((question) => question.type === "4지선다")];
   const scheduled = scheduleRetry({ questions: sessionQuestions, index: 0 }, source, pool, []);
   const retry = scheduled.session.questions.find((question) => question.reviewKind === "retry");
-  assert.ok(retry);
-  assert.equal(retry.category, "채권");
-  assert.notEqual(retry.type, source.type);
+  if (retry) {
+    assert.equal(retry.category, "채권");
+    assert.notEqual(retry.type, source.type);
+  } else {
+    assert.equal(scheduled.deferred?.category, "채권");
+    assert.equal(scheduled.deferred?.lastType, source.type);
+  }
 });
 
 test("a pending retry waits for a compatible category session", () => {
@@ -158,6 +184,21 @@ test("a pending retry waits for a compatible category session", () => {
   assert.equal(compatible[1].reviewKind, "retry");
   assert.equal(compatible[1].category, "주식");
   assert.equal(compatible[1].difficulty, "초급");
+});
+
+test("pending retries also keep a ten-question session at 2-3 of each type", () => {
+  const pool = makePool(40);
+  const pending = [0, 1, 2].map((concept, index) => ({
+    key: `C${concept}`,
+    sourceId: `C${concept}_${index}`,
+    lastType: TYPES[index],
+    dueIndex: index + 1,
+  }));
+  for (let seed = 1; seed <= 100; seed += 1) {
+    const session = planSessionQuestions(pool, 10, seed, {}, 0, pending);
+    const counts = TYPES.map((type) => session.filter((question) => question.type === type).length).sort((a, b) => a - b);
+    assert.deepEqual(counts, [2, 2, 3, 3], `seed ${seed}: ${counts.join(",")}`);
+  }
 });
 
 test("four-choice answers rotate across every display position", () => {

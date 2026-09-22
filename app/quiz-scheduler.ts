@@ -8,6 +8,8 @@ export type SchedulableQuestion = {
   difficulty?: string;
   /** 문항이 다루는 취약 개념 태그 */
   weakness_tag?: string;
+  /** 사용자 화면과 맞춤 추천에 쓰는 20개 상위 태그 */
+  parent_tag?: string;
   choices?: string[];
   answer?: string;
   reviewKind?: ReviewKind;
@@ -35,7 +37,10 @@ export function conceptPriority<T extends SchedulableQuestion>(
   if (!context) return 0;
   let score = 0;
   const weak = new Set(context.weakTags || []);
-  if (weak.size && variants.some((item) => item.weakness_tag && weak.has(item.weakness_tag))) score += 4;
+  if (weak.size && variants.some((item) =>
+    (item.parent_tag && weak.has(item.parent_tag))
+    || (item.weakness_tag && weak.has(item.weakness_tag)),
+  )) score += 4;
   if (context.level && variants.some((item) => item.difficulty === context.level)) score += 2;
   // 이미 충분히 익힌 개념은 뒤로 미룹니다.
   if (review && review.correctStreak >= 3) score -= 3;
@@ -97,11 +102,9 @@ function stringSeed(value: string) {
   return [...value].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 1000003, 7);
 }
 
-function chooseVariant<T extends SchedulableQuestion>(variants: T[], seed: number, lastType?: string, firstExposure = false) {
-  if (firstExposure) {
-    const introductory = variants.filter((question) => question.type === "4지선다");
-    if (introductory.length) return seededShuffle(introductory, seed)[0];
-  }
+function chooseVariant<T extends SchedulableQuestion>(variants: T[], seed: number, lastType?: string, preferredType?: string) {
+  const preferred = variants.filter((question) => question.type === preferredType && question.type !== lastType);
+  if (preferred.length) return seededShuffle(preferred, seed + stringSeed(preferredType || ""))[0];
   const alternativeTypes = QUESTION_TYPE_ORDER.filter((type) => type !== lastType);
   const start = alternativeTypes.length ? Math.abs(seed) % alternativeTypes.length : 0;
   const orderedTypes = alternativeTypes.map((_, index) => alternativeTypes[(start + index) % alternativeTypes.length]);
@@ -113,9 +116,24 @@ function chooseVariant<T extends SchedulableQuestion>(variants: T[], seed: numbe
   return seededShuffle(variants, seed)[0];
 }
 
+function typeTargets(count: number, seed: number) {
+  const order = seededShuffle(QUESTION_TYPE_ORDER, seed + 53);
+  const base = Math.floor(count / QUESTION_TYPE_ORDER.length);
+  const extra = count % QUESTION_TYPE_ORDER.length;
+  return Object.fromEntries(order.map((type, index) => [type, base + (index < extra ? 1 : 0)])) as Record<string, number>;
+}
+
 function prepareChoices<T extends SchedulableQuestion>(question: T, seed: number) {
   if (!question.choices || question.choices.length <= 2) return question;
-  return { ...question, choices: seededShuffle(question.choices, seed + 101) } as T;
+  const answer = question.answer;
+  if (!answer || !question.choices.includes(answer)) {
+    return { ...question, choices: seededShuffle(question.choices, seed + 101) } as T;
+  }
+  const distractors = seededShuffle(question.choices.filter((choice) => choice !== answer), seed + 101);
+  const answerIndex = Math.abs(seed) % question.choices.length;
+  const choices = [...distractors];
+  choices.splice(answerIndex, 0, answer);
+  return { ...question, choices } as T;
 }
 
 export function planLearningQuestions<T extends SchedulableQuestion>(
@@ -125,6 +143,7 @@ export function planLearningQuestions<T extends SchedulableQuestion>(
   reviews: Record<string, ConceptReview>,
   studySessions: number,
   context?: RecommendationContext,
+  typePlan?: { targets: Record<string, number>; used: Record<string, number> },
 ) {
   const groups = new Map<string, T[]>();
   seededShuffle(pool, seed).forEach((question) => {
@@ -161,10 +180,26 @@ export function planLearningQuestions<T extends SchedulableQuestion>(
     return unseen.length ? unseen : variants;
   };
 
-  return seededShuffle(selected, seed + 37).slice(0, count).map(([key, group], index) => {
+  const chosenGroups = seededShuffle(selected, seed + 37).slice(0, count);
+  const targets = typePlan?.targets || typeTargets(chosenGroups.length, seed);
+  const used = typePlan
+    ? { ...typePlan.used }
+    : Object.fromEntries(QUESTION_TYPE_ORDER.map((type) => [type, 0])) as Record<string, number>;
+
+  return chosenGroups.map(([key, group], index) => {
     const review = reviews[key];
     const variants = freshVariants(group);
-    const question = chooseVariant(variants, seed + index * 13, review?.lastType, !review);
+    const availableTypes = QUESTION_TYPE_ORDER.filter((type) =>
+      variants.some((question) => question.type === type && question.type !== review?.lastType),
+    );
+    const fallbackTypes = QUESTION_TYPE_ORDER.filter((type) => variants.some((question) => question.type === type));
+    const preferredType = [...(availableTypes.length ? availableTypes : fallbackTypes)].sort((left, right) =>
+      (targets[right] - used[right]) - (targets[left] - used[left])
+      || used[left] - used[right]
+      || QUESTION_TYPE_ORDER.indexOf(left) - QUESTION_TYPE_ORDER.indexOf(right),
+    )[0];
+    const question = chooseVariant(variants, seed + index * 13, review?.lastType, preferredType);
+    used[question.type] = (used[question.type] || 0) + 1;
     const prepared = prepareChoices(question, seed + index * 29);
     return review ? ({ ...prepared, reviewKind: "scheduled" } as T) : prepared;
   });
@@ -220,17 +255,27 @@ export function scheduleRetry<T extends SchedulableQuestion, S extends { questio
   const offset = 3 + (stringSeed(question.id) % 3);
   const distances = [...new Set([offset, 3, 4, 5])];
   const occupiedDeferred = new Set(pendingRetries.map((item) => item.dueIndex));
-  const placement = distances.map((distance) => {
+  const variants = retryVariants(question, allQuestions);
+  if (!variants.length) return { session, deferred: null };
+  const candidates = distances.map((distance) => {
     const targetIndex = session.index + distance;
     return targetIndex < session.questions.length
       ? { targetIndex, dueIndex: null }
       : { targetIndex: null, dueIndex: targetIndex - session.questions.length };
-  }).find((candidate) => candidate.targetIndex !== null
+  });
+  const available = candidates.filter((candidate) => candidate.targetIndex !== null
     ? session.questions[candidate.targetIndex].reviewKind !== "retry"
     : !occupiedDeferred.has(candidate.dueIndex!));
+  // 가능하면 교체되는 자리와 같은 유형의 변형을 사용해 세션의 2·2·3·3
+  // 유형 분포를 유지합니다. 같은 유형 재출제 금지와 충돌할 때만 차선 위치를 씁니다.
+  const matchingPlacement = available.find((candidate) => candidate.targetIndex !== null
+    && variants.some((variant) => variant.type === session.questions[candidate.targetIndex!].type));
+  const naturallyDeferred = available.find((candidate) => candidate.targetIndex === null);
+  const fallbackDueIndex = [1, 2, 3].find((dueIndex) => !occupiedDeferred.has(dueIndex));
+  const placement = matchingPlacement
+    || naturallyDeferred
+    || (fallbackDueIndex === undefined ? undefined : { targetIndex: null, dueIndex: fallbackDueIndex });
   if (!placement) return { session, deferred: null };
-  const variants = retryVariants(question, allQuestions);
-  if (!variants.length) return { session, deferred: null };
   if (placement.targetIndex === null) {
     return {
       session,
@@ -245,8 +290,13 @@ export function scheduleRetry<T extends SchedulableQuestion, S extends { questio
     };
   }
   const targetIndex = placement.targetIndex;
-  const retry = chooseVariant(variants, stringSeed(question.id) + targetIndex, question.type);
   const nextQuestions = [...session.questions];
+  const retry = chooseVariant(
+    variants,
+    stringSeed(question.id) + targetIndex,
+    question.type,
+    nextQuestions[targetIndex]?.type,
+  );
   nextQuestions[targetIndex] = { ...prepareChoices(retry, stringSeed(question.id) + targetIndex), reviewKind: "retry" } as T;
   return { session: { ...session, questions: nextQuestions } as S, deferred: null };
 }
@@ -275,16 +325,10 @@ export function planSessionQuestions<T extends SchedulableQuestion>(
     && question.type !== pending.lastType,
   )).slice(0, count);
   const pendingKeys = new Set(activePending.map((item) => item.key));
-  const normalQuestions = planLearningQuestions(
-    pool.filter((question) => !pendingKeys.has(conceptKey(question))),
-    Math.max(0, count - activePending.length),
-    seed,
-    reviews,
-    studySessions,
-    context,
-  );
   const slots: Array<T | undefined> = Array.from({ length: count });
   const occupied = new Set<number>();
+  const targets = typeTargets(count, seed);
+  const used = Object.fromEntries(QUESTION_TYPE_ORDER.map((type) => [type, 0])) as Record<string, number>;
 
   activePending.forEach((pending, pendingIndex) => {
     const candidates = pool.filter((question) =>
@@ -298,10 +342,27 @@ export function planSessionQuestions<T extends SchedulableQuestion>(
     const target = [preferred, preferred + 1, preferred - 1, preferred + 2, preferred - 2]
       .find((index) => index >= 0 && index < count && !occupied.has(index));
     if (target === undefined) return;
-    const retry = chooseVariant(candidates, seed + pendingIndex * 43, pending.lastType);
+    const preferredType = QUESTION_TYPE_ORDER
+      .filter((type) => candidates.some((question) => question.type === type))
+      .sort((left, right) =>
+        (targets[right] - used[right]) - (targets[left] - used[left])
+        || QUESTION_TYPE_ORDER.indexOf(left) - QUESTION_TYPE_ORDER.indexOf(right),
+      )[0];
+    const retry = chooseVariant(candidates, seed + pendingIndex * 43, pending.lastType, preferredType);
     slots[target] = { ...prepareChoices(retry, seed + target * 17), reviewKind: "retry" } as T;
+    used[retry.type] = (used[retry.type] || 0) + 1;
     occupied.add(target);
   });
+
+  const normalQuestions = planLearningQuestions(
+    pool.filter((question) => !pendingKeys.has(conceptKey(question))),
+    Math.max(0, count - activePending.length),
+    seed,
+    reviews,
+    studySessions,
+    context,
+    { targets, used },
+  );
 
   let normalIndex = 0;
   for (let index = 0; index < slots.length; index += 1) {

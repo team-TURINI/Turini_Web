@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     return `${label} 비중을 ${Math.abs(action.delta)}%p ${action.action === "확대" ? "늘리는" : "줄이는"} 방향을 살펴보세요.`;
   });
   const weakTags = stringArray(context.weakTags).filter((tag) => CONCEPT_TAGS.includes(tag as typeof CONCEPT_TAGS[number]));
-  const fallbackSummary = `종합점수는 ${computed.score}점(${computed.scoreLabel})이고 위험점수는 ${computed.riskScore}점이에요.`;
+  const fallbackSummary = `내부 종합점수는 ${computed.score}/${computed.scoreMax}점(${computed.scoreLabel})이고 내부 상대위험은 ${computed.riskScore}/65예요.`;
   const allocationPercent = Object.fromEntries(
     ASSETS.map((asset) => [asset.key, Math.round((context.allocation as Allocation)[asset.key] * 1000) / 10]),
   );
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     ASSETS.map((asset) => [asset.key, Math.round(computed.target[asset.key] * 1000) / 10]),
   );
   const allowedNumbers = [
-    computed.score, computed.scoreMax, computed.riskScore, computed.fit, computed.horizonFit,
+    computed.score, computed.scoreMax, computed.riskScore, computed.fit, computed.horizonFit, 65,
     computed.diversification, computed.concentrationPenalty, computed.profileMatch.gap, ASSETS.length,
     ...Object.values(allocationPercent),
     ...Object.values(targetPercent),

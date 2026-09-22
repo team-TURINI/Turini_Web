@@ -120,7 +120,7 @@ const NON_EXEMPT_CONCENTRATION: AssetKey[] = ["domestic", "overseas", "equityFun
 // 성향 중심·표시값은 소수 첫째 자리이며, 판정에는 반올림 전 원값을 사용한다.
 export const RISK_CENTERS: Record<PortfolioType, number> = { 안정형: 30.5, 중립형: 41, 공격형: 52.8 };
 export const PORTFOLIO_TYPE_BANDS = { stableMax: 35.75, neutralMax: 46.9 } as const;
-export const HORIZON_CENTERS: Record<string, number> = { "1년 미만": 20, "1~3년": 40, "3~5년": 55, "5년 이상": 70 };
+export const HORIZON_CENTERS: Record<string, number> = { "1년 미만": 20, "1~3년": 40, "3~5년": 55, "5~10년": 70, "10년 이상": 70 };
 export const EMPTY_ALLOCATION: Allocation = { domestic: 0.2, overseas: 0.15, bond: 0.3, equityFund: 0.15, cash: 0.1, gold: 0.1 };
 
 export function targetFor(tendency: PortfolioTendency): Allocation {

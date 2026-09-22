@@ -5,7 +5,7 @@
  * 학습 기록(XP·레벨·연속 학습·카테고리 진도)에서 그때그때 계산합니다.
  * 해제 목록을 따로 저장하지 않으므로 기록이 어긋날 일이 없습니다.
  *
- * 이미지는 전달받은 자산팩(`public/assets/turini/`)을 그대로 씁니다.
+ * 이미지는 전달받은 자산팩(`public/assets/`)을 그대로 씁니다.
  */
 
 export type AvatarSlot = "hat" | "glasses" | "neck" | "bag" | "background";
@@ -19,7 +19,7 @@ const FOLDER: Record<AvatarSlot, string> = {
   background: "backgrounds",
 };
 
-export const ASSET_ROOT = "/assets/turini";
+export const ASSET_ROOT = "/assets";
 
 /** 원본 이미지 경로 (전달받은 그대로) */
 export function assetPath(slot: AvatarSlot, file: string) {
