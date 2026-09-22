@@ -67,6 +67,15 @@ test("안내 화면 캐릭터는 저장된 모자와 안경 대신 요청한 기
   assert.match(avatarSource2, /turini-reading-transparent\.png/);
 });
 
+test("홈 맞춤 학습은 사용자 꾸미기를 복원하고 자산 안내만 기본 캐릭터를 쓴다", () => {
+  assert.match(pageSource, /<TuriniAvatar scene motion="idle" className="turini-daily" label="나의 투리니"/);
+  assert.match(pageSource, /bag: "bag:green_original"/);
+  assert.match(pageSource, /customization=\{BASIC_BACKPACK_CUSTOMIZATION\} motion="idle" className="turini-planner" decorative/);
+  assert.match(pageSource, /<BasicReadingTurini className="turini-nudge" decorative/);
+  assert.doesNotMatch(pageSource, /<TuriniAvatar motion="thinking" className="turini-planner"/);
+  assert.doesNotMatch(pageSource, /<TuriniAvatar motion="reading" className="turini-nudge"/);
+});
+
 test("진단·학습 화면이 요청한 사용자 흐름을 지킨다", () => {
   assert.match(pageSource, /finished\.mode === "diagnosis"\s*\? \[\]/);
   assert.match(pageSource, /correct: current\.correct \+ \(finished\.mode === "diagnosis" \? 0 : finished\.correct\)/);
