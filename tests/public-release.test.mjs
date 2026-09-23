@@ -82,6 +82,19 @@ test("안내 화면 캐릭터는 저장된 모자와 안경 대신 요청한 기
   assert.match(avatarSource2, /turini-reading-transparent\.png/);
 });
 
+test("AI 코치와 퀴즈 캐릭터는 모자·안경·목장식 없이 기본 새싹·가방 투리니를 쓴다", () => {
+  assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion="reading" className="turini-ai-coach"/);
+  assert.match(pageSource, /<QuizThinkingTurini key=\{`\$\{question\.id\}-\$\{session\.index\}`\} className="turini-quiz turini-quiz--thinking"/);
+  assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion=\{answerCorrect \? "correct" : "wrong"\}/);
+  assert.doesNotMatch(pageSource, /<TuriniAvatar motion="thinking" className="turini-quiz"/);
+  assert.match(avatarSource2, /turini-thinking-transparent\.png/);
+});
+
+test("포트폴리오 결과 문구는 ~해요/~이에요체로 맞춘다", () => {
+  assert.doesNotMatch(pageSource, /상품등급 아님|실행 항목 아님|제안 안 함|격자 조정안 없음|"산출 불가"/);
+  assert.doesNotMatch(pageSource, /\{result\.diversificationStatus\} ·/);
+});
+
 test("홈 맞춤 학습은 사용자 꾸미기를 복원하고 자산 안내만 기본 캐릭터를 쓴다", () => {
   assert.match(pageSource, /<TuriniAvatar scene motion="idle" className="turini-daily" label="나의 투리니"/);
   assert.match(pageSource, /bag: "bag:green_original"/);
