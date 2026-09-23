@@ -84,7 +84,7 @@ test("안내 화면 캐릭터는 저장된 모자와 안경 대신 요청한 기
 
 test("AI 코치와 퀴즈 캐릭터는 모자·안경·목장식 없이 기본 새싹·가방 투리니를 쓴다", () => {
   assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion="reading" className="turini-ai-coach"/);
-  assert.match(pageSource, /<QuizThinkingTurini key=\{\`\$\{question\.id\}-\$\{session\.index\}\`\} className="turini-quiz turini-quiz--thinking"/);
+  assert.match(pageSource, /<QuizThinkingTurini key=\{`\$\{question\.id\}-\$\{session\.index\}`\} className="turini-quiz turini-quiz--thinking"/);
   assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion=\{answerCorrect \? "correct" : "wrong"\}/);
   assert.doesNotMatch(pageSource, /<TuriniAvatar motion="thinking" className="turini-quiz"/);
   assert.match(avatarSource2, /turini-thinking-transparent\.png/);
