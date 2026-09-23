@@ -338,9 +338,9 @@ export function analyzeAllocation(current: Allocation, tendency: PortfolioTenden
   else diversificationReduction = Math.max(0, Math.min(1, 1 - currentRiskRaw / volatilityBudget));
   const heldCount = ASSET_KEYS.filter((key) => current[key] > 1e-12).length;
   const strengthAxes: StrengthAxis[] = [];
-  if (typeFit.fit === 1) strengthAxes.push({ axis: "type_fit", sentence: "현재 변동성이 진단된 투자 성향의 기준 범위에 들어옵니다." });
-  if (heldCount >= 2 && diversificationStatus === "valid" && diversificationReduction !== null && diversificationReduction > 1e-12) strengthAxes.push({ axis: "diversification", sentence: "여러 자산을 함께 보유해 단일 자산 변동성 합계보다 포트폴리오 변동성이 낮아지는 분산 효과가 확인됩니다." });
-  if (periodFit.fit === 1) strengthAxes.push({ axis: "horizon_fit", sentence: "현재 변동성이 선택한 투자 기간의 기준 범위에 들어옵니다." });
+  if (typeFit.fit === 1) strengthAxes.push({ axis: "type_fit", sentence: `연환산 변동성 ${round(currentRiskRaw, 2)}%가 ${profile} 기준 범위 ${round(profileRange[0], 2)}~${round(profileRange[1], 2)}% 안에 들어옵니다.` });
+  if (heldCount >= 2 && diversificationStatus === "valid" && diversificationReduction !== null && diversificationReduction > 1e-12) strengthAxes.push({ axis: "diversification", sentence: `보유 자산 ${heldCount}종의 상관관계를 반영했을 때 단순 가중 변동성 합계보다 ${round(diversificationReduction * 100, 1)}% 낮아지는 분산 효과가 계산됩니다.` });
+  if (periodFit.fit === 1) strengthAxes.push({ axis: "horizon_fit", sentence: `연환산 변동성 ${round(currentRiskRaw, 2)}%가 ${typedHorizon} 기간 기준 범위 ${round(horizonRange[0], 2)}~${round(horizonRange[1], 2)}% 안에 들어옵니다.` });
   const baseTarget = BASE_TARGETS[profile];
   const signals = allocationSignalIds(current).map((id) => ({ id, kind: signalKind(id, current, baseTarget), text: SIGNAL_META[id].text }));
   const cautions = [

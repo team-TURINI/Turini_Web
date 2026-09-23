@@ -39,6 +39,19 @@ test("ten-question sessions never collapse into one question type", () => {
   }
 });
 
+test("completed question history makes newly added questions surface first", () => {
+  const pool = makePool(14);
+  const completedIds = pool
+    .filter((question) => Number(question.base_id.slice(1)) < 12)
+    .map((question) => question.id);
+  const session = planLearningQuestions(pool, 10, 91, {}, 0, { completedIds });
+  const pickedConcepts = new Set(session.map(conceptKey));
+
+  assert.ok(pickedConcepts.has("C12"), "새 개념 C12가 선택되지 않았습니다");
+  assert.ok(pickedConcepts.has("C13"), "새 개념 C13이 선택되지 않았습니다");
+  assert.ok(session.filter((question) => ["C12", "C13"].includes(conceptKey(question))).every((question) => !completedIds.includes(question.id)));
+});
+
 test("the next session mixes seven new concepts with three due reviews", () => {
   const pool = makePool();
   const first = planLearningQuestions(pool, 10, 41, {}, 0);

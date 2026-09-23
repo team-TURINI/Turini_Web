@@ -17,7 +17,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "주식의 개념",
-    "explanation": "주식은 기업의 소유권을 잘게 나눈 지분이며, 보유자는 주주가 된다."
+    "explanation": "주식은 기업의 소유권을 잘게 나눈 지분이며, 보유자는 주주가 됩니다."
   },
   {
     "diagnostic_quiz_id": "S2",
@@ -37,7 +37,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "주주의 권리·배당",
-    "explanation": "주주는 기업의 일부 소유자로서 배당을 받을 수 있고, 보통주 기준 의결권을 가질 수 있다."
+    "explanation": "주주는 기업의 일부 소유자로서 배당을 받을 수 있고, 보통주 기준 의결권을 가질 수 있습니다."
   },
   {
     "diagnostic_quiz_id": "S3",
@@ -57,7 +57,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "자산군별 장기 수익",
-    "explanation": "주식은 손실 위험이 크지만, 장기적으로 위험 프리미엄 때문에 예금·채권보다 높은 기대수익률을 가질 수 있다."
+    "explanation": "주식은 손실 위험이 크지만, 장기적으로 위험 프리미엄 때문에 예금·채권보다 높은 기대수익률을 가질 수 있습니다."
   },
   {
     "diagnostic_quiz_id": "B1",
@@ -77,7 +77,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "채권의 개념",
-    "explanation": "채권은 발행자에게 돈을 빌려주고 이자를 받는 금융상품이다."
+    "explanation": "채권은 발행자에게 돈을 빌려주고 이자를 받는 금융상품입니다."
   },
   {
     "diagnostic_quiz_id": "B2",
@@ -97,7 +97,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "채권 위험·신용위험",
-    "explanation": "채권은 비교적 안정적인 현금흐름을 기대할 수 있으나, 금리 변화나 신용위험에 따른 손실 가능성은 존재한다."
+    "explanation": "채권은 비교적 안정적인 현금흐름을 기대할 수 있으나, 금리 변화나 신용위험에 따른 손실 가능성은 존재합니다."
   },
   {
     "diagnostic_quiz_id": "B3",
@@ -117,7 +117,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "금리와 채권 가격",
-    "explanation": "시장 금리가 오르면 새로 발행되는 채권의 매력이 커져 기존 채권 가격은 보통 하락한다."
+    "explanation": "시장 금리가 오르면 새로 발행되는 채권의 매력이 커져 기존 채권 가격은 보통 하락합니다."
   },
   {
     "diagnostic_quiz_id": "F1",
@@ -137,7 +137,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "펀드의 개념",
-    "explanation": "펀드는 여러 투자자의 자금을 모아 운용사가 대신 투자하는 간접투자 상품이다."
+    "explanation": "펀드는 여러 투자자의 자금을 모아 운용사가 대신 투자하는 간접투자 상품입니다."
   },
   {
     "diagnostic_quiz_id": "F2",
@@ -157,7 +157,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "ETF의 개념",
-    "explanation": "ETF는 펀드의 구조를 가지면서도 거래소에서 주식처럼 매매할 수 있는 상품이다."
+    "explanation": "ETF는 펀드의 구조를 가지면서도 거래소에서 주식처럼 매매할 수 있는 상품입니다."
   },
   {
     "diagnostic_quiz_id": "F3",
@@ -177,7 +177,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "인덱스 ETF 분산효과",
-    "explanation": "여러 종목을 담은 ETF는 특정 기업 하나에 투자할 때보다 위험을 분산하는 효과가 있다. 단, 시장 전체 하락 위험은 남아 있다."
+    "explanation": "여러 종목을 담은 ETF는 특정 기업 하나에 투자할 때보다 위험을 분산하는 효과가 있습니다. 단, 시장 전체 하락 위험은 남아 있습니다."
   },
   {
     "diagnostic_quiz_id": "R1",
@@ -197,7 +197,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "위험-수익 관계",
-    "explanation": "일반적으로 기대수익률이 높은 투자일수록 더 큰 위험을 감수해야 한다."
+    "explanation": "일반적으로 기대수익률이 높은 투자일수록 더 큰 위험을 감수해야 합니다."
   },
   {
     "diagnostic_quiz_id": "R2",
@@ -217,7 +217,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "원금 손실 위험",
-    "explanation": "주식·펀드·ETF는 시장 가격 변동에 따라 원금 손실이 발생할 수 있다."
+    "explanation": "주식·펀드·ETF는 시장 가격 변동에 따라 원금 손실이 발생할 수 있습니다."
   },
   {
     "diagnostic_quiz_id": "R3",
@@ -237,7 +237,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "MDD(최대낙폭)",
-    "explanation": "MDD는 투자 기간 중 고점 대비 최대 하락폭을 의미하며, 투자자가 감내해야 할 손실 위험을 파악하는 데 사용된다."
+    "explanation": "MDD는 투자 기간 중 고점 대비 최대 하락폭을 의미하며, 투자자가 감내해야 할 손실 위험을 파악하는 데 사용됩니다."
   },
   {
     "diagnostic_quiz_id": "D1",
@@ -257,7 +257,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "분산투자 기본 원리",
-    "explanation": "분산투자는 여러 자산에 나누어 투자해 특정 자산 손실의 영향을 줄이기 위한 방법이다."
+    "explanation": "분산투자는 여러 자산에 나누어 투자해 특정 자산 손실의 영향을 줄이기 위한 방법입니다."
   },
   {
     "diagnostic_quiz_id": "D2",
@@ -277,7 +277,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "분산투자 사례 판단",
-    "explanation": "여러 산업과 자산군에 나누어 투자하면 특정 기업·산업 위험이 한 곳에 집중되는 것을 줄일 수 있다."
+    "explanation": "여러 산업과 자산군에 나누어 투자하면 특정 기업·산업 위험이 한 곳에 집중되는 것을 줄일 수 있습니다."
   },
   {
     "diagnostic_quiz_id": "D3",
@@ -297,7 +297,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "리밸런싱 전략",
-    "explanation": "리밸런싱은 목표 자산 비중에서 벗어난 포트폴리오를 원래 비중으로 조정하는 작업이다."
+    "explanation": "리밸런싱은 목표 자산 비중에서 벗어난 포트폴리오를 원래 비중으로 조정하는 작업입니다."
   },
   {
     "diagnostic_quiz_id": "C1",
@@ -317,7 +317,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "투자 수익률 계산",
-    "explanation": "수익률은 (매도가-매수가)÷매수가×100이므로 (120-100)÷100×100=20%이다."
+    "explanation": "수익률은 (매도가-매수가)÷매수가×100이므로 (120-100)÷100×100=20%입니다."
   },
   {
     "diagnostic_quiz_id": "C2",
@@ -337,7 +337,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "복리 개념",
-    "explanation": "복리는 이자에도 다시 이자가 붙는 방식이다. 100만 원×(1.02)^5 ≈ 110.4만 원이다."
+    "explanation": "복리는 이자에도 다시 이자가 붙는 방식입니다. 100만 원×(1.02)^5 ≈ 110.4만 원입니다."
   },
   {
     "diagnostic_quiz_id": "C3",
@@ -357,7 +357,7 @@
     "style_score_2": null,
     "style_score_3": null,
     "weakness_tag": "실질수익률·물가상승률",
-    "explanation": "명목수익률보다 물가상승률이 높으면 같은 돈으로 살 수 있는 양, 즉 실제 구매력은 감소한다."
+    "explanation": "명목수익률보다 물가상승률이 높으면 같은 돈으로 살 수 있는 양, 즉 실제 구매력은 감소합니다."
   },
   {
     "diagnostic_quiz_id": "P1",

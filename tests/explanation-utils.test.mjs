@@ -37,3 +37,13 @@ test("실제 학습·진단 문항의 반말 종결어미가 화면에 남지 �
     }
   }
 });
+
+test("원본 학습·진단 데이터 자체도 정중한 말투로 저장돼 있다", () => {
+  const allExplanations = [
+    ...questions.map((question) => ({ id: question.id, explanation: question.explanation })),
+    ...diagnosticQuestions.map((question) => ({ id: `DIAG_${question.diagnostic_quiz_id}`, explanation: question.explanation })),
+  ];
+  for (const question of allExplanations) {
+    assert.equal(formalizeExplanation(question.explanation), question.explanation, `${question.id}: 원본 해설 말투`);
+  }
+});
