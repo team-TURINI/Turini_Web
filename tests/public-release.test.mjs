@@ -9,6 +9,20 @@ const quizData = JSON.parse(await readFile(new URL("../public/data/quizData_864_
 const spriteSource2 = await readFile(new URL("../app/turini-sprite.tsx", import.meta.url), "utf8");
 const avatarSource2 = await readFile(new URL("../app/turini-avatar.tsx", import.meta.url), "utf8");
 const portfolioRulesSource = await readFile(new URL("../app/portfolio-rules.ts", import.meta.url), "utf8");
+const layoutSource = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
+
+test("한국어 금융 용어가 브라우저 자동 번역으로 오염되지 않는다", () => {
+  assert.match(layoutSource, /<html lang="ko" translate="no" className="notranslate"/);
+  assert.match(layoutSource, /google: "notranslate"/);
+  assert.match(pageSource, /name: "주식"/);
+  assert.match(pageSource, /name: "채권"/);
+  assert.match(pageSource, /name: "펀드\/ETF"/);
+  assert.match(pageSource, /name: "위험 관리"/);
+  assert.match(pageSource, /name: "분산 투자"/);
+  assert.match(pageSource, /name: "수익률 계산"/);
+  assert.match(pageSource, /이어서 학습하기/);
+  assert.doesNotMatch(pageSource, /연극 학습|처벌|자금\/ETF|괜히투자|연극배우기|움직여서/);
+});
 
 test("signed-in pages display the active account ID", () => {
   assert.match(pageSource, /account\.username/);

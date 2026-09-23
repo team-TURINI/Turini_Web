@@ -25,6 +25,9 @@ export const metadata: Metadata = {
   description: "검증한 864문항, 포트폴리오 AI 코칭, 미래 자산 시뮬레이션을 제공하는 금융 학습 앱",
   other: {
     "codex-preview": "development",
+    // 한국어 금융 용어를 브라우저 자동 번역이 다시 번역해
+    // '채권→처벌', '학습→연극 학습'처럼 바꾸지 못하게 합니다.
+    google: "notranslate",
   },
   icons: {
     icon: "/favicon.svg",
@@ -38,9 +41,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" translate="no" className="notranslate" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased notranslate`}
       >
         {children}
       </body>
