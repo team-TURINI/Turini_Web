@@ -65,7 +65,8 @@ export type PortfolioResult = {
   coach: string;
 };
 
-export const PORTFOLIO_RULE_VERSION = "4.0.0-portfolio-v11-document-snapshot";
+// 말투 변경 전 저장 결과가 다시 노출되지 않도록 표시 규칙 버전도 올립니다.
+export const PORTFOLIO_RULE_VERSION = "4.0.1-portfolio-v11-friendly-voice";
 export const PORTFOLIO_MODEL_STATUS: ModelStatus = "document_snapshot_unverified";
 export const PORTFOLIO_SIGMA_ASOF = "2026-09-18";
 export const MODEL_LIMITATION = "첨부된 v11 최종 문서의 변동성·상관계수 스냅샷으로 계산해요. 원시 시계열과 운영용 공분산 상수의 재현 검증은 아직 남아 있어요.";
