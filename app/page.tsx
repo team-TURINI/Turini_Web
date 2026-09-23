@@ -1487,8 +1487,8 @@ function PortfolioResults({ result, allocation, tab, setTab, aiFeedback, aiFeedb
   }, { cursor: 0, stops: [] });
   const targetChartStyle = { background: `conic-gradient(${targetChart.stops.join(", ")})` } as CSSProperties;
   const statusTitle: Record<PortfolioResult["recommendationStatus"], string> = {
-    hold: "현재 비중 유지", recommended: "학습용 조정안", horizon_below_reference: "위험 상향 제안 안 함",
-    constraint_conflict: "성향·기간 기준 충돌", no_feasible_target: "격자 조정안 없음",
+    hold: "지금 비중을 유지해도 좋아요", recommended: "학습용 조정안이에요", horizon_below_reference: "위험을 높이는 제안은 하지 않아요",
+    constraint_conflict: "성향과 기간 기준이 서로 달라요", no_feasible_target: "맞는 조정안을 찾지 못했어요",
   };
   return <section id="portfolio-result" className="portfolio-result card-block">
     <div className="result-hero"><div><p>서비스 변동성 위험등급</p><strong>{result.riskGrade}<small>등급</small></strong><span>{result.riskGradeName} · 연환산 {result.riskScore}%</span></div><TuriniAvatar motion="celebrate" className="turini-score" replayKey={result.riskGrade} /></div>
