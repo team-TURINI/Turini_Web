@@ -9,6 +9,7 @@ import {
   type PortfolioTendency,
 } from "@/app/portfolio-rules";
 import { getCurrentUser } from "@/app/server/auth";
+import { friendlyizeExplanation } from "@/app/explanation-utils";
 
 export const runtime = "nodejs";
 
@@ -100,10 +101,10 @@ export async function POST(request: Request) {
   const assetLabels = Object.fromEntries(ASSETS.map((asset) => [asset.key, asset.label]));
   const deterministicImprovements = computed.rebalancingActions.map((action) => {
     const label = assetLabels[action.asset];
-    return `${label} 비중을 ${Math.abs(action.delta)}%p ${action.action === "확대" ? "늘리는" : "줄이는"} 방향입니다.`;
+    return `${label} 비중을 ${Math.abs(action.delta)}%p ${action.action === "확대" ? "늘리는" : "줄이는"} 방향이에요.`;
   });
   const weakTags = stringArray(context.weakTags).filter((tag) => CONCEPT_TAGS.includes(tag as typeof CONCEPT_TAGS[number]));
-  const fallbackSummary = `서비스 변동성 위험은 ${computed.riskGrade}등급(${computed.riskGradeName})이며, 연환산 변동성은 ${computed.riskScore}%입니다. 성향은 ${computed.typeFitLabel}, 기간은 ${computed.horizonFitLabel}입니다.`;
+  const fallbackSummary = `서비스 변동성 위험은 ${computed.riskGrade}등급(${computed.riskGradeName})이고, 연환산 변동성은 ${computed.riskScore}%예요. 성향은 ${computed.typeFitLabel}, 기간은 ${computed.horizonFitLabel}이에요.`;
   const allocationPercent = Object.fromEntries(
     ASSETS.map((asset) => [asset.key, Math.round((context.allocation as Allocation)[asset.key] * 1000) / 10]),
   );
@@ -136,8 +137,8 @@ export async function POST(request: Request) {
         max_output_tokens: 900,
         store: false,
         instructions: [
-          "당신은 Turini 금융 학습 앱의 포트폴리오 설명 코치입니다.",
-          "서버가 계산한 computed와 context만 근거로 쉽고 친절한 한국어 ~입니다체를 사용하세요.",
+          "당신은 Turini 금융 학습 앱의 친근한 캐릭터 코치 투린이예요.",
+          "서버가 계산한 computed와 context만 근거로 쉽고 다정한 한국어 ~해요/~이에요체를 사용하세요.",
           "strengths와 cautions는 computed의 같은 배열을 문장 변경 없이 그대로 반환하세요.",
           "improvements는 context.allowedImprovements를 순서와 문장 변경 없이 그대로 반환하세요.",
           "입력에 없는 숫자, 금액, 자산, 종목, 상품, 회사, 티커, 수익률을 만들지 마세요.",
@@ -184,7 +185,7 @@ export async function POST(request: Request) {
     const conceptRefs = (unlocked.length ? unlocked : weakTags.length ? weakTags : returnedRefs).slice(0, 3);
     return NextResponse.json({
       feedback: {
-        summary_ko: safeSummary(parsed.summary_ko, allowedNumbers, fallbackSummary),
+        summary_ko: friendlyizeExplanation(safeSummary(parsed.summary_ko, allowedNumbers, fallbackSummary)),
         // 핵심 판정 문장은 LLM 출력 대신 서버 계산값을 사용해 모순과 환각을 차단한다.
         strengths: computed.strengths,
         cautions: computed.cautions,

@@ -68,15 +68,15 @@ export type PortfolioResult = {
 export const PORTFOLIO_RULE_VERSION = "4.0.0-portfolio-v11-document-snapshot";
 export const PORTFOLIO_MODEL_STATUS: ModelStatus = "document_snapshot_unverified";
 export const PORTFOLIO_SIGMA_ASOF = "2026-09-18";
-export const MODEL_LIMITATION = "첨부된 v11 최종 문서의 변동성·상관계수 스냅샷으로 계산하며, 원시 시계열과 운영용 공분산 상수의 재현 검증은 남아 있습니다.";
+export const MODEL_LIMITATION = "첨부된 v11 최종 문서의 변동성·상관계수 스냅샷으로 계산해요. 원시 시계열과 운영용 공분산 상수의 재현 검증은 아직 남아 있어요.";
 
 export const ASSETS: AssetDefinition[] = [
-  { key: "domestic", label: "국내주식", short: "국내", color: "#58cc02", icon: "KR", volatility: 33.69, help: "국내 거래소에 상장된 개별기업 주식의 합계입니다. 국내 주식형 ETF·펀드는 ‘주식형 ETF·펀드’에 입력해 주세요." },
-  { key: "overseas", label: "해외주식", short: "해외", color: "#1cb0f6", icon: "GL", volatility: 22.41, help: "해외 거래소에 상장된 개별기업 주식의 합계입니다. 환율·국가 위험을 함께 반영하며, 해외 주식형 ETF·펀드는 별도 항목에 입력해 주세요." },
-  { key: "bond", label: "채권", short: "채권", color: "#9069e7", icon: "B", volatility: 1.69, help: "직접채권과 일반 채권 ETF·채권형 펀드를 합산합니다. 장기채·하이일드·환노출 해외채권은 실제 위험도가 대표값보다 높을 수 있습니다." },
-  { key: "equityFund", label: "주식형 ETF·펀드", short: "주식형", color: "#ff9600", icon: "F", volatility: 15.03, help: "주식에 주로 투자하는 ETF·펀드입니다. 국내·해외 지수형, 액티브형, 섹터·테마형을 포함하며 레버리지·인버스 상품은 제외합니다." },
-  { key: "cash", label: "현금성자산", short: "현금", color: "#2bb6a8", icon: "₩", volatility: 0.22, help: "현금, 입출금·단기 예금, CMA·MMF처럼 비교적 빠르게 사용할 수 있는 자산입니다. 상품별 원금보장·예금자보호 여부는 다릅니다." },
-  { key: "gold", label: "금", short: "금", color: "#ffc800", icon: "Au", volatility: 19.4, help: "실물 금, 금 통장과 금 현물·선물 가격을 추종하는 일반 상품을 합산합니다. 금광기업 주식형과 레버리지·인버스 상품은 포함하지 않습니다." },
+  { key: "domestic", label: "국내주식", short: "국내", color: "#58cc02", icon: "KR", volatility: 33.69, help: "국내 거래소에 상장된 개별기업 주식의 합계예요. 국내 주식형 ETF·펀드는 ‘주식형 ETF·펀드’에 입력해 주세요." },
+  { key: "overseas", label: "해외주식", short: "해외", color: "#1cb0f6", icon: "GL", volatility: 22.41, help: "해외 거래소에 상장된 개별기업 주식의 합계예요. 환율·국가 위험도 함께 반영하고, 해외 주식형 ETF·펀드는 별도 항목에 입력해 주세요." },
+  { key: "bond", label: "채권", short: "채권", color: "#9069e7", icon: "B", volatility: 1.69, help: "직접채권과 일반 채권 ETF·채권형 펀드를 합산해요. 장기채·하이일드·환노출 해외채권은 실제 위험도가 대표값보다 높을 수 있어요." },
+  { key: "equityFund", label: "주식형 ETF·펀드", short: "주식형", color: "#ff9600", icon: "F", volatility: 15.03, help: "주식에 주로 투자하는 ETF·펀드예요. 국내·해외 지수형, 액티브형, 섹터·테마형을 포함하고 레버리지·인버스 상품은 제외해요." },
+  { key: "cash", label: "현금성자산", short: "현금", color: "#2bb6a8", icon: "₩", volatility: 0.22, help: "현금, 입출금·단기 예금, CMA·MMF처럼 비교적 빠르게 사용할 수 있는 자산이에요. 상품마다 원금보장·예금자보호 여부는 달라요." },
+  { key: "gold", label: "금", short: "금", color: "#ffc800", icon: "Au", volatility: 19.4, help: "실물 금, 금 통장과 금 현물·선물 가격을 추종하는 일반 상품을 합산해요. 금광기업 주식형과 레버리지·인버스 상품은 포함하지 않아요." },
 ];
 
 export const ASSET_KEYS = ASSETS.map((asset) => asset.key) as AssetKey[];
@@ -150,12 +150,12 @@ function portfolioVolatilityRaw(allocation: Allocation) {
 }
 
 export function riskScoreFor(allocation: Allocation) {
-  if (!validateAllocation(allocation)) throw new Error("자산 비중은 0.0~1.0의 유한한 숫자이며 합계가 1.0이어야 합니다.");
+  if (!validateAllocation(allocation)) throw new Error("자산 비중은 0.0~1.0의 숫자이고 합계가 1.0이어야 해요.");
   return round(portfolioVolatilityRaw(allocation), 4);
 }
 
 export function riskGradeFor(volatility: number) {
-  if (!finiteNumber(volatility) || volatility < 0) throw new Error("변동성은 0 이상의 유한한 숫자여야 합니다.");
+  if (!finiteNumber(volatility) || volatility < 0) throw new Error("변동성은 0 이상의 숫자여야 해요.");
   if (volatility <= 0.5) return { grade: 6, name: "매우 낮음" };
   if (volatility <= 5) return { grade: 5, name: "낮음" };
   if (volatility <= 10) return { grade: 4, name: "보통" };
@@ -290,12 +290,12 @@ function allocationSignalIds(allocation: Allocation) {
   return ids;
 }
 const SIGNAL_META: Record<number, { metric: "growth" | "defense" | "cash"; direction: "low" | "high"; text: string }> = {
-  1: { metric: "growth", direction: "low", text: "성장자산 비중이 35%보다 낮습니다." },
-  2: { metric: "growth", direction: "high", text: "성장자산 비중이 60%보다 높습니다." },
-  3: { metric: "defense", direction: "low", text: "방어자산 비중이 32.5%보다 낮습니다." },
-  4: { metric: "defense", direction: "high", text: "방어자산 비중이 60%보다 높습니다." },
-  5: { metric: "cash", direction: "low", text: "현금성자산 비중이 7.5%보다 낮습니다." },
-  6: { metric: "cash", direction: "high", text: "현금성자산 비중이 20%보다 높습니다." },
+  1: { metric: "growth", direction: "low", text: "성장자산 비중이 35%보다 낮아요." },
+  2: { metric: "growth", direction: "high", text: "성장자산 비중이 60%보다 높아요." },
+  3: { metric: "defense", direction: "low", text: "방어자산 비중이 32.5%보다 낮아요." },
+  4: { metric: "defense", direction: "high", text: "방어자산 비중이 60%보다 높아요." },
+  5: { metric: "cash", direction: "low", text: "현금성자산 비중이 7.5%보다 낮아요." },
+  6: { metric: "cash", direction: "high", text: "현금성자산 비중이 20%보다 높아요." },
 };
 function signalKind(id: number, current: Allocation, baseTarget: Allocation): SignalKind {
   if (!allocationSignalIds(baseTarget).includes(id)) return "caution";
@@ -310,16 +310,16 @@ const UNLOCK_TAG_BY_ASSET: Record<AssetKey, string> = {
   bond: "채권의 개념", cash: "원금 손실 위험", gold: "분산투자 기본 원리",
 };
 const STATUS_COACH: Record<RecommendationStatus, string> = {
-  hold: "성향과 기간 기준 범위에 모두 들어와 현재 비중을 유지할 수 있습니다.",
-  recommended: "성향과 기간 기준이 겹치는 범위 안에서 5% 단위의 가까운 학습용 배분을 찾았습니다.",
-  horizon_below_reference: "성향 기준에는 맞지만 기간 기준보다 위험이 낮습니다. 위험을 억지로 높이는 조정안은 제시하지 않습니다.",
-  constraint_conflict: "성향 기준과 기간 기준 범위가 겹치지 않아 하나의 조정안을 제시하지 않습니다.",
-  no_feasible_target: "현재 보유 자산과 허용된 한 종류 추가 조건에서는 5% 단위 조정안을 찾지 못했습니다.",
+  hold: "성향과 기간 기준 범위에 모두 들어와 지금 비중을 유지해도 좋아요.",
+  recommended: "성향과 기간 기준이 겹치는 범위 안에서 5% 단위의 가까운 학습용 배분을 찾아봤어요.",
+  horizon_below_reference: "성향 기준에는 맞지만 기간 기준보다 위험이 낮아요. 위험을 억지로 높이는 조정안은 제시하지 않아요.",
+  constraint_conflict: "성향 기준과 기간 기준 범위가 겹치지 않아 하나의 조정안으로 정하지 않아요.",
+  no_feasible_target: "현재 보유 자산과 한 종류 추가 조건으로는 5% 단위 조정안을 찾지 못했어요.",
 };
 
 export function analyzeAllocation(current: Allocation, tendency: PortfolioTendency, horizon: string): PortfolioResult {
-  if (!validateAllocation(current)) throw new Error("자산 비중은 0.0~1.0의 유한한 숫자이며 합계가 1.0이어야 합니다.");
-  if (!(horizon in HORIZON_CENTERS)) throw new Error("지원하지 않는 투자 기간입니다.");
+  if (!validateAllocation(current)) throw new Error("자산 비중은 0.0~1.0의 숫자이고 합계가 1.0이어야 해요.");
+  if (!(horizon in HORIZON_CENTERS)) throw new Error("지원하지 않는 투자 기간이에요.");
   const profile: PortfolioType = tendency === "진단 전" ? "중립형" : tendency;
   const typedHorizon = horizon as PortfolioHorizon;
   const currentRiskRaw = portfolioVolatilityRaw(current);
@@ -338,14 +338,14 @@ export function analyzeAllocation(current: Allocation, tendency: PortfolioTenden
   else diversificationReduction = Math.max(0, Math.min(1, 1 - currentRiskRaw / volatilityBudget));
   const heldCount = ASSET_KEYS.filter((key) => current[key] > 1e-12).length;
   const strengthAxes: StrengthAxis[] = [];
-  if (typeFit.fit === 1) strengthAxes.push({ axis: "type_fit", sentence: `연환산 변동성 ${round(currentRiskRaw, 2)}%가 ${profile} 기준 범위 ${round(profileRange[0], 2)}~${round(profileRange[1], 2)}% 안에 들어옵니다.` });
-  if (heldCount >= 2 && diversificationStatus === "valid" && diversificationReduction !== null && diversificationReduction > 1e-12) strengthAxes.push({ axis: "diversification", sentence: `보유 자산 ${heldCount}종의 상관관계를 반영했을 때 단순 가중 변동성 합계보다 ${round(diversificationReduction * 100, 1)}% 낮아지는 분산 효과가 계산됩니다.` });
-  if (periodFit.fit === 1) strengthAxes.push({ axis: "horizon_fit", sentence: `연환산 변동성 ${round(currentRiskRaw, 2)}%가 ${typedHorizon} 기간 기준 범위 ${round(horizonRange[0], 2)}~${round(horizonRange[1], 2)}% 안에 들어옵니다.` });
+  if (typeFit.fit === 1) strengthAxes.push({ axis: "type_fit", sentence: `연환산 변동성 ${round(currentRiskRaw, 2)}%가 ${profile} 기준 범위 ${round(profileRange[0], 2)}~${round(profileRange[1], 2)}% 안에 들어와요.` });
+  if (heldCount >= 2 && diversificationStatus === "valid" && diversificationReduction !== null && diversificationReduction > 1e-12) strengthAxes.push({ axis: "diversification", sentence: `보유 자산 ${heldCount}종의 상관관계를 반영하면 단순 가중 변동성 합계보다 ${round(diversificationReduction * 100, 1)}% 낮아지는 분산 효과가 보여요.` });
+  if (periodFit.fit === 1) strengthAxes.push({ axis: "horizon_fit", sentence: `연환산 변동성 ${round(currentRiskRaw, 2)}%가 ${typedHorizon} 기간 기준 범위 ${round(horizonRange[0], 2)}~${round(horizonRange[1], 2)}% 안에 들어와요.` });
   const baseTarget = BASE_TARGETS[profile];
   const signals = allocationSignalIds(current).map((id) => ({ id, kind: signalKind(id, current, baseTarget), text: SIGNAL_META[id].text }));
   const cautions = [
-    ...(typeFit.fit < 1 ? [`성향 판정: ${typeFit.label}입니다.`] : []),
-    ...(periodFit.fit < 1 ? [`기간 판정: ${periodFit.label}입니다.`] : []),
+    ...(typeFit.fit < 1 ? [`성향 판정은 ${typeFit.label}이에요.`] : []),
+    ...(periodFit.fit < 1 ? [`기간 판정은 ${periodFit.label}이에요.`] : []),
     ...signals.filter((signal) => signal.kind === "caution").map((signal) => signal.text),
   ];
   const recommendation = recommendationFor(current, currentRiskRaw, profileRange, horizonRange, RISK_CENTERS[profile]);
