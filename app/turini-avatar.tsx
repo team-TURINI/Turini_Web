@@ -166,50 +166,6 @@ export function BasicReadingTurini({
   );
 }
 
-/**
- * 퀴즈 풀이 전(생각하는 투리니) 전용 기본 프리셋입니다.
- * 사용자 꾸미기(모자·안경·목장식)와 섞지 않고, 기본 캐릭터의 새싹과 초록 가방만 보여 줍니다.
- * PNG 를 늘이거나 자르지 않고 통째로만 움직입니다.
- * - 문제가 바뀔 때마다 톡 튀어나오는 등장
- * - 숨쉬기 + 고개를 갸웃하며 고민하는 흔들림
- * - "아하!" 순간에 전구가 반짝이고 작은 별이 튀는 효과
- * 애니메이션 줄이기 설정에서는 모두 멈춥니다.
- */
-export function QuizThinkingTurini({
-  className = "",
-  decorative = false,
-}: {
-  className?: string;
-  decorative?: boolean;
-}) {
-  const labelProps = decorative
-    ? ({ "aria-hidden": true } as const)
-    : ({ role: "img", "aria-label": "새싹과 초록 가방을 멘 채 생각하는 투리니" } as const);
-  return (
-    <span className={`turini-think ${className}`.trim()} {...labelProps}>
-      <span className="turini-think__enter">
-        <span className="turini-think__breathe">
-          <span className="turini-think__sway">
-            <span className="turini-think__glow" aria-hidden="true" />
-            <Image
-              src="/assets/turini-thinking-transparent.png"
-              alt=""
-              width={1402}
-              height={1122}
-              sizes="(max-width: 390px) 190px, 220px"
-              priority
-              draggable={false}
-            />
-            <i className="turini-think__spark turini-think__spark--1" aria-hidden="true" />
-            <i className="turini-think__spark turini-think__spark--2" aria-hidden="true" />
-            <i className="turini-think__spark turini-think__spark--3" aria-hidden="true" />
-          </span>
-        </span>
-      </span>
-    </span>
-  );
-}
-
 /* ──────────────────────────────────────────────────────────────
    이미지 한 장 — webp 를 먼저 쓰고, 없으면 원본 png, 그것도 없으면 조용히 비웁니다.
    ────────────────────────────────────────────────────────────── */
