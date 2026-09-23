@@ -68,7 +68,7 @@ export default function DifficultySelect({
           </div>
         </div>
         <p className="difficulty-lead">
-          세 난이도는 하나로 이어진 학습 경로예요. 고른 구간부터 로드맵을 이어서 올라가면 됩니다.
+          세 난이도는 하나로 이어진 학습 경로예요. 고른 구간부터 로드맵을 이어서 올라가면 돼요.
         </p>
       </div>
 
