@@ -166,6 +166,46 @@ export function BasicReadingTurini({
   );
 }
 
+/**
+ * 퀴즈 풀이 전용 기본 프리셋입니다.
+ * 사용자 꾸미기와 섞이지 않고 새싹과 초록 가방을 멘 투리니가
+ * 숨 쉬고 고개를 갸웃하며 생각하는 동작을 보여 줍니다.
+ */
+export function QuizThinkingTurini({
+  className = "",
+  decorative = false,
+}: {
+  className?: string;
+  decorative?: boolean;
+}) {
+  const labelProps = decorative
+    ? ({ "aria-hidden": true } as const)
+    : ({ role: "img", "aria-label": "새싹과 초록 가방을 멘 채 생각하는 투리니" } as const);
+  return (
+    <span className={`turini-think ${className}`.trim()} {...labelProps}>
+      <span className="turini-think__enter">
+        <span className="turini-think__breathe">
+          <span className="turini-think__sway">
+            <span className="turini-think__glow" aria-hidden="true" />
+            <Image
+              src="/assets/turini-thinking-transparent.png"
+              alt=""
+              width={1402}
+              height={1122}
+              sizes="(max-width: 390px) 190px, 220px"
+              priority
+              draggable={false}
+            />
+            <i className="turini-think__spark turini-think__spark--1" aria-hidden="true" />
+            <i className="turini-think__spark turini-think__spark--2" aria-hidden="true" />
+            <i className="turini-think__spark turini-think__spark--3" aria-hidden="true" />
+          </span>
+        </span>
+      </span>
+    </span>
+  );
+}
+
 /* ──────────────────────────────────────────────────────────────
    이미지 한 장 — webp 를 먼저 쓰고, 없으면 원본 png, 그것도 없으면 조용히 비웁니다.
    ────────────────────────────────────────────────────────────── */

@@ -105,5 +105,5 @@ test("legacy fund allocation migrates and the new rule version invalidates old r
   const migrated = normalizeAllocation({ domestic: 10, overseas: 20, bond: 30, fund: 20, cash: 10, gold: 10 });
   assert.equal(migrated.equityFund, 0.2);
   assert.equal(allocationTotal(migrated), 1);
-  assert.equal(PORTFOLIO_RULE_VERSION, "4.0.0-portfolio-v11-document-snapshot");
+  assert.equal(PORTFOLIO_RULE_VERSION, "4.0.1-portfolio-v11-friendly-voice");
 });
