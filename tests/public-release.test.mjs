@@ -8,6 +8,7 @@ const envExampleSource = await readFile(new URL("../.env.example", import.meta.u
 const quizData = JSON.parse(await readFile(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"));
 const spriteSource2 = await readFile(new URL("../app/turini-sprite.tsx", import.meta.url), "utf8");
 const avatarSource2 = await readFile(new URL("../app/turini-avatar.tsx", import.meta.url), "utf8");
+const portfolioRulesSource = await readFile(new URL("../app/portfolio-rules.ts", import.meta.url), "utf8");
 
 test("signed-in pages display the active account ID", () => {
   assert.match(pageSource, /account\.username/);
@@ -54,7 +55,7 @@ test("portfolio screen exposes the revised asset classification help", () => {
   assert.doesNotMatch(pageSource, /내부 종합점수/);
   assert.match(pageSource, /서비스 변동성 위험등급/);
   assert.doesNotMatch(pageSource, /portfolio-model-notice/);
-  assert.match(pageSource, /원시 시계열 재현 검증 전/);
+  assert.match(pageSource, /원시 시계열은 아직 재현 검증 전/);
   assert.match(pageSource, /학습용 조정안/);
   assert.match(pageSource, /3~10년/);
   assert.match(pageSource, /PORTFOLIO_HORIZONS = \["1년 미만", "1~3년", "3~10년", "10년 이상"\]/);
@@ -63,6 +64,15 @@ test("portfolio screen exposes the revised asset classification help", () => {
   assert.match(pageSource, /기간 판정/);
   assert.doesNotMatch(pageSource, /<span>성향 적합<\/span><strong>\{fitPercent\}/);
   assert.doesNotMatch(pageSource, /<span>기간 적합<\/span><strong>\{horizonFitPercent\}/);
+});
+
+test("학습과 포트폴리오 안내는 투린이의 친근한 해요체를 쓴다", () => {
+  assert.match(pageSource, /friendlyizeExplanation\(question\.explanation\)/);
+  assert.match(feedbackRouteSource, /~해요\/~이에요체를 사용하세요/);
+  assert.match(portfolioRulesSource, /분산 효과가 보여요/);
+  assert.match(portfolioRulesSource, /지금 비중을 유지해도 좋아요/);
+  assert.doesNotMatch(feedbackRouteSource, /~입니다체를 사용하세요/);
+  assert.doesNotMatch(pageSource, /결과를 표시하고 있습니다/);
 });
 
 test("안내 화면 캐릭터는 저장된 모자와 안경 대신 요청한 기본 프리셋을 쓴다", () => {
