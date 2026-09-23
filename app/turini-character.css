@@ -338,8 +338,8 @@
   .turini-think__enter,
   .turini-think__breathe,
   .turini-think__sway { animation: none; }
+  .turini-think__glow { animation: none; opacity: .45; }
   .turini-think__spark { animation: none; opacity: 0; }
-  .turini-think__glow { animation: none; opacity: .24; }
 }
 
 /* 레슨 결과 */
