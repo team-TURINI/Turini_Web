@@ -174,6 +174,15 @@ test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", (
   assert.ok(existsSync(publicPath(back)), "검정 비즈니스 가방 최종 뒷면 완성본이 없습니다");
 });
 
+test("뒷면에서도 정면과 같은 선택 배경을 유지한다", () => {
+  assert.match(avatarSource, /const background = findItem\(customization\.background\)/);
+  assert.match(
+    avatarSource,
+    /turini-avatar--scene turini-avatar--editor turini-avatar--turn/,
+  );
+  assert.match(avatarSource, /<ItemImage item=\{background\} eager \/>/);
+});
+
 /* ── 배치 (리그 앵커) ──────────────────────────────────── */
 
 test("액세서리는 머리 그룹 안에 있어 고개 움직임을 따라간다", () => {

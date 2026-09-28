@@ -322,6 +322,7 @@ export function TuriniDressUp({
   const visible = showLocked ? slotItems : slotItems.filter((entry) => unlockedIds.has(entry.id));
   const slotName = AVATAR_SLOTS.find((entry) => entry.key === slot)?.name ?? "";
   const bag = findItem(customization.bag);
+  const background = findItem(customization.background);
 
   const choose = (entry: AvatarItem) => {
     if (!unlockedIds.has(entry.id)) return;
@@ -355,7 +356,12 @@ export function TuriniDressUp({
             scene
           />
         ) : (
-          <div className="turini-avatar turini-avatar--editor turini-avatar--turn">
+          <div className="turini-avatar turini-avatar--scene turini-avatar--editor turini-avatar--turn">
+            {background ? (
+              <span className="turini-avatar__background" aria-hidden="true">
+                <ItemImage item={background} eager />
+              </span>
+            ) : null}
             <TurnaroundView view={view} bag={bag} />
           </div>
         )}

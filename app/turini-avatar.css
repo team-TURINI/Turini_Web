@@ -89,6 +89,7 @@
 .turini-dress__turn {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: block;
 }
 .turini-dress__turn img {
