@@ -19,6 +19,7 @@ import {
   remainingLabel,
   requirementLabel,
   requirementProgress,
+  wornBackPreview,
   wornPreview,
   type AvatarItem,
   type AvatarSlot,
@@ -260,14 +261,19 @@ function WornThumb({ item }: { item: AvatarItem }) {
 
 function TurnaroundView({ view, bag }: { view: TurniView; bag: AvatarItem | null }) {
   const [failed, setFailed] = useState(false);
-  // 3/4 후면은 "그 가방 하나를 멘" 완성본이 있으면 그걸 씁니다.
-  const worn = view === "three-quarter-rear" && bag ? wornPreview(bag) : null;
-  if (worn && !failed) {
+  const wornBack = view === "back" && bag ? wornBackPreview(bag) : null;
+  if (wornBack && !failed) {
     return (
-      <picture className="turini-dress__turn">
-        <source srcSet={worn.webp} type="image/webp" />
-        <img src={worn.png} alt="" decoding="async" draggable={false} onError={() => setFailed(true)} />
-      </picture>
+      <span className="turini-dress__turn">
+        <Image
+          src={wornBack}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 520px"
+          draggable={false}
+          onError={() => setFailed(true)}
+        />
+      </span>
     );
   }
   return (
@@ -355,7 +361,7 @@ export function TuriniDressUp({
         )}
 
         <div className="turini-dress__views" role="group" aria-label="보는 방향">
-          {(["front", "three-quarter-rear", "back"] as TurniView[]).map((entry) => (
+          {(["front", "back"] as TurniView[]).map((entry) => (
             <button
               key={entry}
               type="button"
@@ -369,11 +375,7 @@ export function TuriniDressUp({
           ))}
         </div>
         {view !== "front" ? (
-          <p className="turini-dress__view-note">
-            {view === "three-quarter-rear" && bag
-              ? "가방만 따로 보는 각도예요. 모자·안경까지 함께 입은 모습은 정면에서 볼 수 있어요."
-              : "등이 보이는 각도예요. 전체 모습은 정면에서 볼 수 있어요."}
-          </p>
+          <p className="turini-dress__view-note">등이 보이는 각도예요. 전체 모습은 정면에서 볼 수 있어요.</p>
         ) : null}
       </div>
 
@@ -388,8 +390,8 @@ export function TuriniDressUp({
             data-active={slot === key ? "true" : undefined}
             onClick={() => {
               setSlot(key);
-              // 가방은 등 뒤라 정면으로는 잘 보이지 않습니다. 탭을 열면 각도를 돌려 줍니다.
-              setView(key === "bag" ? "three-quarter-rear" : "front");
+              // 가방은 등 뒤라 정면으로는 잘 보이지 않습니다. 가방 탭은 승인된 뒷면을 엽니다.
+              setView(key === "bag" ? "back" : "front");
             }}
           >
             {name}

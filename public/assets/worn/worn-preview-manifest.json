@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "permanentSlots": [
     "hat",
     "glasses",
@@ -9,7 +9,7 @@
   ],
   "removedPermanentSlot": "handProp",
   "viewRules": {
-    "bagCustomizer": "three-quarter-rear",
+    "bagCustomizer": "back",
     "default": "front",
     "quizFeedback": "dedicated animation without permanent hand props"
   },

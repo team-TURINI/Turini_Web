@@ -22,6 +22,7 @@ import {
   remainingLabel,
   requirementLabel,
   requirementProgress,
+  wornBackPreview,
   wornPreview,
 } from "../app/avatar-items.ts";
 
@@ -159,6 +160,18 @@ test("착용 완성본은 목록·단일 미리보기에만 쓰고 겹쳐 조합
   assert.doesNotMatch(rigSource, /wornPreview/);
   // 여러 아이템을 함께 입은 모습은 리그로만 만듭니다.
   assert.match(avatarSource, /TuriniRig/);
+});
+
+test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", () => {
+  assert.doesNotMatch(avatarSource, /three-quarter-rear/);
+  assert.match(avatarSource, /\["front", "back"\]/);
+  assert.match(avatarSource, /key === "bag" \? "back" : "front"/);
+
+  const blackBag = findItem("bag:black_business");
+  assert.ok(blackBag, "검정 비즈니스 가방이 없습니다");
+  const back = wornBackPreview(blackBag);
+  assert.ok(back, "검정 비즈니스 가방 뒷면 완성본 경로가 없습니다");
+  assert.ok(existsSync(publicPath(back)), "검정 비즈니스 가방 최종 뒷면 완성본이 없습니다");
 });
 
 /* ── 배치 (리그 앵커) ──────────────────────────────────── */

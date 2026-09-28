@@ -61,21 +61,28 @@ export function wornPreview(item: { slot: AvatarSlot; file: string }) {
   };
 }
 
-/** 회전 미리보기용 기본 캐릭터 3종 */
-export type TurniView = "front" | "three-quarter-rear" | "back";
+/**
+ * 뒷면 착용 완성본.
+ * 승인된 완성본이 있는 가방만 이 경로를 사용하고, 나머지는 기존 뒷면 합성으로
+ * 안전하게 대체합니다. 현재 검정 비즈니스 가방의 최종 위치 보정본이 등록돼 있습니다.
+ */
+export function wornBackPreview(item: { id: string; slot: AvatarSlot; file: string }) {
+  if (item.id !== "bag:black_business") return null;
+  return `${ASSET_ROOT}/worn-back/bags/${item.file}-worn-back.png`;
+}
+
+/** 회전 미리보기용 기본 캐릭터 — 가방 3/4 후면은 사용하지 않습니다. */
+export type TurniView = "front" | "back";
 export const TURNAROUND: Record<TurniView, string> = {
   front: `${ASSET_ROOT}/turnaround/turini-front.png`,
-  "three-quarter-rear": `${ASSET_ROOT}/turnaround/turini-three-quarter-rear.png`,
   back: `${ASSET_ROOT}/turnaround/turini-back.png`,
 };
 export const TURNAROUND_WEBP: Record<TurniView, string> = {
   front: `${ASSET_ROOT}/optimized/turnaround/turini-front.webp`,
-  "three-quarter-rear": `${ASSET_ROOT}/optimized/turnaround/turini-three-quarter-rear.webp`,
   back: `${ASSET_ROOT}/optimized/turnaround/turini-back.webp`,
 };
 export const VIEW_LABEL: Record<TurniView, string> = {
   front: "정면",
-  "three-quarter-rear": "뒤쪽 3/4",
   back: "뒷면",
 };
 
