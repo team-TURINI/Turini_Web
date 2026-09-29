@@ -84,63 +84,54 @@
   font-weight: 800;
 }
 
-/* ── 회전 미리보기 ─────────────────────────────────────────── */
-.turini-avatar--turn { background: #eef3f0; border-radius: 24px; overflow: hidden; }
-.turini-dress__turn {
+/* 고정된 기본 캐릭터와 모든 액세서리는 같은 정사각형 좌표계를 공유합니다. */
+.turini-dress__figure {
+  position: absolute;
+  inset: 10%;
+  z-index: 1;
+  pointer-events: none;
+}
+.turini-dress__base {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  display: block;
-}
-.turini-dress__turn img {
+  z-index: 2;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
-/* 완전 후면에서는 등 한가운데에 가방을 올립니다.
-   (뒷모습 그림 768px 기준 몸 중심 x≈384, 등 범위 y≈366~640 을 재서 맞춘 값) */
-.turini-dress__turn-bag {
+.turini-dress__piece {
   position: absolute;
-  left: 27.5%;
-  top: 44%;
-  width: 45%;
-  aspect-ratio: 1 / 1;
+  display: block;
+  aspect-ratio: 1;
+  z-index: 3;
 }
-.turini-dress__turn-bag img { width: 100%; height: 100%; object-fit: contain; }
+.turini-dress__piece--bag { z-index: 1; }
+.turini-dress__piece--neck { z-index: 4; }
+.turini-dress__piece--glasses { z-index: 5; }
+.turini-dress__piece--hat { z-index: 6; }
+.turini-dress__piece picture,
+.turini-dress__piece img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.turini-dress__bag-straps { position: absolute; inset: 0; z-index: 3; }
+.turini-dress__bag-straps i {
+  position: absolute;
+  top: 56%;
+  width: 2.4%;
+  height: 13%;
+  border-radius: 99px;
+  background: var(--strap);
+  box-shadow: inset 1px 0 2px #fff6, 1px 1px 2px #54452b55;
+}
+.turini-dress__bag-straps i:first-child { left: 35%; transform: rotate(16deg); }
+.turini-dress__bag-straps i:last-child { left: 62%; transform: rotate(-16deg); }
 
 .turini-dress__stage { margin: 16px 0 4px; }
 
-.turini-dress__views {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 12px;
-}
-.turini-dress__view {
-  min-height: 40px;
-  padding: 0 14px;
-  border: 2px solid var(--line);
-  border-radius: 999px;
-  background: #fff;
-  color: var(--muted);
-  font-size: 12.5px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: border-color .15s, color .15s, background .15s;
-}
-.turini-dress__view[data-active="true"] {
-  border-color: var(--green);
-  background: var(--green-pale);
-  color: var(--green-dark);
-}
-.turini-dress__view-note {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.55;
-  text-align: center;
-}
 
 /* ── 꾸미기 카드 ───────────────────────────────────────────── */
 .turini-dress__head {
@@ -244,6 +235,7 @@
   background: #f5f8f6;
   overflow: hidden;
 }
+.turini-dress__item-art .turini-dress__figure { inset: 6%; }
 .turini-dress__item-art picture,
 .turini-dress__item-art img {
   display: block;
@@ -288,7 +280,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .turini-dress__item, .turini-dress__view { transition: none; }
+  .turini-dress__item { transition: none; }
 }
 
 /* ==========================================================================

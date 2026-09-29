@@ -22,8 +22,6 @@ import {
   remainingLabel,
   requirementLabel,
   requirementProgress,
-  wornBackPreview,
-  wornFrontPreview,
   BAG_BASE,
   wornPreview,
 } from "../app/avatar-items.ts";
@@ -164,29 +162,20 @@ test("착용 완성본은 목록·단일 미리보기에만 쓰고 겹쳐 조합
   assert.match(avatarSource, /TuriniRig/);
 });
 
-test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", () => {
-  assert.doesNotMatch(avatarSource, /three-quarter-rear/);
-  assert.match(avatarSource, /\["front", "back"\]/);
-  assert.match(avatarSource, /key === "bag" \? "back" : "front"/);
-
+test("꾸미기 무대는 카테고리를 바꿔도 고정 기본 그림 위에 각 아이템을 얹는다", () => {
+  assert.match(avatarSource, /turini-base-front\.png/);
+  assert.match(avatarSource, /placementFor\(item, "editor"\)/);
+  assert.match(avatarSource, /accessories\.map\(\(item\) => <EditorPiece/);
+  assert.doesNotMatch(avatarSource, /TurnaroundView|setView\(/);
+  assert.ok(existsSync(publicPath(BAG_BASE.front)));
   for (const bag of itemsForSlot("bag")) {
-    const front = wornFrontPreview(bag);
-    const back = wornBackPreview(bag);
-    assert.ok(front && existsSync(publicPath(front)), `${bag.id} 정면 착용 이미지가 없습니다`);
-    assert.ok(back && existsSync(publicPath(back)), `${bag.id} 뒷면 착용 이미지가 없습니다`);
+    assert.ok(existsSync(publicPath(assetPath(bag.slot, bag.file))));
   }
-  assert.ok(existsSync(publicPath(BAG_BASE.front)), "가방이 없을 때 기본 정면이 없습니다");
-  assert.ok(existsSync(publicPath(BAG_BASE.back)), "가방이 없을 때 기본 뒷면이 없습니다");
-  assert.match(avatarSource, /slot !== "bag"/);
-  assert.match(avatarSource, /bagMode=\{slot === "bag"\}/);
 });
 
-test("뒷면에서도 정면과 같은 선택 배경을 유지한다", () => {
+test("선택 배경은 고정 캐릭터 뒤에 놓인다", () => {
   assert.match(avatarSource, /const background = findItem\(customization\.background\)/);
-  assert.match(
-    avatarSource,
-    /turini-avatar--scene turini-avatar--editor turini-avatar--turn/,
-  );
+  assert.match(avatarSource, /turini-avatar--scene turini-avatar--editor/);
   assert.match(avatarSource, /<ItemImage item=\{background\} eager \/>/);
 });
 

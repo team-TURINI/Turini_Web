@@ -211,6 +211,15 @@ export const SLOT_ANCHOR: Record<AvatarSlot, SlotAnchor> = {
   background: { x: 50, y: 50, gx: 0.5, gy: 0.5, span: 100, fit: "width" },
 };
 
+/** 꾸미기 무대의 고정 1024px 기본 그림에 맞춘 기준점. */
+export const EDITOR_ANCHOR: Record<AvatarSlot, SlotAnchor> = {
+  hat: { x: 50, y: 27, gx: 0.5, gy: 1, span: 43, fit: "width" },
+  glasses: { x: 50, y: 40, gx: 0.5, gy: 0.5, span: 31, fit: "width", spanY: 14 },
+  neck: { x: 50, y: 57, gx: 0.5, gy: 0, span: 29, fit: "width", spanY: 27 },
+  bag: { x: 72, y: 64, gx: 0.5, gy: 0.5, span: 38, fit: "max" },
+  background: { x: 50, y: 50, gx: 0.5, gy: 0.5, span: 100, fit: "width" },
+};
+
 /** 가방 어깨끈 색 — 각 가방 그림에서 가장 많이 쓰인 색을 재서 넣었습니다. */
 export const BAG_STRAP_COLOR: Record<string, string> = {
   "bag:black_business": "#1f1f1f",
@@ -237,10 +246,10 @@ export type Placement = { left: number; top: number; size: number };
 export function placementFor(
   item: { id: string; slot: AvatarSlot },
   /** "rig" = 분리 파츠 캐릭터, "sprite" = 12프레임 아틀라스 */
-  space: "rig" | "sprite" = "rig",
+  space: "rig" | "sprite" | "editor" = "rig",
 ): Placement {
   if (item.slot === "background") return { left: 0, top: 0, size: 100 };
-  const anchor =
+  const anchor = space === "editor" ? EDITOR_ANCHOR[item.slot] :
     space === "sprite" && item.slot in SPRITE_ANCHOR
       ? SPRITE_ANCHOR[item.slot as SpriteSlot]
       : SLOT_ANCHOR[item.slot];
