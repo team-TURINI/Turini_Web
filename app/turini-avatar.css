@@ -107,6 +107,28 @@
   height: 100%;
   object-fit: contain;
 }
+.turini-dress__base { z-index: 1; }
+/* 기존 착용 완성본에서 가방이 그려진 자리만 보여 줍니다.
+   캐릭터 몸과 얼굴은 항상 위의 동일한 기본 그림입니다. */
+.turini-dress__bag-back { z-index: 2; }
+.turini-dress__bag-back {
+  clip-path: polygon(32% 48%, 68% 48%, 70% 83%, 30% 83%);
+}
+.turini-dress__accessory {
+  position: absolute;
+  display: block;
+  aspect-ratio: 1;
+  z-index: 3;
+}
+.turini-dress__accessory--glasses { z-index: 4; }
+.turini-dress__accessory--hat { z-index: 5; }
+.turini-dress__accessory picture,
+.turini-dress__accessory img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 /* 완전 후면에서는 등 한가운데에 가방을 올립니다.
    (뒷모습 그림 768px 기준 몸 중심 x≈384, 등 범위 y≈366~640 을 재서 맞춘 값) */
 .turini-dress__turn-bag {
