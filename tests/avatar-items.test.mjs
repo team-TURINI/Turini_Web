@@ -23,6 +23,8 @@ import {
   requirementLabel,
   requirementProgress,
   wornBackPreview,
+  wornFrontPreview,
+  BAG_BASE,
   wornPreview,
 } from "../app/avatar-items.ts";
 
@@ -167,11 +169,16 @@ test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", (
   assert.match(avatarSource, /\["front", "back"\]/);
   assert.match(avatarSource, /key === "bag" \? "back" : "front"/);
 
-  const blackBag = findItem("bag:black_business");
-  assert.ok(blackBag, "검정 비즈니스 가방이 없습니다");
-  const back = wornBackPreview(blackBag);
-  assert.ok(back, "검정 비즈니스 가방 뒷면 완성본 경로가 없습니다");
-  assert.ok(existsSync(publicPath(back)), "검정 비즈니스 가방 최종 뒷면 완성본이 없습니다");
+  for (const bag of itemsForSlot("bag")) {
+    const front = wornFrontPreview(bag);
+    const back = wornBackPreview(bag);
+    assert.ok(front && existsSync(publicPath(front)), `${bag.id} 정면 착용 이미지가 없습니다`);
+    assert.ok(back && existsSync(publicPath(back)), `${bag.id} 뒷면 착용 이미지가 없습니다`);
+  }
+  assert.ok(existsSync(publicPath(BAG_BASE.front)), "가방이 없을 때 기본 정면이 없습니다");
+  assert.ok(existsSync(publicPath(BAG_BASE.back)), "가방이 없을 때 기본 뒷면이 없습니다");
+  assert.match(avatarSource, /slot !== "bag"/);
+  assert.match(avatarSource, /bagMode=\{slot === "bag"\}/);
 });
 
 test("뒷면에서도 정면과 같은 선택 배경을 유지한다", () => {

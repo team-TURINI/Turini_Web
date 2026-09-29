@@ -61,15 +61,21 @@ export function wornPreview(item: { slot: AvatarSlot; file: string }) {
   };
 }
 
-/**
- * 뒷면 착용 완성본.
- * 승인된 완성본이 있는 가방만 이 경로를 사용하고, 나머지는 기존 뒷면 합성으로
- * 안전하게 대체합니다. 현재 검정 비즈니스 가방의 최종 위치 보정본이 등록돼 있습니다.
- */
+/** 가방 탭에서는 9종 모두 기본 캐릭터와 함께 만든 착용 완성본을 사용합니다. */
+export function wornFrontPreview(item: { slot: AvatarSlot; file: string }) {
+  if (item.slot !== "bag") return null;
+  return `${ASSET_ROOT}/worn-front/bags/${item.file}-worn-front.png`;
+}
+
 export function wornBackPreview(item: { id: string; slot: AvatarSlot; file: string }) {
-  if (item.id !== "bag:black_business") return null;
+  if (item.slot !== "bag") return null;
   return `${ASSET_ROOT}/worn-back/bags/${item.file}-worn-back.png`;
 }
+
+export const BAG_BASE: Record<TurniView, string> = {
+  front: `${ASSET_ROOT}/worn-front/turini-base-front.png`,
+  back: `${ASSET_ROOT}/worn-back/turini-base-back.png`,
+};
 
 /** 회전 미리보기용 기본 캐릭터 — 가방 3/4 후면은 사용하지 않습니다. */
 export type TurniView = "front" | "back";

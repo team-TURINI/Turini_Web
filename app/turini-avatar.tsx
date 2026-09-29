@@ -6,6 +6,7 @@ import TuriniRig from "./turini-rig";
 import TuriniSprite, { type TuriniMotion } from "./turini-sprite";
 import {
   AVATAR_ITEMS,
+  BAG_BASE,
   DEFAULT_CUSTOMIZATION,
   AVATAR_SLOTS,
   TURNAROUND,
@@ -20,6 +21,7 @@ import {
   requirementLabel,
   requirementProgress,
   wornBackPreview,
+  wornFrontPreview,
   wornPreview,
   type AvatarItem,
   type AvatarSlot,
@@ -245,6 +247,18 @@ function ItemImage({
 /** 목록 썸네일 — 그 아이템 하나를 실제로 착용한 완성본을 씁니다 */
 function WornThumb({ item }: { item: AvatarItem }) {
   const [failed, setFailed] = useState(false);
+  if (item.slot === "bag" && !failed) {
+    return (
+      <img
+        src={`/assets/worn-front-thumb/bags/${item.file}-worn-front.webp`}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        onError={() => setFailed(true)}
+      />
+    );
+  }
   const worn = wornPreview(item);
   if (!worn || failed) return <ItemImage item={item} />;
   return (
@@ -259,19 +273,24 @@ function WornThumb({ item }: { item: AvatarItem }) {
    회전 미리보기 — 가방은 등 뒤라서 정면으로는 잘 보이지 않습니다.
    ────────────────────────────────────────────────────────────── */
 
-function TurnaroundView({ view, bag }: { view: TurniView; bag: AvatarItem | null }) {
-  const [failed, setFailed] = useState(false);
-  const wornBack = view === "back" && bag ? wornBackPreview(bag) : null;
-  if (wornBack && !failed) {
+function TurnaroundView({ view, bag, bagMode }: { view: TurniView; bag: AvatarItem | null; bagMode: boolean }) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const worn = bag && bagMode
+    ? view === "front" ? wornFrontPreview(bag) : wornBackPreview(bag)
+    : null;
+  const src = worn ?? BAG_BASE[view];
+  if (bagMode) {
     return (
       <span className="turini-dress__turn">
         <Image
-          src={wornBack}
+          key={src}
+          src={failedSrc === src ? BAG_BASE[view] : src}
           alt=""
           fill
+          unoptimized
           sizes="(max-width: 768px) 100vw, 520px"
           draggable={false}
-          onError={() => setFailed(true)}
+          onError={() => setFailedSrc(src)}
         />
       </span>
     );
@@ -282,11 +301,6 @@ function TurnaroundView({ view, bag }: { view: TurniView; bag: AvatarItem | null
         <source srcSet={TURNAROUND_WEBP[view]} type="image/webp" />
         <img src={TURNAROUND[view]} alt="" decoding="async" draggable={false} />
       </picture>
-      {bag && view === "back" ? (
-        <span className="turini-dress__turn-bag">
-          <ItemImage item={bag} eager />
-        </span>
-      ) : null}
     </span>
   );
 }
@@ -348,7 +362,7 @@ export function TuriniDressUp({
       </div>
 
       <div className="turini-dress__stage">
-        {view === "front" ? (
+        {view === "front" && slot !== "bag" ? (
           <TuriniAvatar
             customization={customization}
             className="turini-avatar--editor"
@@ -362,7 +376,7 @@ export function TuriniDressUp({
                 <ItemImage item={background} eager />
               </span>
             ) : null}
-            <TurnaroundView view={view} bag={bag} />
+            <TurnaroundView view={view} bag={bag} bagMode={slot === "bag"} />
           </div>
         )}
 
@@ -380,7 +394,7 @@ export function TuriniDressUp({
             </button>
           ))}
         </div>
-        {view !== "front" ? (
+        {view !== "front" && slot !== "bag" ? (
           <p className="turini-dress__view-note">등이 보이는 각도예요. 전체 모습은 정면에서 볼 수 있어요.</p>
         ) : null}
       </div>
