@@ -224,6 +224,19 @@ export const EDITOR_FRONT_ANCHOR: Record<"hat" | "glasses" | "neck", SlotAnchor>
   neck: { x: 50, y: 56, gx: 0.5, gy: 0, span: 30, fit: "width", spanY: 27 },
 };
 
+/** 정면 기본 그림에 실제로 겹쳐 확인한 모자별 챙 너비와 아랫선. */
+export const EDITOR_FRONT_HAT_ANCHOR: Record<string, SlotAnchor> = {
+  "hat:green_cap": { x: 50, y: 36, gx: 0.5, gy: 1, span: 45, fit: "width" },
+  "hat:yellow_bucket": { x: 50, y: 34, gx: 0.5, gy: 1, span: 44, fit: "width" },
+  "hat:red_beanie": { x: 50, y: 34, gx: 0.5, gy: 1, span: 36, fit: "width" },
+  "hat:straw_hat": { x: 50, y: 31, gx: 0.5, gy: 1, span: 46, fit: "width" },
+  "hat:explorer_hat": { x: 50, y: 33, gx: 0.5, gy: 1, span: 46, fit: "width" },
+  "hat:chef_hat": { x: 50, y: 32, gx: 0.5, gy: 1, span: 40, fit: "width" },
+  "hat:graduation_cap": { x: 50, y: 34, gx: 0.5, gy: 1, span: 44, fit: "width" },
+  "hat:wizard_hat": { x: 50, y: 35, gx: 0.5, gy: 1, span: 44, fit: "width" },
+  "hat:gold_crown": { x: 50, y: 32, gx: 0.5, gy: 1, span: 43, fit: "width" },
+};
+
 /** 가방 어깨끈 색 — 각 가방 그림에서 가장 많이 쓰인 색을 재서 넣었습니다. */
 export const BAG_STRAP_COLOR: Record<string, string> = {
   "bag:black_business": "#1f1f1f",
@@ -253,7 +266,9 @@ export function placementFor(
   space: "rig" | "sprite" | "editor-front" | "editor-back" = "rig",
 ): Placement {
   if (item.slot === "background") return { left: 0, top: 0, size: 100 };
-  const anchor = space === "editor-front" && item.slot in EDITOR_FRONT_ANCHOR
+  const anchor = space === "editor-front" && item.slot === "hat" && EDITOR_FRONT_HAT_ANCHOR[item.id]
+    ? EDITOR_FRONT_HAT_ANCHOR[item.id]
+    : space === "editor-front" && item.slot in EDITOR_FRONT_ANCHOR
     ? EDITOR_FRONT_ANCHOR[item.slot as "hat" | "glasses" | "neck"]
     : space === "editor-back" && item.slot in EDITOR_BACK_ANCHOR
       ? EDITOR_BACK_ANCHOR[item.slot as "hat" | "neck"]

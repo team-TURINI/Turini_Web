@@ -194,6 +194,20 @@ test("뒷면에서도 정면과 같은 선택 배경을 유지한다", () => {
   assert.match(avatarSource, /<ItemImage item=\{background\} eager \/>/);
 });
 
+test("정면 모자 9종의 실제 그림은 잘리지 않고 이마에 놓인다", () => {
+  for (const hat of itemsForSlot("hat")) {
+    const place = placementFor(hat, "editor-front");
+    const [x0, y0, x1, y1] = CONTENT_BOX[hat.id];
+    const left = place.left + x0 * place.size;
+    const right = place.left + x1 * place.size;
+    const top = place.top + y0 * place.size;
+    const bottom = place.top + y1 * place.size;
+    assert.ok(left >= 0 && right <= 100, `${hat.id}: 가로 잘림`);
+    assert.ok(top >= 0 && bottom <= 36, `${hat.id}: 윗부분 잘림 또는 눈 가림 (${top}~${bottom})`);
+    assert.ok(Math.abs((left + right) / 2 - 50) < 2, `${hat.id}: 머리 중심 이탈`);
+  }
+});
+
 /* ── 배치 (리그 앵커) ──────────────────────────────────── */
 
 test("액세서리는 머리 그룹 안에 있어 고개 움직임을 따라간다", () => {
