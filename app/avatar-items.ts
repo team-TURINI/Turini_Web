@@ -217,6 +217,19 @@ export const EDITOR_BACK_ANCHOR: Record<"hat" | "neck", SlotAnchor> = {
   neck: { x: 50, y: 55, gx: 0.5, gy: 0, span: 27, fit: "width", spanY: 22 },
 };
 
+/** 뒷면에서도 모자별 윗부분이 잘리지 않도록 조정한 기준점. */
+export const EDITOR_BACK_HAT_ANCHOR: Record<string, SlotAnchor> = {
+  "hat:green_cap": { x: 50, y: 31, gx: 0.5, gy: 1, span: 36, fit: "width" },
+  "hat:yellow_bucket": { x: 50, y: 30, gx: 0.5, gy: 1, span: 44, fit: "width" },
+  "hat:red_beanie": { x: 50, y: 31, gx: 0.5, gy: 1, span: 34, fit: "width" },
+  "hat:straw_hat": { x: 50, y: 30, gx: 0.5, gy: 1, span: 46, fit: "width" },
+  "hat:explorer_hat": { x: 50, y: 30, gx: 0.5, gy: 1, span: 45, fit: "width" },
+  "hat:chef_hat": { x: 50, y: 28, gx: 0.5, gy: 1, span: 35, fit: "width" },
+  "hat:graduation_cap": { x: 50, y: 30, gx: 0.5, gy: 1, span: 45, fit: "width" },
+  "hat:wizard_hat": { x: 50, y: 29, gx: 0.5, gy: 1, span: 36, fit: "width" },
+  "hat:gold_crown": { x: 50, y: 30, gx: 0.5, gy: 1, span: 44, fit: "width" },
+};
+
 /** 꾸미기 정면 기본 그림(1024px)의 장식 기준점. */
 export const EDITOR_FRONT_ANCHOR: Record<"hat" | "glasses" | "neck", SlotAnchor> = {
   hat: { x: 50, y: 32, gx: 0.5, gy: 1, span: 40, fit: "width" },
@@ -270,7 +283,9 @@ export function placementFor(
     ? EDITOR_FRONT_HAT_ANCHOR[item.id]
     : space === "editor-front" && item.slot in EDITOR_FRONT_ANCHOR
     ? EDITOR_FRONT_ANCHOR[item.slot as "hat" | "glasses" | "neck"]
-    : space === "editor-back" && item.slot in EDITOR_BACK_ANCHOR
+    : space === "editor-back" && item.slot === "hat" && EDITOR_BACK_HAT_ANCHOR[item.id]
+      ? EDITOR_BACK_HAT_ANCHOR[item.id]
+      : space === "editor-back" && item.slot in EDITOR_BACK_ANCHOR
       ? EDITOR_BACK_ANCHOR[item.slot as "hat" | "neck"]
       : space === "sprite" && item.slot in SPRITE_ANCHOR
       ? SPRITE_ANCHOR[item.slot as SpriteSlot]
