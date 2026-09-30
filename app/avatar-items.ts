@@ -217,6 +217,13 @@ export const EDITOR_BACK_ANCHOR: Record<"hat" | "neck", SlotAnchor> = {
   neck: { x: 50, y: 55, gx: 0.5, gy: 0, span: 27, fit: "width", spanY: 22 },
 };
 
+/** 꾸미기 정면 기본 그림(1024px)의 장식 기준점. */
+export const EDITOR_FRONT_ANCHOR: Record<"hat" | "glasses" | "neck", SlotAnchor> = {
+  hat: { x: 50, y: 32, gx: 0.5, gy: 1, span: 40, fit: "width" },
+  glasses: { x: 50, y: 41, gx: 0.5, gy: 0.5, span: 37, fit: "width", spanY: 16 },
+  neck: { x: 50, y: 56, gx: 0.5, gy: 0, span: 30, fit: "width", spanY: 27 },
+};
+
 /** 가방 어깨끈 색 — 각 가방 그림에서 가장 많이 쓰인 색을 재서 넣었습니다. */
 export const BAG_STRAP_COLOR: Record<string, string> = {
   "bag:black_business": "#1f1f1f",
@@ -243,12 +250,14 @@ export type Placement = { left: number; top: number; size: number };
 export function placementFor(
   item: { id: string; slot: AvatarSlot },
   /** "rig" = 분리 파츠 캐릭터, "sprite" = 12프레임 아틀라스 */
-  space: "rig" | "sprite" | "editor-back" = "rig",
+  space: "rig" | "sprite" | "editor-front" | "editor-back" = "rig",
 ): Placement {
   if (item.slot === "background") return { left: 0, top: 0, size: 100 };
-  const anchor = space === "editor-back" && item.slot in EDITOR_BACK_ANCHOR
-    ? EDITOR_BACK_ANCHOR[item.slot as "hat" | "neck"]
-    : space === "sprite" && item.slot in SPRITE_ANCHOR
+  const anchor = space === "editor-front" && item.slot in EDITOR_FRONT_ANCHOR
+    ? EDITOR_FRONT_ANCHOR[item.slot as "hat" | "glasses" | "neck"]
+    : space === "editor-back" && item.slot in EDITOR_BACK_ANCHOR
+      ? EDITOR_BACK_ANCHOR[item.slot as "hat" | "neck"]
+      : space === "sprite" && item.slot in SPRITE_ANCHOR
       ? SPRITE_ANCHOR[item.slot as SpriteSlot]
       : SLOT_ANCHOR[item.slot];
 

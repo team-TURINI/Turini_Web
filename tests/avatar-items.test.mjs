@@ -177,11 +177,12 @@ test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", (
   }
   assert.ok(existsSync(publicPath(BAG_BASE.front)), "가방이 없을 때 기본 정면이 없습니다");
   assert.ok(existsSync(publicPath(BAG_BASE.back)), "가방이 없을 때 기본 뒷면이 없습니다");
-  assert.match(avatarSource, /src=\{BAG_BASE\.back\}/);
+  assert.match(avatarSource, /src=\{BAG_BASE\[view\]\}/);
+  assert.match(avatarSource, /wornFrontPreview\(bag\)/);
+  assert.match(avatarSource, /turini-dress__bag-front--\$\{side\}/);
   assert.match(avatarSource, /className="turini-dress__bag-back" src=\{worn\}/);
-  assert.match(avatarSource, /view === "front" \? \(/);
-  assert.match(avatarSource, /animated=\{false\} scene/);
-  assert.match(avatarSource, /placementFor\(item, "editor-back"\)/);
+  assert.match(avatarSource, /<TurnaroundView customization=\{customization\} view=\{view\} \/>/);
+  assert.match(avatarSource, /view === "front" \? "editor-front" : "editor-back"/);
 });
 
 test("뒷면에서도 정면과 같은 선택 배경을 유지한다", () => {

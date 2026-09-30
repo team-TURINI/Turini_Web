@@ -101,6 +101,12 @@
   width: 66%;
   height: 66%;
 }
+/* 두 원본의 투명 여백 차이를 보정해 머리 꼭대기와 발끝 높이를 맞춥니다. */
+.turini-dress__turn[data-view="front"] {
+  left: 15.75%;
+  width: 68.5%;
+  height: 68.5%;
+}
 .turini-dress__turn img {
   display: block;
   width: 100%;
@@ -108,6 +114,11 @@
   object-fit: contain;
 }
 .turini-dress__base { z-index: 1; }
+/* 정면 착용 원본에서 어깨끈이 보이는 부분만 겹칩니다.
+   기본 캐릭터의 얼굴과 몸통은 항상 BAG_BASE.front 그림 그대로입니다. */
+.turini-dress__bag-front { z-index: 2; }
+.turini-dress__bag-front--left { clip-path: polygon(38% 55%, 49% 55%, 49% 74%, 37% 74%); }
+.turini-dress__bag-front--right { clip-path: polygon(55% 55%, 67% 55%, 67% 75%, 55% 75%); }
 /* 기존 착용 완성본에서 가방이 그려진 자리만 보여 줍니다.
    캐릭터 몸과 얼굴은 항상 위의 동일한 기본 그림입니다. */
 .turini-dress__bag-back { z-index: 2; }

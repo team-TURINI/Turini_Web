@@ -20,6 +20,7 @@ import {
   requirementLabel,
   requirementProgress,
   wornBackPreview,
+  wornFrontPreview,
   wornPreview,
   type AvatarItem,
   type AvatarSlot,
@@ -268,8 +269,8 @@ function WornThumb({ item }: { item: AvatarItem }) {
 }
 
 /* 뒷면 그림 위에 머리·목 장식만 얹습니다. 안경은 얼굴 뒤에서 보이지 않습니다. */
-function PreviewAccessory({ item }: { item: AvatarItem }) {
-  const place = placementFor(item, "editor-back");
+function PreviewAccessory({ item, view }: { item: AvatarItem; view: TurniView }) {
+  const place = placementFor(item, view === "front" ? "editor-front" : "editor-back");
   return (
     <span className={`turini-dress__accessory turini-dress__accessory--${item.slot}`}
       style={{ left: `${place.left}%`, top: `${place.top}%`, width: `${place.size}%` }}>
@@ -278,21 +279,28 @@ function PreviewAccessory({ item }: { item: AvatarItem }) {
   );
 }
 
-function TurnaroundView({ customization }: { customization: TuriniCustomization }) {
+function TurnaroundView({ customization, view }: { customization: TuriniCustomization; view: TurniView }) {
   const bag = findItem(customization.bag);
-  const worn = bag ? wornBackPreview(bag) : null;
-  const accessories = (["neck", "hat"] as const)
+  const worn = bag ? (view === "front" ? wornFrontPreview(bag) : wornBackPreview(bag)) : null;
+  const slots: readonly ("neck" | "glasses" | "hat")[] =
+    view === "front" ? ["neck", "glasses", "hat"] : ["neck", "hat"];
+  const selected = slots
     .map((slot) => findItem(customization[slot]))
     .filter((item): item is AvatarItem => Boolean(item));
   return (
-    <span className="turini-dress__turn" aria-hidden="true">
-      <Image className="turini-dress__base" src={BAG_BASE.back} alt="" fill unoptimized
+    <span className="turini-dress__turn" data-view={view} aria-hidden="true">
+      <Image className="turini-dress__base" src={BAG_BASE[view]} alt="" fill unoptimized
         sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
-      {worn ? (
+      {worn ? view === "front" ? (
+        (["left", "right"] as const).map((side) => (
+          <Image key={`${worn}-${side}`} className={`turini-dress__bag-front turini-dress__bag-front--${side}`}
+            src={worn} alt="" fill unoptimized sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
+        ))
+      ) : (
         <Image key={worn} className="turini-dress__bag-back" src={worn} alt="" fill unoptimized
           sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
       ) : null}
-      {accessories.map((item) => <PreviewAccessory key={item.id} item={item} />)}
+      {selected.map((item) => <PreviewAccessory key={item.id} item={item} view={view} />)}
     </span>
   );
 }
@@ -353,20 +361,15 @@ export function TuriniDressUp({
       </div>
 
       <div className="turini-dress__stage">
-        {view === "front" ? (
-          <TuriniAvatar customization={customization} className="turini-avatar--editor"
-            label="꾸미는 중인 나의 투리니 정면" animated={false} scene />
-        ) : (
           <div className="turini-avatar turini-avatar--scene turini-avatar--editor turini-avatar--turn"
-            role="img" aria-label="꾸미는 중인 나의 투리니 뒷면">
+            role="img" aria-label={`꾸미는 중인 나의 투리니 ${view === "front" ? "정면" : "뒷면"}`}>
             {background ? (
               <span className="turini-avatar__background" aria-hidden="true">
                 <ItemImage item={background} eager />
               </span>
             ) : null}
-            <TurnaroundView customization={customization} />
+            <TurnaroundView customization={customization} view={view} />
           </div>
-        )}
 
         <div className="turini-dress__views" role="group" aria-label="보는 방향">
           {(["front", "back"] as TurniView[]).map((entry) => (
