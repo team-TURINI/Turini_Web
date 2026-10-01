@@ -133,6 +133,8 @@
 }
 .turini-dress__accessory--glasses { z-index: 4; }
 .turini-dress__accessory--hat { z-index: 5; }
+.turini-dress__approved-hat { z-index: 5; }
+.turini-dress__back-pending { position: relative; z-index: 2; display: grid; place-items: center; height: 100%; padding: 24px; color: #52665a; font-size: 14px; font-weight: 800; text-align: center; }
 .turini-dress__accessory picture,
 .turini-dress__accessory img {
   display: block;

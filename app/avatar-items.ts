@@ -61,6 +61,17 @@ export function wornPreview(item: { slot: AvatarSlot; file: string }) {
   };
 }
 
+/** 검토를 통과한 모자 착용본과 동일 캔버스의 분리 레이어. */
+export function approvedHatAsset(file: string, kind: "worn" | "overlay") {
+  if (!APPROVED_HATS.has(file)) return null;
+  return `${ASSET_ROOT}/approved-hats/${file}-${kind}.webp`;
+}
+
+const APPROVED_HATS = new Set([
+  "green_cap", "yellow_bucket", "red_beanie", "straw_hat", "explorer_hat",
+  "chef_hat", "graduation_cap", "wizard_hat", "gold_crown",
+]);
+
 /** 가방 탭에서는 9종 모두 기본 캐릭터와 함께 만든 착용 완성본을 사용합니다. */
 export function wornFrontPreview(item: { slot: AvatarSlot; file: string }) {
   if (item.slot !== "bag") return null;
