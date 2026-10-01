@@ -92,7 +92,7 @@ test("안내 화면도 꾸미기 기본 정면 캐릭터를 쓴다", () => {
   assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion="idle" className="turini-future"/);
   assert.match(pageSource, /BasicReadingTurini className="turini-learning"/);
   assert.match(pageSource, /BasicReadingTurini className="turini-coach" decorative/);
-  assert.match(avatarSource2, /src=\{BAG_BASE\.front\}/);
+  assert.match(avatarSource2, /: BAG_BASE\.front;/);
   assert.doesNotMatch(avatarSource2, /turini-reading-transparent\.png/);
 });
 
@@ -187,7 +187,8 @@ test("금액 입력칸은 앞의 0 없이 쉼표로 보여 주고, 설명은 반
   assert.match(pageSource, /const rest = absolute % 10_000/);
 });
 
-test("일반 화면 캐릭터는 스프라이트 로딩 없이 기본 이미지를 표시한다", () => {
-  assert.match(avatarSource2, /src=\{BAG_BASE\.front\}/);
+test("일반 화면 캐릭터는 기본 이미지에서 만든 동작을 표시한다", () => {
+  assert.match(avatarSource2, /\/assets\/character\/animation\/\$\{sequence\}\.webp/);
+  assert.match(avatarSource2, /: BAG_BASE\.front;/);
   assert.doesNotMatch(avatarSource2, /<TuriniSprite/);
 });

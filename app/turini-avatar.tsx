@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { TuriniMotion } from "./turini-sprite";
 import {
   AVATAR_ITEMS,
@@ -77,14 +77,30 @@ export default function TuriniAvatar({
   label = "나의 투리니",
   decorative = false,
   animated = true,
+  replayKey,
 }: TuriniAvatarProps) {
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+  const sequence = motion === "reading" ? "thinking" : motion === "celebrate" ? "correct" : motion;
+  const shouldMove = animated && !reduceMotion;
+  const src = shouldMove
+    ? `/assets/character/animation/${sequence}.webp`
+    : motion === "wrong"
+      ? "/assets/character/animation/wrong-still.png"
+      : BAG_BASE.front;
   return (
     <span className={`turini-avatar turini-avatar--base ${className}`.trim()}
-      data-motion={motion} data-animated={animated ? "true" : "false"}
+      data-motion={motion} data-animated={shouldMove ? "true" : "false"}
       role={decorative ? undefined : "img"} aria-label={decorative ? undefined : label}
       aria-hidden={decorative || undefined}>
-      <Image className="turini-avatar__base-image" src={BAG_BASE.front} alt="" fill unoptimized
-        sizes="(max-width: 600px) 150px, 180px" draggable={false} />
+      <img key={`${sequence}-${replayKey ?? "default"}-${shouldMove}`} className="turini-avatar__base-image"
+        src={src} alt="" draggable={false} decoding="async" />
     </span>
   );
 }
