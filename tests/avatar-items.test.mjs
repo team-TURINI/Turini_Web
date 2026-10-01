@@ -160,8 +160,8 @@ test("착용 완성본은 목록·단일 미리보기에만 쓰고 겹쳐 조합
   }
   // 완성본을 여러 장 겹치는 코드가 없어야 합니다.
   assert.doesNotMatch(rigSource, /wornPreview/);
-  // 여러 아이템을 함께 입은 모습은 리그로만 만듭니다.
-  assert.match(avatarSource, /TuriniRig/);
+  // 일반 화면은 꾸미기의 기본 정면 이미지 한 장을 사용합니다.
+  assert.match(avatarSource, /src=\{BAG_BASE\.front\}/);
 });
 
 test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", () => {

@@ -6,7 +6,6 @@ const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "
 const feedbackRouteSource = await readFile(new URL("../app/api/portfolio-feedback/route.ts", import.meta.url), "utf8");
 const envExampleSource = await readFile(new URL("../.env.example", import.meta.url), "utf8");
 const quizData = JSON.parse(await readFile(new URL("../public/data/quizData_864_FINAL.json", import.meta.url), "utf8"));
-const spriteSource2 = await readFile(new URL("../app/turini-sprite.tsx", import.meta.url), "utf8");
 const avatarSource2 = await readFile(new URL("../app/turini-avatar.tsx", import.meta.url), "utf8");
 const portfolioRulesSource = await readFile(new URL("../app/portfolio-rules.ts", import.meta.url), "utf8");
 const layoutSource = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
@@ -89,11 +88,12 @@ test("학습과 포트폴리오 안내는 투린이의 친근한 해요체를 �
   assert.doesNotMatch(pageSource, /결과를 표시하고 있습니다/);
 });
 
-test("안내 화면 캐릭터는 저장된 모자와 안경 대신 요청한 기본 프리셋을 쓴다", () => {
+test("안내 화면도 꾸미기 기본 정면 캐릭터를 쓴다", () => {
   assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion="idle" className="turini-future"/);
   assert.match(pageSource, /BasicReadingTurini className="turini-learning"/);
   assert.match(pageSource, /BasicReadingTurini className="turini-coach" decorative/);
-  assert.match(avatarSource2, /turini-reading-transparent\.png/);
+  assert.match(avatarSource2, /src=\{BAG_BASE\.front\}/);
+  assert.doesNotMatch(avatarSource2, /turini-reading-transparent\.png/);
 });
 
 test("AI 코치와 퀴즈 캐릭터는 모자·안경·목도리 없이 기본 투리니를 쓴다", () => {
@@ -101,7 +101,8 @@ test("AI 코치와 퀴즈 캐릭터는 모자·안경·목도리 없이 기본 �
   assert.match(pageSource, /<QuizThinkingTurini key=\{`\$\{question\.id\}-\$\{session\.index\}`\} className="turini-quiz turini-quiz--thinking"/);
   assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion=\{answerCorrect \? "correct" : "wrong"\}/);
   assert.doesNotMatch(pageSource, /<TuriniAvatar motion="thinking" className="turini-quiz"/);
-  assert.match(avatarSource2, /turini-thinking-transparent\.png/);
+  assert.match(avatarSource2, /return <TuriniAvatar motion="thinking"/);
+  assert.doesNotMatch(avatarSource2, /turini-thinking-transparent\.png/);
 });
 
 test("포트폴리오 결과 문구는 ~해요\/~이에요체로 맞춘다", () => {
@@ -186,8 +187,7 @@ test("금액 입력칸은 앞의 0 없이 쉼표로 보여 주고, 설명은 반
   assert.match(pageSource, /const rest = absolute % 10_000/);
 });
 
-test("애니메이션 그림을 못 읽으면 캐릭터가 사라지지 않고 리그로 대체된다", () => {
-  assert.match(spriteSource2, /resolve\(null\)/);
-  assert.match(spriteSource2, /onAtlasMissing/);
-  assert.match(avatarSource2, /atlasMissing \|\| motion === "idle"/);
+test("일반 화면 캐릭터는 스프라이트 로딩 없이 기본 이미지를 표시한다", () => {
+  assert.match(avatarSource2, /src=\{BAG_BASE\.front\}/);
+  assert.doesNotMatch(avatarSource2, /<TuriniSprite/);
 });
