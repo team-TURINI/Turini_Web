@@ -150,3 +150,25 @@ npm start
 배포 시 Render의 Environment에 `OPENAI_API_KEY`를 등록해야 GPT 코칭이 작동합니다. 키가 없거나 호출에 실패하면 기존 규칙 분석 결과가 대신 표시됩니다.
 
 각 학습 문항에는 난이도, 약점 태그, 해설, 출처명, 출처 URL 및 검증 상태가 포함되어 있습니다.
+
+## AI 코치 채팅 (포트폴리오 탭 > AI 코치)
+
+질문은 별도 RAG 서버가 답하고, 대화는 이 앱의 DB(`turini_conversations`, `turini_messages`)에 저장합니다. 구조는 `docs/ERD.md`, API 는 `docs/API_SPEC.md`, RAG 로 보내는 포트폴리오 형식은 `docs/rag/` 에 있습니다.
+
+| 파일 | 역할 |
+|---|---|
+| `app/coach-chat.tsx` · `app/coach-chat.css` | 채팅 화면 |
+| `app/api/coach/*` | 기동 확인 · 질문 · 대화 목록 · 내역 · 제목 변경 · 삭제 |
+| `app/coach-context.ts` | 저장된 포트폴리오 + 규칙엔진 결과 → RAG 로 보낼 문맥 |
+| `app/coach-utils.ts` | 입력 검증, RAG 응답 해석 |
+| `app/server/rag-client.ts` · `app/server/coach-store.ts` | RAG 호출, 대화 저장 |
+| `scripts/mock-rag.mjs` | 로컬 확인용 가짜 RAG 서버 |
+
+로컬에서 실제 RAG 없이 돌려 보기
+
+```bash
+node scripts/mock-rag.mjs          # 터미널 1 — http://localhost:8787
+npm run dev                        # 터미널 2 — .env.local 에 RAG_API_URL, RAG_API_KEY 필요 (.env.example 참고)
+```
+
+`MOCK_RAG_BOOT_MS=30000 node scripts/mock-rag.mjs` 로 띄우면 처음 30초 동안 "코치를 깨우는 중" 화면을 볼 수 있습니다. `RAG_API_URL` 을 비워 두면 채팅 입력만 꺼지고 나머지는 그대로 동작합니다.

@@ -1,0 +1,246 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "turini-portfolio-context/1",
+  "title": "투리니 포트폴리오 문맥 (앱 → RAG, POST /chat 의 portfolio 칸)",
+  "description": "앱 서버가 요청마다 DB 의 저장값으로 만들고, computed 는 규칙엔진 v12 로 다시 계산해서 넣는다. 금액과 진단 원점수는 들어 있지 않다. 필드가 바뀌면 schema_version 의 숫자를 올린다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "diagnosis", "portfolio", "computed"],
+  "properties": {
+    "schema_version": {
+      "const": "turini-portfolio-context/1"
+    },
+    "diagnosis": {
+      "description": "진단 결과. 사용자가 진단 문항을 풀어 얻은 값이다.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diagnosed", "risk_type", "level_type", "weak_tags"],
+      "properties": {
+        "diagnosed": {
+          "description": "진단을 마쳤는지. false 이면 risk_type 은 기본값 '중립형' 이고 사용자가 고른 성향이 아니다.",
+          "type": "boolean"
+        },
+        "risk_type": {
+          "description": "투자 성향. computed 의 성향 적합 판정은 이 값을 기준으로 한다.",
+          "enum": ["안정형", "중립형", "공격형"]
+        },
+        "level_type": {
+          "description": "금융 지식 수준. 진단 전이면 null. 설명 난이도를 맞추는 데 쓴다.",
+          "enum": ["초급", "중급", "고급", null]
+        },
+        "weak_tags": {
+          "description": "진단과 오답에서 모인 취약 개념 태그 (최근 것 최대 10개). 비어 있을 수 있다.",
+          "type": "array",
+          "maxItems": 10,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "portfolio": {
+      "description": "사용자가 입력한 값.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_mode", "investment_horizon", "allocation"],
+      "properties": {
+        "input_mode": {
+          "description": "실제 = 실제 보유 자산, 연습 = 가상으로 넣어 본 배분.",
+          "enum": ["실제", "연습"]
+        },
+        "investment_horizon": {
+          "enum": ["1년 미만", "1~3년", "3~10년", "10년 이상"]
+        },
+        "allocation": { "$ref": "#/definitions/allocation" }
+      }
+    },
+    "computed": {
+      "description": "규칙엔진 v12 의 계산 결과. 화면에 보이는 값과 같다. 답변에서 포트폴리오를 평가할 때는 이 값을 그대로 인용하고 새로 판정하지 않는다.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine_version", "sigma_asof",
+        "risk_score", "risk_var", "risk_grade", "risk_grade_name", "downside_6m",
+        "fit_type_ok", "fit_type_label", "type_range",
+        "fit_horizon_ok", "fit_horizon_label", "horizon_cap",
+        "characteristics", "recommendation_status",
+        "near_target", "base_target", "rebalancing_actions",
+        "signals", "strengths", "cautions"
+      ],
+      "properties": {
+        "engine_version": {
+          "description": "규칙엔진 버전. 예: 5.0.0-portfolio-v12",
+          "type": "string"
+        },
+        "sigma_asof": {
+          "description": "계산에 쓴 시세 자료의 기준일 (YYYY-MM-DD).",
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "risk_score": {
+          "description": "연환산 변동성 σ (%). 성향·기간 적합 판정의 기준 숫자.",
+          "type": "number",
+          "minimum": 0
+        },
+        "risk_var": {
+          "description": "역사적 VaR 97.5% (%, 양수). 위험등급을 정하는 숫자. 실제 손실 한도가 아니다.",
+          "type": "number",
+          "minimum": 0
+        },
+        "risk_grade": {
+          "description": "위험등급. 1 이 가장 위험, 6 이 가장 안전. VaR 밴드 1/10/20/30/50% 로 나눈다.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
+        },
+        "risk_grade_name": {
+          "enum": ["매우 높음", "높음", "다소 높음", "보통", "낮음", "매우 낮음"]
+        },
+        "downside_6m": {
+          "description": "6개월 하방 추정 (%, 0 이하). 실제 손실 한도가 아니다.",
+          "type": "number",
+          "maximum": 0
+        },
+        "fit_type_ok": {
+          "description": "변동성이 성향 범위(type_range) 안이면 true.",
+          "type": "boolean"
+        },
+        "fit_type_label": {
+          "description": "성향 적합 판정 문구. 화면과 같은 문장이므로 바꿔 쓰지 않는다. 예: 성향과 잘 맞아요 / 성향보다 조금 공격적이에요 / 성향보다 많이 안정적이에요",
+          "type": "string"
+        },
+        "type_range": {
+          "description": "이 성향의 변동성 권장 범위 [하한, 상한] (%).",
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number", "minimum": 0 }
+        },
+        "fit_horizon_ok": {
+          "description": "변동성이 기간 상한(horizon_cap) 이하이면 true. 기간 적합은 상한만 있고 '너무 낮다' 는 판정은 없다.",
+          "type": "boolean"
+        },
+        "fit_horizon_label": {
+          "description": "기간 적합 판정 문구. 예: 투자기간 기준 안이에요 / 기간에 비해 위험이 조금 커요 / 기간에 비해 위험이 많이 커요",
+          "type": "string"
+        },
+        "horizon_cap": {
+          "description": "이 투자기간이 허용하는 변동성 상한 (%).",
+          "type": "number",
+          "minimum": 0
+        },
+        "characteristics": {
+          "description": "배분의 특성. 정보 표시용이며 좋고 나쁨의 판정이 아니다.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["growth", "defense", "liquidity"],
+          "properties": {
+            "growth": { "$ref": "#/definitions/level" },
+            "defense": { "$ref": "#/definitions/level" },
+            "liquidity": { "$ref": "#/definitions/level" }
+          }
+        },
+        "recommendation_status": {
+          "description": "hold = 지금 배분 유지 (조정안 없음). recommended = 성향 범위에 들어가는 조정안 있음. horizon_capped = 성향보다 투자기간이 더 낮은 위험을 요구해 기간 기준을 우선한 조정안 (답변에 이 점을 함께 말한다). no_feasible_target = 조정안을 찾지 못함.",
+          "enum": ["hold", "recommended", "horizon_capped", "no_feasible_target"]
+        },
+        "near_target": {
+          "description": "조정안. 지금 가진 자산군 안에서 비율만 바꾼 가장 가까운 배분. hold 와 no_feasible_target 이면 null.",
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/target" }
+          ]
+        },
+        "base_target": {
+          "description": "이 성향의 기준 배분 (자산군 6종). 참고용이며 조정 방향은 near_target 을 따른다.",
+          "$ref": "#/definitions/target"
+        },
+        "rebalancing_actions": {
+          "description": "현재 → near_target 으로 갈 때 5%p 이상 바뀌는 자산군. 이 순서대로 말한다. 여기에 없는 자산군을 늘리거나 줄이라고 하지 않는다. 조정안이 없으면 빈 배열.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["asset_class", "delta_pp", "action"],
+            "properties": {
+              "asset_class": { "$ref": "#/definitions/asset_class" },
+              "delta_pp": {
+                "description": "비중 변화 (퍼센트포인트). -40 = 40%p 줄임.",
+                "type": "number"
+              },
+              "action": { "enum": ["확대", "축소"] }
+            }
+          }
+        },
+        "signals": {
+          "description": "배분 구조에서 발동한 신호. kind 가 caution 인 것만 주의점이다. structural 은 이 성향의 기준 배분에도 있는 구조적 특징이라 주의점으로 말하지 않는다.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "kind", "text"],
+            "properties": {
+              "id": {
+                "description": "1 성장 높음 · 2 성장 낮음 · 3 방어 낮음 · 4 방어 높음 · 5 현금 높음 · 6 현금 낮음",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6
+              },
+              "kind": { "enum": ["caution", "structural"] },
+              "text": { "type": "string" }
+            }
+          }
+        },
+        "strengths": {
+          "description": "강점 문장 0~3개 (성향 적합 · 분산효과 · 기간 적합 순). 비어 있으면 강점을 만들어 말하지 않는다.",
+          "type": "array",
+          "maxItems": 3,
+          "items": { "type": "string" }
+        },
+        "cautions": {
+          "description": "주의점 문장. 성향·기간 판정이 '맞아요' 가 아닐 때의 문장과 caution 신호 문장. 여기에 없는 주의점을 덧붙이지 않는다.",
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "asset_class": {
+      "enum": ["국내주식", "해외주식", "주식형 ETF·펀드", "채권", "현금성자산", "금"]
+    },
+    "level": {
+      "enum": ["낮음", "보통", "높음"]
+    },
+    "allocation": {
+      "description": "자산군 이름 → 비율(0~1). 합은 1 이다 (스키마로는 검사하지 못하므로 보내는 쪽이 보장). 비율이 0 인 자산군은 넣지 않는다.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "국내주식": { "$ref": "#/definitions/ratio" },
+        "해외주식": { "$ref": "#/definitions/ratio" },
+        "주식형 ETF·펀드": { "$ref": "#/definitions/ratio" },
+        "채권": { "$ref": "#/definitions/ratio" },
+        "현금성자산": { "$ref": "#/definitions/ratio" },
+        "금": { "$ref": "#/definitions/ratio" }
+      }
+    },
+    "ratio": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allocation", "risk_score", "risk_var", "risk_grade", "risk_grade_name", "downside_6m"],
+      "properties": {
+        "allocation": { "$ref": "#/definitions/allocation" },
+        "risk_score": { "type": "number", "minimum": 0 },
+        "risk_var": { "type": "number", "minimum": 0 },
+        "risk_grade": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "risk_grade_name": { "enum": ["매우 높음", "높음", "다소 높음", "보통", "낮음", "매우 낮음"] },
+        "downside_6m": { "type": "number", "maximum": 0 }
+      }
+    }
+  }
+}

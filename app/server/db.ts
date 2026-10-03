@@ -46,6 +46,33 @@ export function ensureSchema() {
         CREATE INDEX IF NOT EXISTS turini_sessions_expires_at_idx
         ON turini_sessions(expires_at)
       `;
+      // AI 코치 대화 (docs/ERD.md 2절). RAG 서버는 저장하지 않고, 앱이 내역과 모델용 문맥(state)을 보관한다.
+      await sql`
+        CREATE TABLE IF NOT EXISTS turini_conversations (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES turini_users(id) ON DELETE CASCADE,
+          title VARCHAR(80) NOT NULL,
+          state JSONB,
+          message_count INTEGER NOT NULL DEFAULT 0,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+      `;
+      await sql`
+        CREATE INDEX IF NOT EXISTS turini_conversations_user_updated_idx
+        ON turini_conversations(user_id, updated_at DESC)
+      `;
+      await sql`
+        CREATE TABLE IF NOT EXISTS turini_messages (
+          conversation_id TEXT NOT NULL REFERENCES turini_conversations(id) ON DELETE CASCADE,
+          seq INTEGER NOT NULL,
+          role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+          content TEXT NOT NULL,
+          meta JSONB,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          PRIMARY KEY (conversation_id, seq)
+        )
+      `;
     })().catch((error) => {
       schemaPromise = null;
       throw error;

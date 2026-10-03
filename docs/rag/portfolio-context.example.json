@@ -1,0 +1,106 @@
+{
+  "schema_version": "turini-portfolio-context/1",
+  "diagnosis": {
+    "diagnosed": true,
+    "risk_type": "안정형",
+    "level_type": "초급",
+    "weak_tags": [
+      "분산투자 기본 원리",
+      "위험-수익 관계"
+    ]
+  },
+  "portfolio": {
+    "input_mode": "실제",
+    "investment_horizon": "3~10년",
+    "allocation": {
+      "국내주식": 0.55,
+      "해외주식": 0.1,
+      "채권": 0.05,
+      "현금성자산": 0.3
+    }
+  },
+  "computed": {
+    "engine_version": "5.0.0-portfolio-v12",
+    "sigma_asof": "2026-09-18",
+    "risk_score": 19.01,
+    "risk_var": 28.62,
+    "risk_grade": 3,
+    "risk_grade_name": "다소 높음",
+    "downside_6m": -19.84,
+    "fit_type_ok": false,
+    "fit_type_label": "성향보다 많이 공격적이에요",
+    "type_range": [
+      0,
+      6.61
+    ],
+    "fit_horizon_ok": false,
+    "fit_horizon_label": "기간에 비해 위험이 많이 커요",
+    "horizon_cap": 11.09,
+    "characteristics": {
+      "growth": "높음",
+      "defense": "보통",
+      "liquidity": "높음"
+    },
+    "recommendation_status": "recommended",
+    "near_target": {
+      "allocation": {
+        "국내주식": 0.15,
+        "해외주식": 0.1,
+        "채권": 0.05,
+        "현금성자산": 0.7
+      },
+      "risk_score": 5.85,
+      "risk_var": 9.7,
+      "risk_grade": 5,
+      "risk_grade_name": "낮음",
+      "downside_6m": -6.57
+    },
+    "base_target": {
+      "allocation": {
+        "국내주식": 0.05,
+        "해외주식": 0.1,
+        "채권": 0.45,
+        "주식형 ETF·펀드": 0.05,
+        "현금성자산": 0.3,
+        "금": 0.05
+      },
+      "risk_score": 4,
+      "risk_var": 7.62,
+      "risk_grade": 5,
+      "risk_grade_name": "낮음",
+      "downside_6m": -4.54
+    },
+    "rebalancing_actions": [
+      {
+        "asset_class": "국내주식",
+        "delta_pp": -40,
+        "action": "축소"
+      },
+      {
+        "asset_class": "현금성자산",
+        "delta_pp": 40,
+        "action": "확대"
+      }
+    ],
+    "signals": [
+      {
+        "id": 1,
+        "kind": "caution",
+        "text": "성장자산 비중이 60%보다 높아 성장성과 변동성이 모두 높은 구조예요."
+      },
+      {
+        "id": 5,
+        "kind": "structural",
+        "text": "현금성자산 비중이 20%보다 높아 유동성은 좋지만 성장성이 제한될 수 있어요."
+      }
+    ],
+    "strengths": [
+      "자산을 섞은 효과로 위험이 2등급(높음)에서 3등급(다소 높음)으로 1단계 낮아져 있어요."
+    ],
+    "cautions": [
+      "연환산 변동성 19.01%는 안정형 기준 범위 0~6.61% 밖이라 성향보다 많이 공격적이에요.",
+      "3~10년 투자기간이 허용하는 위험 상한은 11.09%인데 지금은 19.01%라 기간에 비해 위험이 많이 커요.",
+      "성장자산 비중이 60%보다 높아 성장성과 변동성이 모두 높은 구조예요."
+    ]
+  }
+}

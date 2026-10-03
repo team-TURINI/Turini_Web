@@ -9,6 +9,7 @@ import "./turini-character.css";
 import "./learning-map.css";
 import "./turini-avatar.css";
 import "./difficulty-select.css";
+import "./coach-chat.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

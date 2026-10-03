@@ -12,6 +12,7 @@ import {
 import { directInputGuide, isAnswerCorrect } from "./answer-utils";
 import { friendlyizeExplanation } from "./explanation-utils";
 import LearningMap, { bandEntryLesson } from "./learning-map";
+import CoachChat from "./coach-chat";
 import DifficultySelect, { DIFFICULTY_COPY, type DifficultyCard } from "./difficulty-select";
 import TuriniAvatar, { BasicReadingTurini, QuizThinkingTurini, TuriniAvatarProvider, TuriniDressUp, CustomizedTuriniAvatar } from "./turini-avatar";
 import {
@@ -501,6 +502,12 @@ export default function Home() {
     }, 400);
     return () => window.clearTimeout(timer);
   }, [account, accountStateReady, allocation, amount, goal, horizon, loading, planner, portfolioInputMode, portfolioResult, progress]);
+
+  // 포트폴리오 탭에 들어오면 AI 코치(RAG 서버)를 미리 깨워 둔다. 결과와 무관하게 조용히 실패한다.
+  useEffect(() => {
+    if (view !== "portfolio" || !account) return;
+    void fetch("/api/coach/health", { cache: "no-store" }).catch(() => undefined);
+  }, [view, account]);
 
   const authenticate = async (mode: "login" | "register", username: string, pin: string) => {
     try {
@@ -1534,6 +1541,7 @@ function PortfolioResults({ result, allocation, tab, setTab, aiFeedback, aiFeedb
     {tab === "rebalance" && <div className="tab-panel"><div className="target-chart"><div className="allocation-donut small" style={targetChartStyle}><span>{result.nearTarget ? "조정안" : "비교"}</span></div><div><h3>{statusTitle[result.recommendationStatus]}</h3><p>{result.coach}</p></div></div>{["recommended", "horizon_capped"].includes(result.recommendationStatus) && result.nearTarget && result.rebalancingActions.length ? <div className="rebalance-table"><div className="table-head"><span>자산</span><span>현재</span><span>조정안</span><span>차이 · 방향</span></div>{result.rebalancingActions.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; return <div key={asset.key}><strong><i style={{ background: asset.color }} />{asset.label}</strong><span>{toPercent(allocation[asset.key])}%</span><span>{toPercent(result.nearTarget!.allocation[asset.key])}%</span><b className={item.delta > 0 ? "buy" : "sell"}>{item.delta > 0 ? "+" : ""}{item.delta}%p · {item.delta > 0 ? "늘리기" : "줄이기"}</b></div>; })}</div> : <p className="fine-print">이 상태에서는 실행 항목을 만들지 않아요.</p>}{result.residualItems.length ? <div className="residual-list"><b>5%p 미만 차이는 참고만 해요 · 실행 항목은 아니에요</b>{result.residualItems.map((item) => { const asset = ASSETS.find((candidate) => candidate.key === item.asset)!; return <span key={item.asset}>{asset.label} {item.delta > 0 ? "+" : ""}{item.delta}%p</span>; })}</div> : null}<p className="fine-print">성향별 기본 배분은 비교 기준일 뿐, 조정 목표로 그대로 쓰지 않아요. 비율 차이와 방향만 보여 주고 금액·상품은 제안하지 않아요.</p></div>}
     {tab === "detail" && <div className="tab-panel detail-grid"><article><span>연환산 변동성</span><strong>{result.riskScore}%</strong><p>공분산으로 계산했어요 · 기준일 {result.sigmaAsof}</p></article><article><span>6개월 하방 참고값</span><strong>{result.downside6m}%</strong><p>정규분포를 가정한 교육용 값이고 손실 예측은 아니에요.</p></article><article><span>분산효과 감소율</span><strong>{result.diversificationReduction === null ? "계산할 수 없어요" : `${Math.round(result.diversificationReduction * 100)}%`}</strong><p>{DIVERSIFICATION_STATUS_TEXT[result.diversificationStatus]} · 자산이 하나뿐이면 강점으로 보지 않아요.</p></article><article><span>기준 범위</span><strong>{result.profileRange[0].toFixed(2)}~{result.profileRange[1].toFixed(2)}%</strong><p>투자기간이 허용하는 위험 상한은 {result.horizonCap.toFixed(2)}%예요.</p></article></div>}
     {tab === "coach" && <div className="tab-panel ai-coach-panel"><TuriniAvatar customization={BASIC_DISPLAY_CUSTOMIZATION} motion={aiFeedbackLoading ? "thinking" : "reading"} className="turini-ai-coach" decorative /><div><p className="eyebrow">TURINI GPT COACH</p>{aiFeedbackLoading ? <><h3>GPT가 규칙 결과를 설명하고 있어요…</h3><p>잠시만 기다려 주세요.</p></> : aiFeedback ? <><h3>{aiFeedback.summary_ko}</h3>{aiFeedback.strengths.length > 0 && <section className="ai-feedback-section"><b>강점</b><ul>{aiFeedback.strengths.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.cautions.length > 0 && <section className="ai-feedback-section"><b>주의할 점</b><ul>{aiFeedback.cautions.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.improvements.length > 0 && <section className="ai-feedback-section"><b>개선 방향</b><ul>{aiFeedback.improvements.map((item) => <li key={item}>{item}</li>)}</ul></section>}{aiFeedback.concept_refs.length > 0 && <p className="ai-concepts">함께 공부할 개념 · {aiFeedback.concept_refs.join(" · ")}</p>}</> : <><h3>{result.coach}</h3><p>{aiFeedbackError || "규칙 분석 결과를 보여 주고 있어요."}</p>{aiFeedbackError && <button className="primary-button" onClick={retryAiFeedback}>GPT 코칭 다시 받기</button>}</>}<button className="primary-button" onClick={() => setTab("rebalance")}>조정 방향 보기</button></div></div>}
+    {tab === "coach" && <CoachChat />}
     <p className="result-disclaimer">이 결과는 과거 약 3년의 문서화된 변동성 스냅샷을 사용한 금융 학습용 자산배분 예시예요. 공식 금융상품 위험등급이나 특정 상품 추천, 매수·매도 권유, 미래 손실 예측은 아니에요. 원시 시계열은 아직 재현 검증 전이고 세금·수수료·상품별 위험은 반영하지 않았어요.</p>
   </section>;
 }

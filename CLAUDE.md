@@ -58,3 +58,14 @@ npm run lint
 | LLM set3 (gpt-4.1-mini / 심판 gpt-4.1, K=10) | ① 제약 80% · ② 필수정보 100% · ③ 환각 1.6% · ④ 심판≥4 91.7% · ⑤ 거절 F1 0.957 · ⑥ 일관성 33.3% · ⑦ 태그 F1 0.963 |
 
 LLM 결과 읽는 법: 숫자 오류·판정 뒤바뀜·위험 요청 놓침·공격 성공 전부 0건. 남은 것은 (a) 자동 검사 6건 — 조정안 순서 뒤집음 3, 신호 밖 일반론 주의점 3, (b) 일관성 — 리밸런싱 방향 표현(파서 보완으로 해결 가능)·주의점 개수·기간 문구 의역. 이 레포의 `route.ts` 프롬프트에 반영할 것: 주의점은 발동 신호와 1:1, 조정안은 computed 순서 그대로, 판정 문구는 의역 없이 인용, "엔진이 계산한 등급·자산군 특성 설명은 교육 정보"(과잉거절 방지).
+
+## 4. AI 코치 채팅 (RAG 연동)
+
+포트폴리오 탭 > AI 코치 탭의 채팅. 설계 문서: `docs/ERD.md` · `docs/API_SPEC.md` · `docs/rag/portfolio-context.schema.json`.
+
+- **대화는 앱이 저장한다** (`turini_conversations`, `turini_messages` — `app/server/db.ts` 의 `ensureSchema`). RAG 서버는 저장소가 없고, `POST /chat` 으로 질문·문맥(`state`)·포트폴리오를 받아 답변과 새 `state` 를 돌려준다.
+- **브라우저는 RAG 를 직접 부르지 않는다.** `app/api/coach/*` 가 중계하고, `RAG_API_URL`·`RAG_API_KEY` 는 `app/server/rag-client.ts` 에만 있다.
+- **포트폴리오 문맥은 서버가 만든다** (`app/coach-context.ts`). 브라우저가 보낸 값이나 저장된 `result` 를 믿지 않고 규칙엔진을 다시 돌린다. 금액(`amount`)과 진단 원점수는 넣지 않는다.
+- 문맥 형식을 바꾸면 `docs/rag/portfolio-context.schema.json` · `portfolio-context.example.json` · `PORTFOLIO_CONTEXT_SCHEMA_VERSION` 을 함께 고친다. `tests/coach-chat.test.mjs` 가 예시 파일과 엔진 출력이 같은지 확인한다.
+- 로컬 확인: `node scripts/mock-rag.mjs` + `.env.local` 의 `RAG_API_URL=http://localhost:8787`, `RAG_API_KEY=dev-rag-key`.
+- RAG 서버 쪽 `/chat` 을 문맥 입출력형으로 바꾸는 작업은 RAG 팀 대기 중 (`docs/API_SPEC.md` 5절). 실제 서버로 붙여 본 적은 아직 없다.

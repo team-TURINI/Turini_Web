@@ -12,6 +12,10 @@ services:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+      - key: RAG_API_URL
+        sync: false
+      - key: RAG_API_KEY
+        sync: false
       - key: OPENAI_MODEL
         value: gpt-4.1-mini-2025-04-14
       - key: PORT
