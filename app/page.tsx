@@ -9,7 +9,7 @@ import {
   type ConceptReview,
   type PendingRetry,
 } from "./quiz-scheduler";
-import { isAnswerCorrect } from "./answer-utils";
+import { directInputGuide, isAnswerCorrect } from "./answer-utils";
 import { friendlyizeExplanation } from "./explanation-utils";
 import LearningMap, { bandEntryLesson } from "./learning-map";
 import DifficultySelect, { DIFFICULTY_COPY, type DifficultyCard } from "./difficulty-select";
@@ -934,6 +934,7 @@ export default function Home() {
   if (session) {
     const question = session.questions[session.index];
     const isText = question.type.includes("직접입력");
+    const inputGuide = directInputGuide(question.answer);
     const questionGuide = question.isProfile
       ? { label: "성향 진단", copy: "나와 가장 가까운 답을 고르세요" }
       : question.type === "OX"
@@ -942,7 +943,7 @@ export default function Home() {
           ? { label: "4지선다", copy: "문제에 맞는 답을 고르세요" }
           : question.type === "빈칸선택"
             ? { label: "빈칸 선택", copy: "빈칸에 들어갈 답을 고르세요" }
-            : { label: "직접 입력", copy: "정답을 직접 입력하세요" };
+            : { label: "직접 입력", copy: inputGuide.copy };
     const displayQuestion = question.question
       .replace(/^다음 설명이 맞으면 O, 틀리면 X를 선택하세요\.\s*/u, "")
       .replace(/^다음 질문의 빈칸에 들어갈 알맞은 답을 고르세요\.\s*/u, "")
@@ -961,12 +962,12 @@ export default function Home() {
           </header>
           <div className="quiz-meta"><span>{question.category}</span><span>{question.difficulty}</span>{question.reviewKind ? <span>{question.reviewKind === "retry" ? "오답 복습" : "복습"}</span> : null}</div>
           <div className="quiz-count"><strong>{session.index + 1}</strong> / {session.questions.length}<span>+10 XP</span></div>
-          <p className="question-guide"><b>{questionGuide.label}</b><span>{questionGuide.copy}</span></p>
+          <p id="question-guide" className="question-guide"><b>{questionGuide.label}</b><span>{questionGuide.copy}</span></p>
           <h1 className="quiz-question">{displayQuestion}</h1>
           {isText ? (
             <form className="answer-form" onSubmit={submitAnswer}>
               <label htmlFor="short-answer">정답 입력</label>
-              <input id="short-answer" value={typed} onChange={(event) => setTyped(event.target.value)} placeholder="금융 용어를 입력하세요" disabled={answered} autoFocus />
+              <input id="short-answer" value={typed} onChange={(event) => setTyped(event.target.value)} placeholder={inputGuide.placeholder} aria-describedby="question-guide" disabled={answered} autoFocus />
             </form>
           ) : (
             <div className={`answer-grid ${question.choices.length === 2 ? "ox-grid" : ""}`}>
@@ -990,7 +991,7 @@ export default function Home() {
           </div>
           {answered ? (
             <aside className={`feedback-card ${answerCorrect ? "success" : "error"}`}>
-              <h2>{question.isProfile ? "성향 선택 완료" : answerCorrect ? "정답이에요!" : `정답: ${question.answer}`}</h2>
+              <h2>{question.isProfile ? "성향 선택 완료" : answerCorrect ? "정답이에요!" : `정답: ${isText ? inputGuide.answerLabel : question.answer}`}</h2>
               <p>{friendlyizeExplanation(question.explanation)}</p>
               {/* 출처는 데이터에 그대로 보관하고(question.source_url·source_name) 사용자 화면에는 보여 주지 않습니다. */}
             </aside>
