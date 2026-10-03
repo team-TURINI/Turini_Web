@@ -136,7 +136,7 @@
 .turini-avatar--turn { background: #eef3f0; border-radius: 24px; overflow: hidden; }
 .turini-dress__turn {
   position: absolute;
-  inset: auto auto 13% 17%;
+  inset: auto auto 18% 17%;
   z-index: 1;
   display: block;
   width: 66%;
