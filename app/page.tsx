@@ -26,6 +26,7 @@ import { financeLevelForRawScore } from "./diagnosis-utils";
 import {
   categoryLessonPool,
   categoryLevelForSolved,
+  completedCategoryLessons,
   completedCategoryLessonsForSolved,
   MAX_CATEGORY_LEVEL,
   QUESTIONS_PER_CATEGORY,
@@ -110,6 +111,7 @@ type Progress = {
   level: number;
   completedIds: string[];
   completedLessons: number[];
+  categoryLessonCompletions: Record<string, number>;
   correct: number;
   attempts: number;
   financeLevel: "진단 전" | Difficulty;
@@ -186,6 +188,7 @@ const DEFAULT_PROGRESS: Progress = {
   level: 1,
   completedIds: [],
   completedLessons: [],
+  categoryLessonCompletions: {},
   correct: 0,
   attempts: 0,
   financeLevel: "진단 전",
@@ -371,6 +374,8 @@ export default function Home() {
       correct: Math.min(savedCorrect, savedAttempts),
       completedIds: Array.isArray(savedProgress.completedIds) ? savedProgress.completedIds : [],
       completedLessons: Array.isArray(savedProgress.completedLessons) ? savedProgress.completedLessons : [],
+      categoryLessonCompletions: savedProgress.categoryLessonCompletions && typeof savedProgress.categoryLessonCompletions === "object" && !Array.isArray(savedProgress.categoryLessonCompletions)
+        ? savedProgress.categoryLessonCompletions : {},
       weakTags: normalizeParentTags(savedProgress.weakTags, learningQuestions),
       conceptReviews: savedProgress.conceptReviews || {},
       pendingRetries: savedProgress.pendingRetries || [],
@@ -559,8 +564,10 @@ export default function Home() {
   const defaultCategory = CATEGORIES[0];
   const activeCategory = CATEGORIES.find((category) => category.name === activeCategoryName) || defaultCategory;
   const activeCategorySolved = categoryCounts[activeCategory.name] || 0;
-  const activeCategoryLevel = categoryLevelForSolved(activeCategorySolved);
-  const activeCategoryCompletedLessons = completedCategoryLessonsForSolved(activeCategorySolved);
+  const activeCategoryCompletedLessons = completedCategoryLessons(
+    activeCategorySolved, progress.categoryLessonCompletions[activeCategory.name] || 0,
+  );
+  const activeCategoryLevel = Math.min(MAX_CATEGORY_LEVEL, activeCategoryCompletedLessons + 1);
   const activeCategoryCurrentLesson = activeCategoryCompletedLessons < MAX_CATEGORY_LEVEL ? activeCategoryCompletedLessons + 1 : null;
   const learningAccuracy = progress.attempts > 0
     ? Math.round((Math.min(progress.correct, progress.attempts) / progress.attempts) * 100)
@@ -591,11 +598,11 @@ export default function Home() {
         categoryLessons: Object.fromEntries(
           CATEGORIES.map((category) => [
             category.name,
-            completedCategoryLessonsForSolved(categoryCounts[category.name] || 0),
+            completedCategoryLessons(categoryCounts[category.name] || 0, progress.categoryLessonCompletions[category.name] || 0),
           ]),
         ),
       }),
-    [progress.xp, progress.level, progress.streak, progress.completedIds.length, categoryCounts],
+    [progress.xp, progress.level, progress.streak, progress.completedIds.length, progress.categoryLessonCompletions, categoryCounts],
   );
 
   const saveCustomization = (next: TuriniCustomization) => {
@@ -728,6 +735,10 @@ export default function Home() {
       level: Math.max(current.level, Math.floor((current.xp + xpGain) / 100) + 1),
       completedIds: [...new Set([...current.completedIds, ...ids])],
       completedLessons: finished.lesson ? [...new Set([...current.completedLessons, finished.lesson])] : current.completedLessons,
+      categoryLessonCompletions: finished.lesson && finished.questions[0]?.category
+        ? { ...current.categoryLessonCompletions,
+            [finished.questions[0].category]: Math.max(current.categoryLessonCompletions[finished.questions[0].category] || 0, finished.lesson) }
+        : current.categoryLessonCompletions,
       correct: current.correct + (finished.mode === "diagnosis" ? 0 : finished.correct),
       attempts: current.attempts + knowledgeQuestions.length,
       studySessions: current.studySessions + (finished.mode === "diagnosis" ? 0 : 1),
@@ -869,25 +880,24 @@ export default function Home() {
   /** 난이도 카드 세 장. 계산은 기존 함수만 씁니다. */
   const difficultyCards = useMemo<DifficultyCard[]>(() => {
     const solved = categoryCounts[activeCategory.name] || 0;
-    const completed = completedCategoryLessonsForSolved(solved);
+    const completed = completedCategoryLessons(solved, progress.categoryLessonCompletions[activeCategory.name] || 0);
     return (["초급", "중급", "고급"] as Difficulty[]).map((key, index) => {
       const from = index * 4 + 1;
       const lessonsInBand = Math.min(4, MAX_CATEGORY_LEVEL - (from - 1));
       const total = lessonsInBand * QUESTIONS_PER_CATEGORY_LEVEL;
       const done = Math.max(0, Math.min(total, solved - (from - 1) * QUESTIONS_PER_CATEGORY_LEVEL));
       const locked = completed < from - 1;
-      const needed = (from - 1) * QUESTIONS_PER_CATEGORY_LEVEL - solved;
       return {
         key,
         copy: DIFFICULTY_COPY[key],
         total,
         done,
         locked,
-        lockHint: locked ? `앞 구간을 마치면 열려요 · ${Math.max(0, needed)}문항 남음` : "",
+        lockHint: locked ? "앞 구간의 레슨을 마치면 열려요" : "",
         firstLesson: bandEntryLesson(key, completed, MAX_CATEGORY_LEVEL),
       };
     });
-  }, [categoryCounts, activeCategory.name]);
+  }, [categoryCounts, activeCategory.name, progress.categoryLessonCompletions]);
 
   if (loading) {
     return <main className="loading-screen"><TuriniAvatar motion="reading" className="turini-loading" /><h1>투리니가 문제를 준비하고 있어요!</h1><div className="loading-track"><span /></div></main>;
@@ -1075,7 +1085,6 @@ export default function Home() {
                 categoryIcon={activeCategory.icon}
                 totalLessons={MAX_CATEGORY_LEVEL}
                 questionsPerLesson={QUESTIONS_PER_CATEGORY_LEVEL}
-                solvedQuestions={activeCategorySolved}
                 completedLessons={activeCategoryCompletedLessons}
                 currentLesson={activeCategoryCurrentLesson}
                 focusDifficulty={focusDifficulty}
@@ -1101,7 +1110,8 @@ export default function Home() {
               <PageTitle eyebrow="LEARNING" title="금융 학습" copy="카테고리를 고르면 난이도를 먼저 정할 수 있어요. 난이도는 하나로 이어진 길이에요." />
               <div className="category-list">{CATEGORIES.map((category) => {
                 const solved = categoryCounts[category.name] || 0;
-                const categoryLevel = categoryLevelForSolved(solved);
+                const categoryLevel = Math.min(MAX_CATEGORY_LEVEL,
+                  completedCategoryLessons(solved, progress.categoryLessonCompletions[category.name] || 0) + 1);
                 return <article className={`category-card ${category.color}`} style={{ "--category-color": CATEGORY_COLORS[category.color] } as CSSProperties} key={category.name}><button className="category-main" onClick={() => openDifficulty(category.name)}><span className="category-icon">{category.icon}</span><div><div className="category-title-row"><h2>{category.name}</h2><span>Lv. {categoryLevel}</span></div><p>{category.copy}</p><div className="progress-track"><span style={{ width: `${Math.min(100, solved / QUESTIONS_PER_CATEGORY * 100)}%` }} /></div><small>{Math.min(solved, QUESTIONS_PER_CATEGORY)} / {QUESTIONS_PER_CATEGORY}문항 완료 · 난이도 고르기</small></div><b>›</b></button></article>;
               })}</div>
             </div>

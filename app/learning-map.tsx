@@ -51,8 +51,6 @@ export type LearningMapProps = {
   categoryIcon: string;
   totalLessons: number;
   questionsPerLesson: number;
-  /** 이 카테고리에서 푼 고유 문항 수 */
-  solvedQuestions: number;
   /** 완료한 레슨 수 (바깥에서 계산해 내려줍니다) */
   completedLessons: number;
   /** 지금 학습할 레슨 번호. 모두 끝냈으면 null (바깥에서 계산해 내려줍니다) */
@@ -68,7 +66,6 @@ export default function LearningMap({
   categoryIcon,
   totalLessons,
   questionsPerLesson,
-  solvedQuestions,
   completedLessons,
   currentLesson,
   focusDifficulty = null,
@@ -141,8 +138,6 @@ export default function LearningMap({
   }, [focusDifficulty, categoryName, completedLessons, totalLessons]);
 
   const unlockHint = (level: number) => {
-    const needed = (level - 1) * questionsPerLesson - solvedQuestions;
-    if (needed > 0 && level === completedLessons + 2) return `${needed}문항 더 풀면 열려요`;
     return `Lv.${level - 1} 완료 시`;
   };
 

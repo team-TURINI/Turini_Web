@@ -22,7 +22,7 @@ test("지도는 12단계 레벨 규칙을 바깥에서 그대로 받아 쓴다",
   assert.match(pageSource, /questionsPerLesson=\{QUESTIONS_PER_CATEGORY_LEVEL\}/);
   assert.match(pageSource, /completedLessons=\{activeCategoryCompletedLessons\}/);
   assert.match(pageSource, /currentLesson=\{activeCategoryCurrentLesson\}/);
-  assert.match(pageSource, /solvedQuestions=\{activeCategorySolved\}/);
+  assert.match(pageSource, /completedCategoryLessons\(\s*activeCategorySolved, progress\.categoryLessonCompletions\[activeCategory\.name\]/);
 });
 
 test("지도는 레벨·완료 계산을 다시 구현하지 않는다", () => {

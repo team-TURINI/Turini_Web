@@ -12,6 +12,12 @@ export function completedCategoryLessonsForSolved(solved: number) {
   return Math.min(MAX_CATEGORY_LEVEL, Math.floor(completed / QUESTIONS_PER_CATEGORY_LEVEL));
 }
 
+/** 이전 계정의 문항별 진도와 새 레슨 완료 기록 중 더 앞선 위치를 사용합니다. */
+export function completedCategoryLessons(solved: number, completedLesson: number) {
+  const saved = Number.isFinite(completedLesson) ? Math.max(0, Math.floor(completedLesson)) : 0;
+  return Math.min(MAX_CATEGORY_LEVEL, Math.max(completedCategoryLessonsForSolved(solved), saved));
+}
+
 export function categoryDifficultyForLesson(lesson: number) {
   const safeLesson = Math.min(MAX_CATEGORY_LEVEL, Math.max(1, Math.floor(lesson)));
   if (safeLesson <= 4) return "초급" as const;

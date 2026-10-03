@@ -7,6 +7,7 @@ import {
   categoryLessonPool,
   categoryLevelForSolved,
   completedCategoryLessonsForSolved,
+  completedCategoryLessons,
   MAX_CATEGORY_LEVEL,
   QUESTIONS_PER_CATEGORY_LEVEL,
 } from "../app/category-progress.ts";
@@ -42,6 +43,14 @@ test("each category's 12 lessons map to four lessons per difficulty", () => {
   assert.equal(categoryDifficultyForLesson(8), "중급");
   assert.equal(categoryDifficultyForLesson(9), "고급");
   assert.equal(categoryDifficultyForLesson(12), "고급");
+});
+
+test("finishing stock lesson 7 unlocks lesson 8 even when all ten questions were repeats", () => {
+  assert.equal(completedCategoryLessons(65, 0), 6);
+  assert.equal(completedCategoryLessons(65, 7), 7);
+  assert.equal(completedCategoryLessons(70, 0), 7);
+  assert.equal(completedCategoryLessons(65, 7.9), 7);
+  assert.equal(completedCategoryLessons(65, Number.NaN), 6);
 });
 
 test("every category lesson offers all four types for twelve distinct concepts", () => {
