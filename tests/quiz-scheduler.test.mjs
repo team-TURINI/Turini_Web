@@ -230,3 +230,12 @@ test("four-choice answers rotate across every display position", () => {
   assert.ok(positions.every((count) => count > 200), `answer positions were ${positions.join(",")}`);
   assert.ok(Math.max(...positions) - Math.min(...positions) < 100, `answer positions were ${positions.join(",")}`);
 });
+
+test("a retry never falls back to another difficulty when its own level has no alternative", () => {
+  const source = {id:'same_beginner', base_id:'same', category:'주식', difficulty:'초급', type:'4지선다'};
+  const advanced = {id:'same_advanced', base_id:'same', category:'주식', difficulty:'고급', type:'OX'};
+  const session = {questions:[source, ...makePool(9).filter(q => q.type === 'OX')], index:0};
+  const plan = scheduleRetry(session, source, [source, advanced]);
+  assert.deepEqual(plan.session, session);
+  assert.equal(plan.deferred, null);
+});

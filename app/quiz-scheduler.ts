@@ -251,8 +251,7 @@ function retryVariants<T extends SchedulableQuestion>(question: T, allQuestions:
   const sameDifficulty = question.difficulty
     ? sameCategory.filter((item) => item.difficulty === question.difficulty)
     : sameCategory;
-  const scoped = sameDifficulty.length ? sameDifficulty : sameCategory;
-  return scoped.filter((item) => item.id !== question.id && item.type !== question.type);
+  return sameDifficulty.filter((item) => item.id !== question.id && item.type !== question.type);
 }
 
 export function scheduleRetry<T extends SchedulableQuestion, S extends { questions: T[]; index: number }>(
@@ -321,6 +320,89 @@ export function insertRetry<T extends SchedulableQuestion, S extends { questions
   return scheduleRetry(session, question, allQuestions).session;
 }
 
+/** 이력은 유형별 후보의 우선순위로 쓰고, 유형 할당량은 세션 전체에서 맞춥니다. */
+function balanceSessionTypes<T extends SchedulableQuestion>(
+  questions: T[], pool: T[], seed: number, reviews: Record<string, ConceptReview>,
+  pending: PendingRetry[], context?: RecommendationContext,
+) {
+  const targets = typeTargets(questions.length, seed);
+  const typeSlots = QUESTION_TYPE_ORDER.flatMap((type) => Array.from({ length: targets[type] }, () => type));
+  const completed = new Set(context?.completedIds || []);
+  const recent = new Set(context?.recentIds || []);
+  const candidates = questions.map((question) => {
+    const retry = question.reviewKind === "retry" ? pending.find((item) => item.key === conceptKey(question)) : undefined;
+    return pool.filter((item) => conceptKey(item) === conceptKey(question)
+      && item.category === question.category && item.difficulty === question.difficulty
+      && (!retry || item.type !== retry.lastType));
+  });
+  const penalty = (question: T, index: number) =>
+    (completed.has(question.id) ? 4 : 0) + (recent.has(question.id) ? 2 : 0)
+    + (question.type === reviews[conceptKey(questions[index])]?.lastType ? 1 : 0);
+  const preferences = candidates.map((variants, index) => seededShuffle(typeSlots.map((_, slot) => slot), seed + index * 31)
+    .filter((slot) => variants.some((question) => question.type === typeSlots[slot]))
+    .sort((left, right) =>
+      Math.min(...variants.filter((question) => question.type === typeSlots[left]).map((question) => penalty(question, index)))
+      - Math.min(...variants.filter((question) => question.type === typeSlots[right]).map((question) => penalty(question, index)))));
+  const owners = Array<number>(typeSlots.length).fill(-1);
+  const assign = (index: number, visited: Set<number>): boolean => {
+    for (const slot of preferences[index]) {
+      if (visited.has(slot)) continue;
+      visited.add(slot);
+      if (owners[slot] < 0 || assign(owners[slot], visited)) {
+        owners[slot] = index;
+        return true;
+      }
+    }
+    return false;
+  };
+  // 자유 학습 후보에 네 유형이 갖춰지지 않은 경우에도 기존 문제를 유지합니다.
+  if (!questions.every((_, index) => assign(index, new Set()))) return questions;
+  const assigned = owners.reduce<Record<number, string>>((map, index, slot) => ({ ...map, [index]: typeSlots[slot] }), {});
+  return questions.map((original, index) => {
+    const variants = seededShuffle(candidates[index].filter((question) => question.type === assigned[index]), seed + index * 13)
+      .sort((left, right) => penalty(left, index) - penalty(right, index));
+    return { ...prepareChoices(variants[0], seed + index * 29), reviewKind: original.reviewKind } as T;
+  });
+}
+
+/** 예약된 복습 위치를 유지하면서 나머지 문항의 유형이 연속되지 않도록 섞습니다. */
+function interleaveTypes<T extends SchedulableQuestion>(slots: Array<T | undefined>, normal: T[], seed: number) {
+  const queues = new Map(QUESTION_TYPE_ORDER.map((type, index) => [
+    type, seededShuffle(normal.filter((question) => question.type === type), seed + index * 31),
+  ] as const));
+  const remaining = Object.fromEntries(QUESTION_TYPE_ORDER.map((type) => [type, queues.get(type)!.length])) as Record<string, number>;
+  const order: string[] = [];
+
+  const assign = (index: number): boolean => {
+    if (index === slots.length) return true;
+    const previous = order[index - 1];
+    if (slots[index]) {
+      if (slots[index]!.type === previous) return false;
+      order.push(slots[index]!.type);
+      if (assign(index + 1)) return true;
+      order.pop();
+      return false;
+    }
+    const candidates = seededShuffle(QUESTION_TYPE_ORDER.filter((type) => remaining[type] > 0 && type !== previous), seed + index * 47)
+      .sort((left, right) => remaining[right] - remaining[left]);
+    for (const type of candidates) {
+      remaining[type]--;
+      order.push(type);
+      if (assign(index + 1)) return true;
+      order.pop();
+      remaining[type]++;
+    }
+    return false;
+  };
+
+  // 복습 문항이 이미 같은 유형으로 연속 배치된 예외에는 기존 순서를 사용합니다.
+  if (!assign(0)) {
+    let next = 0;
+    return slots.map((question) => question || normal[next++]);
+  }
+  return slots.map((question, index) => question || queues.get(order[index])!.shift()!);
+}
+
 export function planSessionQuestions<T extends SchedulableQuestion>(
   pool: T[],
   count: number,
@@ -377,8 +459,11 @@ export function planSessionQuestions<T extends SchedulableQuestion>(
   );
 
   let normalIndex = 0;
-  for (let index = 0; index < slots.length; index += 1) {
-    if (!slots[index]) slots[index] = normalQuestions[normalIndex++];
-  }
-  return slots.filter((question): question is T => Boolean(question));
+  const planned = slots.map((question) => question || normalQuestions[normalIndex++])
+    .filter((question): question is T => Boolean(question));
+  const balanced = balanceSessionTypes(planned, pool, seed, reviews, activePending, context);
+  return interleaveTypes(
+    balanced.map((question) => question.reviewKind === "retry" ? question : undefined),
+    balanced.filter((question) => question.reviewKind !== "retry"), seed,
+  ).filter((question): question is T => Boolean(question));
 }

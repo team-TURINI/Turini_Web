@@ -2,6 +2,20 @@ export const QUESTIONS_PER_CATEGORY_LEVEL = 10;
 export const MAX_CATEGORY_LEVEL = 12;
 export const QUESTIONS_PER_CATEGORY = QUESTIONS_PER_CATEGORY_LEVEL * MAX_CATEGORY_LEVEL;
 
+/** 과거 진단 기록과 중복 id를 학습 진도에서 제외합니다. */
+export function learningCompletedIds(saved: unknown, questions: Array<{ id: string }>) {
+  const valid = new Set(questions.map((question) => question.id));
+  return Array.isArray(saved) ? [...new Set(saved.filter((id): id is string => typeof id === "string" && valid.has(id)))] : [];
+}
+
+export function difficultySolvedCount(
+  questions: Array<{ id: string; category: string; difficulty: string }>,
+  completedIds: Set<string>, category: string, difficulty: string,
+) {
+  return new Set(questions.filter((question) => question.category === category
+    && question.difficulty === difficulty && completedIds.has(question.id)).map((question) => question.id)).size;
+}
+
 export function categoryLevelForSolved(solved: number) {
   const completed = Number.isFinite(solved) ? Math.max(0, Math.floor(solved)) : 0;
   return Math.min(MAX_CATEGORY_LEVEL, Math.floor(completed / QUESTIONS_PER_CATEGORY_LEVEL) + 1);

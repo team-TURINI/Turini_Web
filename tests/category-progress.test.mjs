@@ -78,11 +78,15 @@ test("actual ten-question category sessions interleave all four types", () => {
   for (const category of categories) {
     for (let lesson = 1; lesson <= MAX_CATEGORY_LEVEL; lesson += 1) {
       const pool = categoryLessonPool(quizData, category, lesson);
-      for (const seed of [1, 17, 97]) {
+      for (const seed of [1, 17, 97, 211, 997]) {
         const session = planSessionQuestions(pool, 10, seed, {}, 0, []);
         const counts = Object.values(Object.groupBy(session, (question) => question.type)).map((items) => items.length).sort();
         assert.deepEqual(counts, [2, 2, 3, 3], `${category} level ${lesson} seed ${seed}`);
         assert.equal(new Set(session.map((question) => question.base_id)).size, 10);
+        assert.ok(session.every((question) => question.category === category && question.difficulty === categoryDifficultyForLesson(lesson)),
+          `${category} level ${lesson} seed ${seed}: category or difficulty leaked`);
+        assert.ok(session.every((question, index) => index === 0 || question.type !== session[index - 1].type),
+          `${category} level ${lesson} seed ${seed}: adjacent identical types`);
       }
     }
   }
@@ -98,4 +102,51 @@ test("the category header uses its own level and the waiting speech bubble fits 
   assert.doesNotMatch(page, /전체 레벨/);
   assert.doesNotMatch(page, /const category = CATEGORIES\[\(level - 1\) % CATEGORIES\.length\]/);
   assert.match(css, /\.quiz-mascot\.waiting \.speech \{[^}]*width:max-content;[^}]*justify-self:start;/s);
+});
+
+test("repeated learning with completed and recent history keeps every category and difficulty balanced", async () => {
+  const { recordConceptReview, scheduleRetry } = await import('../app/quiz-scheduler.ts');
+  const types = ['4지선다', 'OX', '빈칸선택', '빈칸직접입력'];
+  for (const category of new Set(quizData.map(q => q.category))) {
+    for (const lesson of [1, 5, 9]) {
+      const pool = categoryLessonPool(quizData, category, lesson);
+      let progress = {studySessions: 0, conceptReviews: {}, pendingRetries: [], completedIds: []};
+      for (let run = 0; run < 16; run++) {
+        let session = {questions: planSessionQuestions(pool, 10, 48 + run * 1967, progress.conceptReviews, run, progress.pendingRetries,
+          {completedIds: progress.completedIds, recentIds: progress.completedIds.slice(-30)}), index: 0};
+        const check = () => {
+          assert.equal(session.questions.length, 10);
+          assert.deepEqual(types.map(t => session.questions.filter(q => q.type === t).length).sort(), [2,2,3,3], `${category} lesson ${lesson} run ${run}`);
+          assert.ok(session.questions.every(q => q.category === category && q.difficulty === categoryDifficultyForLesson(lesson)));
+        };
+        check();
+        for (let index = 0; index < 10; index++) {
+          session.index = index;
+          const question = session.questions[index];
+          const correct = (index + run) % 3 !== 0;
+          if (!correct) {
+            const plan = scheduleRetry(session, question, quizData, progress.pendingRetries);
+            session = plan.session;
+            if (plan.deferred && !progress.pendingRetries.some(p => p.key === plan.deferred.key)) progress.pendingRetries.push(plan.deferred);
+          }
+          progress = recordConceptReview(progress, question, correct);
+          check();
+        }
+        progress.completedIds = [...new Set([...progress.completedIds, ...session.questions.map(q => q.id)])];
+        progress.studySessions++;
+      }
+    }
+  }
+});
+
+test("diagnosis ids are excluded and difficulty progress counts only that difficulty", async () => {
+  const {learningCompletedIds, difficultySolvedCount} = await import('../app/category-progress.ts');
+  const beginner = categoryLessonPool(quizData, '위험 관리', 1).slice(0, 10);
+  const intermediate = categoryLessonPool(quizData, '위험 관리', 5).slice(0, 7);
+  const ids = learningCompletedIds([...beginner.map(q => q.id), ...intermediate.map(q => q.id), ...Array.from({length:7}, (_,i)=>`DIAG_${i}`), beginner[0].id], quizData);
+  assert.equal(ids.length, 17);
+  assert.equal(difficultySolvedCount(quizData, new Set(ids), '위험 관리', '초급'), 10);
+  assert.equal(difficultySolvedCount(quizData, new Set(ids), '위험 관리', '중급'), 7);
+  assert.equal(difficultySolvedCount(quizData, new Set(ids), '위험 관리', '고급'), 0);
+  assert.deepEqual(learningCompletedIds(null, quizData), []);
 });

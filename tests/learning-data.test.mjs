@@ -63,6 +63,12 @@ test("all 864 learning questions are structurally usable", () => {
   }
 });
 
+test("explanations do not refer to shuffled answer choice numbers", () => {
+  for (const question of questions) {
+    assert.doesNotMatch(question.explanation, /(?:[①②③④]\s*(?:은|는|이|가|번)|[①②③④]\s+[A-Za-z]|[1-4]\s*번(?!째))/u, question.id);
+  }
+});
+
 test("tag crosswalk and parent index exactly match the 864-question dataset", () => {
   const csv = fs.readFileSync(new URL("../reference-data/tag_crosswalk_FINAL.csv", import.meta.url), "utf8").replace(/^\uFEFF/u, "").trim();
   const [headerLine, ...lines] = csv.split(/\r?\n/u);

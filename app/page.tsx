@@ -25,8 +25,9 @@ import { advanceStreak, normalizeStreak } from "./streak";
 import { financeLevelForRawScore } from "./diagnosis-utils";
 import {
   categoryLessonPool,
+  learningCompletedIds,
+  difficultySolvedCount,
   completedCategoryLessons,
-  completedCategoryLessonsForSolved,
   MAX_CATEGORY_LEVEL,
   QUESTIONS_PER_CATEGORY,
   QUESTIONS_PER_CATEGORY_LEVEL,
@@ -371,7 +372,7 @@ export default function Home() {
       // 진단 정답이 과거 학습 정답 수에 섞여 저장된 계정도 학습 시도 수 범위로 복구합니다.
       attempts: savedAttempts,
       correct: Math.min(savedCorrect, savedAttempts),
-      completedIds: Array.isArray(savedProgress.completedIds) ? savedProgress.completedIds : [],
+      completedIds: learningCompletedIds(savedProgress.completedIds, learningQuestions),
       completedLessons: Array.isArray(savedProgress.completedLessons) ? savedProgress.completedLessons : [],
       categoryLessonCompletions: savedProgress.categoryLessonCompletions && typeof savedProgress.categoryLessonCompletions === "object" && !Array.isArray(savedProgress.categoryLessonCompletions)
         ? savedProgress.categoryLessonCompletions : {},
@@ -885,7 +886,7 @@ export default function Home() {
       const from = index * 4 + 1;
       const lessonsInBand = Math.min(4, MAX_CATEGORY_LEVEL - (from - 1));
       const total = lessonsInBand * QUESTIONS_PER_CATEGORY_LEVEL;
-      const done = Math.max(0, Math.min(total, solved - (from - 1) * QUESTIONS_PER_CATEGORY_LEVEL));
+      const done = Math.min(total, difficultySolvedCount(questions, completedSet, activeCategory.name, key));
       const locked = completed < from - 1;
       return {
         key,
@@ -897,7 +898,7 @@ export default function Home() {
         firstLesson: bandEntryLesson(key, completed, MAX_CATEGORY_LEVEL),
       };
     });
-  }, [categoryCounts, activeCategory.name, progress.categoryLessonCompletions]);
+  }, [categoryCounts, activeCategory.name, progress.categoryLessonCompletions, questions, completedSet]);
 
   if (loading) {
     return <main className="loading-screen"><TuriniAvatar motion="reading" className="turini-loading" /><h1>투리니가 문제를 준비하고 있어요!</h1><div className="loading-track"><span /></div></main>;
