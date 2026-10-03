@@ -154,10 +154,14 @@ function ItemImage({
 }
 
 /** 목록 썸네일 — 그 아이템 하나를 실제로 착용한 완성본을 씁니다 */
-function WornThumb({ item }: { item: AvatarItem }) {
+function WornThumb({ item, view = "front" }: { item: AvatarItem; view?: TurniView }) {
   const [failed, setFailed] = useState(false);
   const approvedWorn = item.slot === "hat" ? approvedHatAsset(item.file, "worn") : null;
   if (approvedWorn) return <img src={approvedWorn} alt="" loading="lazy" decoding="async" draggable={false} />;
+  if (item.slot === "bag" && view === "back") {
+    return <img src={failed ? wornBackPreview(item)! : `/assets/worn-back-thumb/bags/${item.file}-worn-back.webp`}
+      alt="" loading="lazy" decoding="async" draggable={false} onError={() => setFailed(true)} />;
+  }
   if (item.slot === "bag" && !failed) {
     return (
       <img
@@ -416,7 +420,7 @@ export function TuriniDressUp({
                 }
               >
                 <span className="turini-dress__item-art">
-                  {entry.slot === "background" ? <ItemImage item={entry} /> : <WornThumb item={entry} />}
+                  {entry.slot === "background" ? <ItemImage item={entry} /> : <WornThumb key={`${entry.id}-${previewView}`} item={entry} view={previewView} />}
                   {selected ? <CheckBadge /> : null}
                   {!unlocked ? <LockBadge /> : null}
                 </span>

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {createRequire, Module} from 'node:module';
 
@@ -70,7 +70,7 @@ test('profile and dress-up render identical foreground character layers for the 
   assert.equal(character(editor),character(profile));
 });
 
-function editorHarness(customization = equipped) {
+function editorHarness(customization = equipped, stats = {xp:99999,level:99,streak:999,solved:9999,categoryLessons:{}}) {
   const hooks = {state:[],index:0};
   const editor = {
     customization,
@@ -79,7 +79,7 @@ function editorHarness(customization = equipped) {
       editorHooks = hooks;
       try {
         return TuriniDressUp({customization:editor.customization,
-          stats:{xp:99999,level:99,streak:999,solved:9999,categoryLessons:{}},
+          stats,
           saving:false,onChange:next => {editor.customization = next;}});
       } finally {editorHooks = null;}
     },
@@ -142,4 +142,26 @@ test('all nine bags use their approved complete back image and clearing the bag 
   assert.ok(cleared.includes('/assets/worn-back/turini-base-back.png'));
   assert.ok(!cleared.includes('/assets/worn-back/bags/'));
   assert.equal(editor.customization.hat,equipped.hat);
+});
+
+test('bag selection cards follow front/back direction, including locked bags, without changing equipped items', () => {
+  const bags = ['black_business','mint_bubble','navy_school','green_original','purple_star','red_hiking','tan_explorer','yellow_giraffe','pink_heart'];
+  for (const stats of [undefined,{xp:0,level:1,streak:0,solved:0,categoryLessons:{}}]) {
+    const editor = editorHarness(equipped,stats);
+    pressTab(editor,'가방');
+    pressDirection(editor,'뒷면');
+    const back = renderToStaticMarkup(editor.render());
+    for (const bag of bags) {
+      const src = `/assets/worn-back-thumb/bags/${bag}-worn-back.webp`;
+      assert.ok(back.includes(src),bag);
+      assert.ok(existsSync(fileURLToPath(new URL(`../public${src}`,import.meta.url))),bag);
+    }
+    assert.ok(!back.includes('/assets/worn-front-thumb/bags/'));
+    if (stats) assert.ok(back.includes('data-state="locked"'));
+    pressDirection(editor,'정면');
+    const front = renderToStaticMarkup(editor.render());
+    for (const bag of bags) assert.ok(front.includes(`/assets/worn-front-thumb/bags/${bag}-worn-front.webp`),bag);
+    assert.ok(!front.includes('/assets/worn-back-thumb/bags/'));
+    assert.deepEqual(editor.customization,equipped);
+  }
 });
