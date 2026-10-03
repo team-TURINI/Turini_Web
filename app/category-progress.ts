@@ -23,8 +23,6 @@ export function categoryLessonPool<
   T extends { id: string; base_id: string; category: string; difficulty: string },
 >(questions: T[], category: string, lesson: number) {
   const difficulty = categoryDifficultyForLesson(lesson);
-  const safeLesson = Math.min(MAX_CATEGORY_LEVEL, Math.max(1, Math.floor(lesson)));
-  const variantIndex = (safeLesson - 1) % 4;
   const byConcept = new Map<string, T[]>();
 
   questions
@@ -37,8 +35,7 @@ export function categoryLessonPool<
 
   return [...byConcept.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
-    .map(([, variants]) => variants.sort((left, right) => left.id.localeCompare(right.id))[variantIndex])
-    .filter((question): question is T => Boolean(question));
+    .flatMap(([, variants]) => variants.sort((left, right) => left.id.localeCompare(right.id)));
 }
 
 /** 난이도 구간의 첫 레슨 번호 (1-4 초급 · 5-8 중급 · 9-12 고급) */

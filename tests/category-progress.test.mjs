@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { planSessionQuestions } from "../app/quiz-scheduler.ts";
 import {
   categoryDifficultyForLesson,
   categoryLessonPool,
@@ -43,19 +44,38 @@ test("each category's 12 lessons map to four lessons per difficulty", () => {
   assert.equal(categoryDifficultyForLesson(12), "고급");
 });
 
-test("every category lesson pool offers twelve distinct concepts and the twelve lessons cover all 144 variants", () => {
+test("every category lesson offers all four types for twelve distinct concepts", () => {
   const categories = [...new Set(quizData.map((question) => question.category))];
   for (const category of categories) {
     const ids = new Set();
     for (let lesson = 1; lesson <= MAX_CATEGORY_LEVEL; lesson += 1) {
       const pool = categoryLessonPool(quizData, category, lesson);
       // 칸(카테고리×난이도)마다 개념 12개. 레슨은 이 중 10문항만 내고, 나머지는 자유 학습에서 나온다.
-      assert.equal(pool.length, 12, `${category} level ${lesson}`);
+      assert.equal(pool.length, 48, `${category} level ${lesson}`);
       assert.ok(pool.length >= QUESTIONS_PER_CATEGORY_LEVEL, `${category} level ${lesson}`);
       assert.equal(new Set(pool.map((question) => question.base_id)).size, 12, `${category} level ${lesson}`);
+      for (const baseId of new Set(pool.map((question) => question.base_id))) {
+        assert.deepEqual(new Set(pool.filter((question) => question.base_id === baseId).map((question) => question.type)),
+          new Set(["4지선다", "OX", "빈칸선택", "빈칸직접입력"]), `${category} level ${lesson} ${baseId}`);
+      }
       pool.forEach((question) => ids.add(question.id));
     }
     assert.equal(ids.size, 144, category);
+  }
+});
+
+test("actual ten-question category sessions interleave all four types", () => {
+  const categories = [...new Set(quizData.map((question) => question.category))];
+  for (const category of categories) {
+    for (let lesson = 1; lesson <= MAX_CATEGORY_LEVEL; lesson += 1) {
+      const pool = categoryLessonPool(quizData, category, lesson);
+      for (const seed of [1, 17, 97]) {
+        const session = planSessionQuestions(pool, 10, seed, {}, 0, []);
+        const counts = Object.values(Object.groupBy(session, (question) => question.type)).map((items) => items.length).sort();
+        assert.deepEqual(counts, [2, 2, 3, 3], `${category} level ${lesson} seed ${seed}`);
+        assert.equal(new Set(session.map((question) => question.base_id)).size, 10);
+      }
+    }
   }
 });
 
