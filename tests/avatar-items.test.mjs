@@ -181,7 +181,7 @@ test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", (
   assert.match(avatarSource, /wornFrontPreview\(bag\)/);
   assert.match(avatarSource, /turini-dress__bag-front--\$\{side\}/);
   assert.match(avatarSource, /className="turini-dress__bag-back" src=\{worn\}/);
-  assert.match(avatarSource, /<TurnaroundView customization=\{customization\} view=\{view\} \/>/);
+  assert.match(avatarSource, /<TurnaroundView customization=\{customization\} view="front" \/>/);
   assert.match(avatarSource, /view === "front" \? "editor-front" : "editor-back"/);
 });
 

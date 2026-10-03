@@ -219,6 +219,28 @@ function TurnaroundView({ customization, view }: { customization: TuriniCustomiz
   );
 }
 
+/** 프로필과 꾸미기 정면이 동일한 원본·레이어·배치를 사용합니다. */
+export function CustomizedTuriniAvatar({
+  customization: override,
+  className = "",
+  label = "나의 투리니",
+}: Pick<TuriniAvatarProps, "customization" | "className" | "label">) {
+  const saved = useCustomization();
+  const customization = override ?? saved;
+  const background = findItem(customization.background);
+  return (
+    <span className={`turini-avatar turini-avatar--scene turini-avatar--turn ${className}`.trim()}
+      role="img" aria-label={label}>
+      {background ? (
+        <span className="turini-avatar__background" aria-hidden="true">
+          <ItemImage item={background} eager />
+        </span>
+      ) : null}
+      <TurnaroundView customization={customization} view="front" />
+    </span>
+  );
+}
+
 /* ──────────────────────────────────────────────────────────────
    꾸미기 화면
    ────────────────────────────────────────────────────────────── */
@@ -275,17 +297,20 @@ export function TuriniDressUp({
       </div>
 
       <div className="turini-dress__stage">
-          <div className="turini-avatar turini-avatar--scene turini-avatar--editor turini-avatar--turn"
-            role="img" aria-label={`꾸미는 중인 나의 투리니 ${view === "front" ? "정면" : "뒷면"}`}>
-            {background ? (
-              <span className="turini-avatar__background" aria-hidden="true">
-                <ItemImage item={background} eager />
-              </span>
-            ) : null}
-            {view === "front" ? <TurnaroundView customization={customization} view={view} /> : (
+          {view === "front" ? (
+            <CustomizedTuriniAvatar customization={customization} className="turini-avatar--editor"
+              label="꾸미는 중인 나의 투리니 정면" />
+          ) : (
+            <div className="turini-avatar turini-avatar--scene turini-avatar--editor turini-avatar--turn"
+              role="img" aria-label="꾸미는 중인 나의 투리니 뒷면">
+              {background ? (
+                <span className="turini-avatar__background" aria-hidden="true">
+                  <ItemImage item={background} eager />
+                </span>
+              ) : null}
               <span className="turini-dress__back-pending">뒷면은 아직 업데이트되지 않았어요.</span>
-            )}
-          </div>
+            </div>
+          )}
 
         <div className="turini-dress__views" role="group" aria-label="보는 방향">
           {(["front", "back"] as TurniView[]).map((entry) => (

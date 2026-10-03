@@ -13,7 +13,7 @@ import { isAnswerCorrect } from "./answer-utils";
 import { friendlyizeExplanation } from "./explanation-utils";
 import LearningMap, { bandEntryLesson } from "./learning-map";
 import DifficultySelect, { DIFFICULTY_COPY, type DifficultyCard } from "./difficulty-select";
-import TuriniAvatar, { BasicReadingTurini, QuizThinkingTurini, TuriniAvatarProvider, TuriniDressUp } from "./turini-avatar";
+import TuriniAvatar, { BasicReadingTurini, QuizThinkingTurini, TuriniAvatarProvider, TuriniDressUp, CustomizedTuriniAvatar } from "./turini-avatar";
 import {
   DEFAULT_CUSTOMIZATION,
   avatarStatsFrom,
@@ -1169,9 +1169,9 @@ export default function Home() {
 
           {view === "profile" && (
             <div className="screen profile-screen">
-              <section className="profile-hero"><div className="profile-mascot-frame"><TuriniAvatar scene label="나의 투리니" /></div><div><p className="eyebrow">MY PROFILE</p><h1>{account.username}</h1><span>{progress.financeLevel} · {progress.tendency}</span><div className="profile-level-progress"><div><b>Lv. {progress.level}</b><small>다음 레벨까지 {100 - levelXp} XP</small></div><div className="progress-track"><span style={{ width: `${levelXp}%` }} /></div></div></div></section>
+              <section className="profile-hero"><div className="profile-mascot-frame"><CustomizedTuriniAvatar customization={progress.customization} label="나의 투리니" /></div><div><p className="eyebrow">MY PROFILE</p><h1>{account.username}</h1><span>{progress.financeLevel} · {progress.tendency}</span><div className="profile-level-progress"><div><b>Lv. {progress.level}</b><small>다음 레벨까지 {100 - levelXp} XP</small></div><div className="progress-track"><span style={{ width: `${levelXp}%` }} /></div></div></div></section>
               <section className="card-block account-card">
-                <div className="account-identity"><TuriniAvatar className="turini-avatar--card" label="프로필 캐릭터" /><div><p className="eyebrow">ACCOUNT</p><h2>{account.username}</h2><small className={`save-state ${saveState}`}>{saveState === "saving" ? "기록 저장 중…" : saveState === "error" ? "저장 실패 · 인터넷 연결을 확인해 주세요" : "학습 기록이 계정에 저장돼요"}</small></div></div>
+                <div className="account-identity"><CustomizedTuriniAvatar customization={progress.customization} className="turini-avatar--card" label="프로필 캐릭터" /><div><p className="eyebrow">ACCOUNT</p><h2>{account.username}</h2><small className={`save-state ${saveState}`}>{saveState === "saving" ? "기록 저장 중…" : saveState === "error" ? "저장 실패 · 인터넷 연결을 확인해 주세요" : "학습 기록이 계정에 저장돼요"}</small></div></div>
                 <div className="account-actions"><button onClick={logout}>로그아웃</button><button className="danger-link" onClick={() => { setResetConfirm(true); setResetError(""); }}>계정 초기화</button></div>
                 {resetConfirm ? <div className="reset-panel"><h3>아이디와 모든 기록을 삭제할까요?</h3><p>삭제하면 진단 결과, 학습 기록, 포트폴리오가 모두 사라지고 되돌릴 수 없어요.</p><label>비밀번호 4자리<input type="password" inputMode="numeric" maxLength={4} value={resetPin} onChange={(event) => setResetPin(event.target.value.replace(/\D/g, "").slice(0, 4))} autoComplete="current-password" /></label>{resetError ? <p className="form-error">{resetError}</p> : null}<div><button onClick={() => { setResetConfirm(false); setResetPin(""); setResetError(""); }}>취소</button><button className="danger-button" onClick={deleteAccount} disabled={resetBusy}>{resetBusy ? "삭제 중…" : "아이디와 기록 모두 삭제"}</button></div></div> : null}
               </section>
