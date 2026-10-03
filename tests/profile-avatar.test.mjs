@@ -19,6 +19,7 @@ function loadComponent(filename) {
   const localRequire = createRequire(filename);
   compiledModule.require = (name) => {
     if (name === 'next/image') return {__esModule:true, default:(props) => {const imageProps = {...props}; for (const key of ['fill','unoptimized','sizes']) delete imageProps[key]; return React.createElement('img', imageProps);}};
+    if (name === './turini-motion') return loadComponent(fileURLToPath(new URL('../app/turini-motion.tsx', import.meta.url)));
     if (name === './avatar-items') return loadComponent(fileURLToPath(new URL('../app/avatar-items.ts', import.meta.url)));
     return localRequire(name);
   };

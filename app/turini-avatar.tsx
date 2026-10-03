@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import type { TuriniMotion } from "./turini-sprite";
+import TuriniMotion, { type TuriniMotionName } from "./turini-motion";
 import {
   AVATAR_ITEMS,
   approvedHatAsset,
@@ -57,7 +57,12 @@ export function useCustomization() {
 export type TuriniAvatarProps = {
   /** 생략하면 공통 저장소(Provider)의 값을 씁니다 */
   customization?: TuriniCustomization;
-  motion?: TuriniMotion;
+  /**
+   * 상황별 동작
+   * idle 기본 · greet 인사 · thinking 고민 · reading 설명 · correct 정답(O 팻말)
+   * wrong 오답(X 팻말) · celebrate 축하 · loading 준비 중
+   */
+  motion?: TuriniMotionName;
   /** 값이 바뀌면 같은 동작이라도 처음부터 다시 재생합니다 */
   replayKey?: string | number;
   /** 1회 재생이 끝나도 마지막 프레임을 유지합니다 (정답·오답 팻말) */
@@ -73,23 +78,25 @@ export type TuriniAvatarProps = {
 
 export default function TuriniAvatar({
   motion = "idle",
+  replayKey,
+  holdLast = false,
   className = "",
   label = "나의 투리니",
   decorative = false,
   animated = true,
 }: TuriniAvatarProps) {
   return (
-    <span className={`turini-avatar turini-avatar--base ${className}`.trim()}
+    <span className={`turini-avatar turini-avatar--base turini-avatar--motion ${className}`.trim()}
       data-motion={motion} data-animated={animated ? "true" : "false"}
       role={decorative ? undefined : "img"} aria-label={decorative ? undefined : label}
       aria-hidden={decorative || undefined}>
-      <Image className="turini-avatar__base-image" src={BAG_BASE.front} alt="" fill unoptimized
-        sizes="(max-width: 600px) 150px, 180px" draggable={false} />
+      <TuriniMotion className="turini-avatar__motion" motion={motion} replayKey={replayKey}
+        holdLast={holdLast} animated={animated} />
     </span>
   );
 }
 
-/** 학습·코칭에도 동일한 기본 정면 이미지를 씁니다. */
+/** 학습·코칭 화면 — 고개를 끄덕이며 설명하는 동작 */
 export function BasicReadingTurini({
   className = "",
   decorative = false,
@@ -100,7 +107,7 @@ export function BasicReadingTurini({
   return <TuriniAvatar motion="reading" className={className} decorative={decorative} />;
 }
 
-/** 퀴즈 풀이 중에도 동일한 기본 캐릭터가 살짝 기울어집니다. */
+/** 퀴즈 풀이 중 — 고개를 갸웃하며 고민하는 동작 */
 export function QuizThinkingTurini({
   className = "",
   decorative = false,

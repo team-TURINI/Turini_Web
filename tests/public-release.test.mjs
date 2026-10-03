@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
@@ -92,12 +93,12 @@ test("안내 화면도 꾸미기 기본 정면 캐릭터를 쓴다", () => {
   assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion="idle" className="turini-future"/);
   assert.match(pageSource, /BasicReadingTurini className="turini-learning"/);
   assert.match(pageSource, /BasicReadingTurini className="turini-coach" decorative/);
-  assert.match(avatarSource2, /src=\{BAG_BASE\.front\}/);
+  assert.match(avatarSource2, /<TuriniMotion className="turini-avatar__motion"/);
   assert.doesNotMatch(avatarSource2, /turini-reading-transparent\.png/);
 });
 
 test("AI 코치와 퀴즈 캐릭터는 모자·안경·목도리 없이 기본 투리니를 쓴다", () => {
-  assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion="reading" className="turini-ai-coach"/);
+  assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion=\{aiFeedbackLoading \? "thinking" : "reading"\} className="turini-ai-coach"/);
   assert.match(pageSource, /<QuizThinkingTurini key=\{`\$\{question\.id\}-\$\{session\.index\}`\} className="turini-quiz turini-quiz--thinking"/);
   assert.match(pageSource, /customization=\{BASIC_DISPLAY_CUSTOMIZATION\} motion=\{answerCorrect \? "correct" : "wrong"\}/);
   assert.doesNotMatch(pageSource, /<TuriniAvatar motion="thinking" className="turini-quiz"/);
@@ -112,7 +113,7 @@ test("포트폴리오 결과 문구는 ~해요\/~이에요체로 맞춘다", () 
 });
 
 test("홈 맞춤 학습은 사용자 꾸미기를 복원하고 자산 안내만 기본 캐릭터를 쓴다", () => {
-  assert.match(pageSource, /<TuriniAvatar scene motion="idle" className="turini-daily" label="나의 투리니"/);
+  assert.match(pageSource, /<TuriniAvatar scene motion="greet" className="turini-daily" label="나의 투리니"/);
   assert.match(pageSource, /bag: "bag:green_original"/);
   assert.match(pageSource, /customization=\{BASIC_BACKPACK_CUSTOMIZATION\} motion="idle" className="turini-planner" decorative/);
   assert.match(pageSource, /<BasicReadingTurini className="turini-nudge" decorative/);
@@ -187,7 +188,11 @@ test("금액 입력칸은 앞의 0 없이 쉼표로 보여 주고, 설명은 반
   assert.match(pageSource, /const rest = absolute % 10_000/);
 });
 
-test("일반 화면 캐릭터는 스프라이트 로딩 없이 기본 이미지를 표시한다", () => {
-  assert.match(avatarSource2, /src=\{BAG_BASE\.front\}/);
+test("일반 화면 캐릭터는 스프라이트 로딩 없이 관절 애니메이션으로 표시한다", () => {
+  assert.match(avatarSource2, /<TuriniMotion className="turini-avatar__motion"/);
   assert.doesNotMatch(avatarSource2, /<TuriniSprite/);
+  // 파츠 그림이 모두 있어야 합니다.
+  for (const part of ["head", "body", "earL", "earR", "eyeL", "eyeR", "browL", "browR", "mouth", "armL", "armR", "legL", "legR"]) {
+    assert.ok(existsSync(new URL(`../public/assets/turini-motion/${part}.webp`, import.meta.url)), `${part} 파츠 없음`);
+  }
 });
