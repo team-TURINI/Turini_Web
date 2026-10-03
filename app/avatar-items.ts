@@ -68,6 +68,25 @@ export function approvedHatAsset(file: string, kind: "worn" | "overlay") {
   return `${ASSET_ROOT}/approved-hats/${file}-${kind}.webp`;
 }
 
+/**
+ * 기본 정면 그림(1024px)에 실제로 착용한 모습으로 만든 안경·목장식·가방 레이어.
+ * 착용 완성본(-worn)에서 아이템 부분만 그대로 떼어 낸 것이라(-overlay),
+ * 기본 그림 위에 겹치기만 하면 위치 계산 없이 착용 완성본과 똑같아집니다.
+ */
+const APPROVED_ITEM_FOLDER: Partial<Record<AvatarSlot, string>> = { glasses: "glasses", neck: "neck", bag: "bags" };
+const APPROVED_ITEMS: Record<string, Set<string>> = {
+  glasses: new Set(["black_square", "blue_sport", "gold_round", "green_round", "heart_sunglasses", "monocle", "red_reading", "safety_goggles", "star_glasses"]),
+  neck: new Set(["blue_scarf", "camera", "flower_lei", "gold_medal", "green_bow", "pearl_necklace", "red_tie", "white_green_collar", "yellow_bandana"]),
+  bags: new Set(["black_business", "green_original", "mint_bubble", "navy_school", "pink_heart", "purple_star", "red_hiking", "tan_explorer", "yellow_giraffe"]),
+};
+
+export function approvedItemAsset(item: { slot: AvatarSlot; file: string }, kind: "worn" | "overlay") {
+  if (item.slot === "hat") return approvedHatAsset(item.file, kind);
+  const folder = APPROVED_ITEM_FOLDER[item.slot];
+  if (!folder || !APPROVED_ITEMS[folder]?.has(item.file)) return null;
+  return `${ASSET_ROOT}/approved-items/${folder}/${item.file}-${kind}.webp`;
+}
+
 const APPROVED_HATS = new Set([
   "green_cap", "yellow_bucket", "red_beanie", "straw_hat", "explorer_hat",
   "chef_hat", "graduation_cap", "wizard_hat", "gold_crown",

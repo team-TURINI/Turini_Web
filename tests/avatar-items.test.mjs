@@ -24,6 +24,7 @@ import {
   requirementProgress,
   wornBackPreview,
   wornFrontPreview,
+  approvedItemAsset,
   BAG_BASE,
   wornPreview,
 } from "../app/avatar-items.ts";
@@ -178,8 +179,16 @@ test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", (
   assert.ok(existsSync(publicPath(BAG_BASE.front)), "가방이 없을 때 기본 정면이 없습니다");
   assert.ok(existsSync(publicPath(BAG_BASE.back)), "가방이 없을 때 기본 뒷면이 없습니다");
   assert.match(avatarSource, /src=\{BAG_BASE\[view\]\}/);
-  assert.match(avatarSource, /wornFrontPreview\(bag\)/);
-  assert.match(avatarSource, /turini-dress__bag-front--\$\{side\}/);
+  // 정면은 착용 완성본에서 떼어 낸 1024 레이어(approved-items)를 그대로 겹칩니다.
+  assert.match(avatarSource, /approvedItemAsset\(item, "overlay"\)/);
+  for (const slot of ["glasses", "neck", "bag"]) {
+    for (const item of itemsForSlot(slot)) {
+      for (const kind of ["overlay", "worn"]) {
+        const src = approvedItemAsset(item, kind);
+        assert.ok(src && existsSync(publicPath(src)), `${item.id} ${kind} 레이어가 없습니다`);
+      }
+    }
+  }
   assert.match(avatarSource, /className="turini-dress__bag-back" src=\{worn\}/);
   assert.match(avatarSource, /<TurnaroundView customization=\{customization\} view="front" \/>/);
   assert.match(avatarSource, /view === "front" \? "editor-front" : "editor-back"/);

@@ -32,7 +32,7 @@ const renderProfile = customization => renderToStaticMarkup(React.createElement(
 
 test('profile renders all five saved customization slots and uses the original chef hat', () => {
   const html = renderProfile(equipped);
-  for (const file of ['chef_hat-original-overlay.png','black_square.png','blue_scarf.png','green_original-worn-front.png','forest_class.png','turini-base-front.png']) assert.ok(html.includes(file), file);
+  for (const file of ['chef_hat-original-overlay.png','black_square-overlay.webp','blue_scarf-overlay.webp','green_original-overlay.webp','forest_class.png','turini-base-front.png']) assert.ok(html.includes(file), file);
   assert.ok(html.includes('data-view="front"'));
   assert.ok(html.includes('turini-dress__hat-canvas--chef'));
 });
@@ -44,7 +44,7 @@ test('changing or clearing saved customization replaces all profile layers witho
   assert.ok(!changed.includes('chef_hat-original-overlay.png'));
   assert.ok(!changed.includes('forest_class.png'));
   const cleared = renderProfile({hat:null,glasses:null,neck:null,bag:null,background:null});
-  for (const file of ['chef_hat-original-overlay.png','black_square.png','blue_scarf.png','green_original-worn-front.png','forest_class.png']) assert.ok(!cleared.includes(file),file);
+  for (const file of ['chef_hat-original-overlay.png','black_square-overlay.webp','blue_scarf-overlay.webp','green_original-overlay.webp','forest_class.png']) assert.ok(!cleared.includes(file),file);
   assert.ok(cleared.includes('turini-base-front.png'));
 });
 

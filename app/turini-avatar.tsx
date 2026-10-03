@@ -6,6 +6,7 @@ import TuriniMotion, { type TuriniMotionName } from "./turini-motion";
 import {
   AVATAR_ITEMS,
   approvedHatAsset,
+  approvedItemAsset,
   BAG_BASE,
   DEFAULT_CUSTOMIZATION,
   AVATAR_SLOTS,
@@ -20,7 +21,6 @@ import {
   requirementLabel,
   requirementProgress,
   wornBackPreview,
-  wornFrontPreview,
   wornPreview,
   type AvatarItem,
   type AvatarSlot,
@@ -193,35 +193,50 @@ function PreviewAccessory({ item, view }: { item: AvatarItem; view: TurniView })
 
 function TurnaroundView({ customization, view }: { customization: TuriniCustomization; view: TurniView }) {
   const bag = findItem(customization.bag);
-  const worn = bag ? (view === "front" ? wornFrontPreview(bag) : wornBackPreview(bag)) : null;
-  const slots: readonly ("neck" | "glasses" | "hat")[] =
-    view === "front" ? ["neck", "glasses", "hat"] : ["neck", "hat"];
-  const selected = slots
-    .map((slot) => findItem(customization[slot]))
-    .filter((item): item is AvatarItem => Boolean(item));
   const hat = findItem(customization.hat);
   const approvedHat = hat ? approvedHatAsset(hat.file, "overlay") : null;
+
+  if (view === "front") {
+    // 정면: 착용 완성본에서 떼어 낸 1024 레이어를 기본 그림 위에 그대로 겹칩니다.
+    // 겹치는 순서 = 가방끈 → 목장식 → 안경 → 모자
+    const layered = (["bag", "neck", "glasses"] as const)
+      .map((slot) => findItem(customization[slot]))
+      .filter((item): item is AvatarItem => Boolean(item))
+      .map((item) => ({ item, src: approvedItemAsset(item, "overlay") }));
+    return (
+      <span className="turini-dress__turn" data-view={view} aria-hidden="true">
+        <Image className="turini-dress__base" src={BAG_BASE.front} alt="" fill unoptimized
+          sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
+        {layered.map(({ item, src }) => src ? (
+          <Image key={item.id} className={`turini-dress__worn-layer turini-dress__worn-layer--${item.slot}`}
+            src={src} alt="" fill unoptimized sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
+        ) : (
+          <PreviewAccessory key={item.id} item={item} view={view} />
+        ))}
+        {hat && !approvedHat ? <PreviewAccessory item={hat} view={view} /> : null}
+        {approvedHat ? (
+          <span className={`turini-dress__hat-canvas${hat?.file === "chef_hat" ? " turini-dress__hat-canvas--chef" : ""}`}>
+            <Image className="turini-dress__approved-hat" src={approvedHat} alt="" fill unoptimized
+              sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
+          </span>
+        ) : null}
+      </span>
+    );
+  }
+
+  const worn = bag ? wornBackPreview(bag) : null;
+  const selected = (["neck", "hat"] as const)
+    .map((slot) => findItem(customization[slot]))
+    .filter((item): item is AvatarItem => Boolean(item));
   return (
     <span className="turini-dress__turn" data-view={view} aria-hidden="true">
       <Image className="turini-dress__base" src={BAG_BASE[view]} alt="" fill unoptimized
         sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
-      {worn ? view === "front" ? (
-        (["left", "right"] as const).map((side) => (
-          <Image key={`${worn}-${side}`} className={`turini-dress__bag-front turini-dress__bag-front--${side}`}
-            src={worn} alt="" fill unoptimized sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
-        ))
-      ) : (
+      {worn ? (
         <Image key={worn} className="turini-dress__bag-back" src={worn} alt="" fill unoptimized
           sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
       ) : null}
-      {selected.filter((item) => item.slot !== "hat" || !approvedHat).map((item) =>
-        <PreviewAccessory key={item.id} item={item} view={view} />)}
-      {view === "front" && approvedHat ? (
-        <span className={`turini-dress__hat-canvas${hat?.file === "chef_hat" ? " turini-dress__hat-canvas--chef" : ""}`}>
-          <Image className="turini-dress__approved-hat" src={approvedHat} alt="" fill unoptimized
-            sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
-        </span>
-      ) : null}
+      {selected.map((item) => <PreviewAccessory key={item.id} item={item} view={view} />)}
     </span>
   );
 }

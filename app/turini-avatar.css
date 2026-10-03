@@ -186,6 +186,10 @@
 .turini-dress__accessory--glasses { z-index: 4; }
 .turini-dress__accessory--hat { z-index: 5; }
 .turini-dress__approved-hat { z-index: 5; }
+/* 착용 완성본에서 떼어 낸 정면 레이어 (기본 그림과 같은 1024 캔버스) */
+.turini-dress__worn-layer--bag { z-index: 2; }
+.turini-dress__worn-layer--neck { z-index: 3; }
+.turini-dress__worn-layer--glasses { z-index: 4; }
 .turini-dress__hat-canvas { position: absolute; inset: 0; z-index: 5; }
 /* 1254px 원본을 가로·세로 동일하게 0.85배로 표시합니다.
    투명 캔버스까지 포함해 배치하며, 높은 모자에 맞춰 윗부분을 위로 이동합니다. */
