@@ -25,7 +25,6 @@ import { advanceStreak, normalizeStreak } from "./streak";
 import { financeLevelForRawScore } from "./diagnosis-utils";
 import {
   categoryLessonPool,
-  categoryLevelForSolved,
   completedCategoryLessons,
   completedCategoryLessonsForSolved,
   MAX_CATEGORY_LEVEL,
@@ -578,7 +577,8 @@ export default function Home() {
     (categoryCounts[category.name] || 0) > (categoryCounts[best.name] || 0) ? category : best,
   (resumableCategories.length ? resumableCategories : [...CATEGORIES])[0]);
   const resumeSolved = categoryCounts[resumeCategory.name] || 0;
-  const resumeLevel = categoryLevelForSolved(resumeSolved);
+  const resumeLevel = Math.min(MAX_CATEGORY_LEVEL,
+    completedCategoryLessons(resumeSolved, progress.categoryLessonCompletions[resumeCategory.name] || 0) + 1);
   const showActiveLearningContext = view === "learn" || view === "difficulty";
   const generalContext: Record<Exclude<View, "learn" | "difficulty">, string> = {
     home: "홈",
