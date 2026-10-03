@@ -64,6 +64,7 @@ export function wornPreview(item: { slot: AvatarSlot; file: string }) {
 /** 검토를 통과한 모자 착용본과 동일 캔버스의 분리 레이어. */
 export function approvedHatAsset(file: string, kind: "worn" | "overlay") {
   if (!APPROVED_HATS.has(file)) return null;
+  if (file === "chef_hat" && kind === "overlay") return `${ASSET_ROOT}/approved-hats/chef_hat-original-overlay.png`;
   return `${ASSET_ROOT}/approved-hats/${file}-${kind}.webp`;
 }
 

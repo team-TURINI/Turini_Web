@@ -175,6 +175,16 @@
 .turini-dress__accessory--glasses { z-index: 4; }
 .turini-dress__accessory--hat { z-index: 5; }
 .turini-dress__approved-hat { z-index: 5; }
+.turini-dress__hat-canvas { position: absolute; inset: 0; z-index: 5; }
+/* 1254px 원본을 가로·세로 동일하게 0.85배로 표시합니다.
+   투명 캔버스까지 포함해 배치하며, 높은 모자에 맞춰 윗부분을 위로 이동합니다. */
+.turini-dress__hat-canvas--chef {
+  inset: auto;
+  left: -1.4599609375%;
+  top: -7.2265625%;
+  width: 104.091796875%;
+  height: 104.091796875%;
+}
 .turini-dress__back-pending { position: relative; z-index: 2; display: grid; place-items: center; height: 100%; padding: 24px; color: #52665a; font-size: 14px; font-weight: 800; text-align: center; }
 .turini-dress__accessory picture,
 .turini-dress__accessory img {

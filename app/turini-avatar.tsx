@@ -210,8 +210,10 @@ function TurnaroundView({ customization, view }: { customization: TuriniCustomiz
       {selected.filter((item) => item.slot !== "hat" || !approvedHat).map((item) =>
         <PreviewAccessory key={item.id} item={item} view={view} />)}
       {view === "front" && approvedHat ? (
-        <Image className="turini-dress__approved-hat" src={approvedHat} alt="" fill unoptimized
-          sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
+        <span className={`turini-dress__hat-canvas${hat?.file === "chef_hat" ? " turini-dress__hat-canvas--chef" : ""}`}>
+          <Image className="turini-dress__approved-hat" src={approvedHat} alt="" fill unoptimized
+            sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
+        </span>
       ) : null}
     </span>
   );
