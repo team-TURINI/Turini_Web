@@ -168,7 +168,7 @@ test("착용 완성본은 목록·단일 미리보기에만 쓰고 겹쳐 조합
 test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", () => {
   assert.doesNotMatch(avatarSource, /three-quarter-rear/);
   assert.match(avatarSource, /\["front", "back"\]/);
-  assert.match(avatarSource, /onClick=\{\(\) => setSlot\(key\)\}/);
+  assert.match(avatarSource, /setSlot\(key\); setView\("front"\)/);
 
   for (const bag of itemsForSlot("bag")) {
     const front = wornFrontPreview(bag);
@@ -178,7 +178,7 @@ test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", (
   }
   assert.ok(existsSync(publicPath(BAG_BASE.front)), "가방이 없을 때 기본 정면이 없습니다");
   assert.ok(existsSync(publicPath(BAG_BASE.back)), "가방이 없을 때 기본 뒷면이 없습니다");
-  assert.match(avatarSource, /src=\{BAG_BASE\[view\]\}/);
+  assert.match(avatarSource, /src=\{worn \?\? BAG_BASE\.back\}/);
   // 정면은 착용 완성본에서 떼어 낸 1024 레이어(approved-items)를 그대로 겹칩니다.
   assert.match(avatarSource, /approvedItemAsset\(item, "overlay"\)/);
   for (const slot of ["glasses", "neck", "bag"]) {
@@ -189,7 +189,7 @@ test("가방 꾸미기는 뒤쪽 3/4 없이 정면과 뒷면만 사용한다", (
       }
     }
   }
-  assert.match(avatarSource, /className="turini-dress__bag-back" src=\{worn\}/);
+  assert.match(avatarSource, /<TurnaroundView customization=\{customization\} view="back" \/>/);
   assert.match(avatarSource, /<TurnaroundView customization=\{customization\} view="front" \/>/);
   assert.match(avatarSource, /view === "front" \? "editor-front" : "editor-back"/);
 });

@@ -171,12 +171,6 @@
 .turini-dress__bag-front { z-index: 2; }
 .turini-dress__bag-front--left { clip-path: polygon(38% 55%, 49% 55%, 49% 74%, 37% 74%); }
 .turini-dress__bag-front--right { clip-path: polygon(55% 55%, 67% 55%, 67% 75%, 55% 75%); }
-/* 기존 착용 완성본에서 가방이 그려진 자리만 보여 줍니다.
-   캐릭터 몸과 얼굴은 항상 위의 동일한 기본 그림입니다. */
-.turini-dress__bag-back { z-index: 2; }
-.turini-dress__bag-back {
-  clip-path: polygon(32% 48%, 68% 48%, 70% 83%, 30% 83%);
-}
 .turini-dress__accessory {
   position: absolute;
   display: block;
@@ -200,7 +194,6 @@
   width: 104.091796875%;
   height: 104.091796875%;
 }
-.turini-dress__back-pending { position: relative; z-index: 2; display: grid; place-items: center; height: 100%; padding: 24px; color: #52665a; font-size: 14px; font-weight: 800; text-align: center; }
 .turini-dress__accessory picture,
 .turini-dress__accessory img {
   display: block;

@@ -9,6 +9,7 @@ const ts = require('typescript');
 const React = require('react');
 const {renderToStaticMarkup} = require('react-dom/server');
 const cache = new Map();
+let editorHooks = null;
 function loadComponent(filename) {
   if (cache.has(filename)) return cache.get(filename).exports;
   const compiled = ts.transpileModule(readFileSync(filename, 'utf8'), {compilerOptions:{
@@ -18,6 +19,19 @@ function loadComponent(filename) {
   cache.set(filename, compiledModule);
   const localRequire = createRequire(filename);
   compiledModule.require = (name) => {
+    // The test harness runs only the editor directly; nested SSR components use React's real hooks.
+    /* eslint-disable react-hooks/rules-of-hooks, react-hooks/exhaustive-deps */
+    if (name === 'react') return {...React,
+      useState: initial => {
+        if (!editorHooks) return React.useState(initial);
+        const hooks = editorHooks;
+        const index = hooks.index++;
+        if (!(index in hooks.state)) hooks.state[index] = initial;
+        return [hooks.state[index], value => {hooks.state[index] = typeof value === 'function' ? value(hooks.state[index]) : value;}];
+      },
+      useMemo: (compute, dependencies) => editorHooks ? compute() : React.useMemo(compute, dependencies),
+    };
+    /* eslint-enable react-hooks/rules-of-hooks, react-hooks/exhaustive-deps */
     if (name === 'next/image') return {__esModule:true, default:(props) => {const imageProps = {...props}; for (const key of ['fill','unoptimized','sizes']) delete imageProps[key]; return React.createElement('img', imageProps);}};
     if (name === './turini-motion') return loadComponent(fileURLToPath(new URL('../app/turini-motion.tsx', import.meta.url)));
     if (name === './avatar-items') return loadComponent(fileURLToPath(new URL('../app/avatar-items.ts', import.meta.url)));
@@ -54,4 +68,78 @@ test('profile and dress-up render identical foreground character layers for the 
   const character = html => html.match(/<span class="turini-dress__turn"[\s\S]*?<\/span><\/span>/)?.[0];
   assert.ok(character(profile));
   assert.equal(character(editor),character(profile));
+});
+
+function editorHarness(customization = equipped) {
+  const hooks = {state:[],index:0};
+  const editor = {
+    customization,
+    render() {
+      hooks.index = 0;
+      editorHooks = hooks;
+      try {
+        return TuriniDressUp({customization:editor.customization,
+          stats:{xp:99999,level:99,streak:999,solved:9999,categoryLessons:{}},
+          saving:false,onChange:next => {editor.customization = next;}});
+      } finally {editorHooks = null;}
+    },
+  };
+  return editor;
+}
+function elements(node) {
+  if (Array.isArray(node)) return node.flatMap(elements);
+  if (!node || typeof node !== 'object' || !node.props) return [];
+  return [node,...elements(node.props.children)];
+}
+function pressTab(editor, name) {
+  const button = elements(editor.render()).find(node => node.props.role === 'tab' && node.props.children === name);
+  assert.ok(button, name);
+  button.props.onClick();
+}
+function pressDirection(editor, name) {
+  const button = elements(editor.render()).find(node => node.props.className === 'turini-dress__view' && node.props.children === name);
+  assert.ok(button, name);
+  button.props.onClick();
+}
+
+test('back controls exist only on the bag tab and leaving it returns to the front without changing saved items', () => {
+  const editor = editorHarness();
+  for (const name of ['모자','안경','목 액세서리','배경']) {
+    pressTab(editor,name);
+    const html = renderToStaticMarkup(editor.render());
+    assert.ok(!html.includes('aria-label="보는 방향"'),name);
+    assert.ok(html.includes('data-view="front"'),name);
+  }
+  pressTab(editor,'가방');
+  pressDirection(editor,'뒷면');
+  assert.ok(renderToStaticMarkup(editor.render()).includes('data-view="back"'));
+  pressTab(editor,'모자');
+  assert.ok(renderToStaticMarkup(editor.render()).includes('data-view="front"'));
+  pressTab(editor,'가방');
+  assert.ok(renderToStaticMarkup(editor.render()).includes('data-view="front"'));
+  assert.deepEqual(editor.customization,equipped);
+});
+
+test('all nine bags use their approved complete back image and clearing the bag shows the bare back', () => {
+  const editor = editorHarness();
+  pressTab(editor,'가방');
+  pressDirection(editor,'뒷면');
+  const bags = ['black_business','mint_bubble','navy_school','green_original','purple_star','red_hiking','tan_explorer','yellow_giraffe','pink_heart'];
+  for (const bag of bags) {
+    editor.customization = {...equipped,bag:`bag:${bag}`};
+    const html = renderToStaticMarkup(editor.render());
+    const back = html.match(/<span class="turini-dress__turn" data-view="back"[\s\S]*?<\/span>/)?.[0];
+    assert.ok(back,bag);
+    assert.ok(back.includes(`/assets/worn-back/bags/${bag}-worn-back.png`),bag);
+    assert.equal((back.match(/<img /g)||[]).length,1,bag);
+    for (const other of ['turini-base-back.png','chef_hat','blue_scarf','black_square']) assert.ok(!back.includes(other),`${bag}: ${other}`);
+    assert.ok(html.includes('forest_class.png'));
+    assert.ok(!html.includes('뒷면은 아직 업데이트되지 않았어요'));
+  }
+  const clear = elements(editor.render()).find(node => node.props.className === 'turini-dress__item turini-dress__item--none');
+  clear.props.onClick();
+  const cleared = renderToStaticMarkup(editor.render());
+  assert.ok(cleared.includes('/assets/worn-back/turini-base-back.png'));
+  assert.ok(!cleared.includes('/assets/worn-back/bags/'));
+  assert.equal(editor.customization.hat,equipped.hat);
 });

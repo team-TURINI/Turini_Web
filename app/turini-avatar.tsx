@@ -180,7 +180,7 @@ function WornThumb({ item }: { item: AvatarItem }) {
   );
 }
 
-/* 뒷면 그림 위에 머리·목 장식만 얹습니다. 안경은 얼굴 뒤에서 보이지 않습니다. */
+/* 정면에서 승인 레이어가 없는 아이템의 위치를 잡습니다. */
 function PreviewAccessory({ item, view }: { item: AvatarItem; view: TurniView }) {
   const place = placementFor(item, view === "front" ? "editor-front" : "editor-back");
   return (
@@ -225,18 +225,11 @@ function TurnaroundView({ customization, view }: { customization: TuriniCustomiz
   }
 
   const worn = bag ? wornBackPreview(bag) : null;
-  const selected = (["neck", "hat"] as const)
-    .map((slot) => findItem(customization[slot]))
-    .filter((item): item is AvatarItem => Boolean(item));
+  // 가방 탭의 뒷면은 이미 승인된 착용 완성본을 그대로 보여 줍니다.
   return (
     <span className="turini-dress__turn" data-view={view} aria-hidden="true">
-      <Image className="turini-dress__base" src={BAG_BASE[view]} alt="" fill unoptimized
+      <Image className="turini-dress__base" src={worn ?? BAG_BASE.back} alt="" fill unoptimized
         sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
-      {worn ? (
-        <Image key={worn} className="turini-dress__bag-back" src={worn} alt="" fill unoptimized
-          sizes="(max-width: 768px) 66vw, 211px" draggable={false} />
-      ) : null}
-      {selected.map((item) => <PreviewAccessory key={item.id} item={item} view={view} />)}
     </span>
   );
 }
@@ -281,6 +274,7 @@ export function TuriniDressUp({
   const [slot, setSlot] = useState<AvatarSlot>("hat");
   const [showLocked, setShowLocked] = useState(true);
   const [view, setView] = useState<TurniView>("front");
+  const previewView = slot === "bag" ? view : "front";
 
   const unlockedIds = useMemo(() => {
     const set = new Set<string>();
@@ -319,7 +313,7 @@ export function TuriniDressUp({
       </div>
 
       <div className="turini-dress__stage">
-          {view === "front" ? (
+          {previewView === "front" ? (
             <CustomizedTuriniAvatar customization={customization} className="turini-avatar--editor"
               label="꾸미는 중인 나의 투리니 정면" />
           ) : (
@@ -330,11 +324,11 @@ export function TuriniDressUp({
                   <ItemImage item={background} eager />
                 </span>
               ) : null}
-              <span className="turini-dress__back-pending">뒷면은 아직 업데이트되지 않았어요.</span>
+              <TurnaroundView customization={customization} view="back" />
             </div>
           )}
 
-        <div className="turini-dress__views" role="group" aria-label="보는 방향">
+        {slot === "bag" ? <div className="turini-dress__views" role="group" aria-label="보는 방향">
           {(["front", "back"] as TurniView[]).map((entry) => (
             <button
               key={entry}
@@ -347,7 +341,7 @@ export function TuriniDressUp({
               {VIEW_LABEL[entry]}
             </button>
           ))}
-        </div>
+        </div> : null}
       </div>
 
       <div className="turini-dress__tabs" role="tablist" aria-label="꾸미기 카테고리">
@@ -359,7 +353,7 @@ export function TuriniDressUp({
             aria-selected={slot === key}
             className="turini-dress__tab"
             data-active={slot === key ? "true" : undefined}
-            onClick={() => setSlot(key)}
+            onClick={() => { setSlot(key); setView("front"); }}
           >
             {name}
           </button>
