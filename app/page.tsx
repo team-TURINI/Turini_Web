@@ -24,6 +24,7 @@ import { loadCustomizationCache, saveCustomizationCache } from "./avatar-storage
 import { advanceStreak, normalizeStreak } from "./streak";
 import { financeLevelForRawScore } from "./diagnosis-utils";
 import {
+  categoryDifficultyForLesson,
   categoryLessonPool,
   learningCompletedIds,
   difficultySolvedCount,
@@ -127,6 +128,7 @@ type Progress = {
 type QuizSession = {
   mode: QuizMode;
   title: string;
+  category?: string;
   questions: QuizQuestion[];
   index: number;
   correct: number;
@@ -630,6 +632,7 @@ export default function Home() {
     setSession({
       mode,
       title,
+      category: mode === "lesson" ? pool[0].category : undefined,
       questions: planSessionQuestions(
         pool,
         count,
@@ -663,6 +666,7 @@ export default function Home() {
 
   const startLesson = (category: string, lesson: number) => {
     setActiveCategoryName(category);
+    setFocusDifficulty(categoryDifficultyForLesson(lesson));
     const lessonPool = categoryLessonPool(questions, category, lesson);
     openSession("lesson", `${category} 레벨 ${lesson}`, lessonPool, QUESTIONS_PER_CATEGORY_LEVEL, lesson);
   };
@@ -1006,6 +1010,26 @@ export default function Home() {
   if (result) {
     const total = result.questions.filter((question) => !question.isProfile).length;
     const percent = Math.round((result.correct / Math.max(1, total)) * 100);
+    const resultCategory = result.category;
+    const nextLesson = result.mode === "lesson" && result.lesson && result.lesson < MAX_CATEGORY_LEVEL
+      ? result.lesson + 1
+      : null;
+    const continueLearning = () => {
+      if (result.mode === "lesson") {
+        if (!resultCategory) {
+          navigate("category");
+          return;
+        }
+        if (nextLesson) {
+          startLesson(resultCategory, nextLesson);
+          return;
+        }
+        setActiveCategoryName(resultCategory);
+        navigate("learn");
+        return;
+      }
+      startDaily();
+    };
     return (
       <TuriniAvatarProvider customization={progress.customization}>
       <main className="result-stage">
@@ -1018,7 +1042,7 @@ export default function Home() {
           <div className="result-stats"><div><span>정답률</span><strong>{percent}%</strong></div><div><span>획득 XP</span><strong>+{result.mode === "diagnosis" ? result.correct * 5 : result.correct * 10}</strong></div><div><span>연속 학습</span><strong>{progress.streak}일</strong></div></div>
           {result.weakTags.length ? <div className="weak-box"><span>취약 상위 태그 · 눌러서 맞춤 학습</span><div>{result.weakTags.slice(0, 3).map((tag) => <button key={tag} onClick={() => startWeakTag(tag)}>{tag}</button>)}</div></div> : null}
           <button className="primary-button" onClick={() => { setResult(null); navigate("home"); }}>홈으로</button>
-          {result.mode !== "diagnosis" ? <button className="secondary-button" onClick={() => { setResult(null); startDaily(); }}>10문제 더 풀기</button> : null}
+          {result.mode !== "diagnosis" ? <button className="secondary-button" onClick={continueLearning}>{result.mode === "lesson" ? nextLesson ? "다음 단계 · 10문제" : "카테고리 학습 지도 보기" : "10문제 더 풀기"}</button> : null}
         </section>
       </main>
       </TuriniAvatarProvider>

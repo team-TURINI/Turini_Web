@@ -92,6 +92,36 @@ test("actual ten-question category sessions interleave all four types", () => {
   }
 });
 
+test("continuing each category lesson excludes retries from other categories and follows the next difficulty band", () => {
+  const categories = [...new Set(quizData.map(question => question.category))];
+  const pendingRetries = categories.map(category => {
+    const question = quizData.find(item => item.category === category && item.type === "OX");
+    return { key: question.base_id, sourceId: question.id, category, difficulty: question.difficulty, lastType: question.type, dueIndex: 0 };
+  });
+  for (const category of categories) {
+    for (let finishedLesson = 1; finishedLesson < MAX_CATEGORY_LEVEL; finishedLesson++) {
+      const nextLesson = finishedLesson + 1;
+      const pool = categoryLessonPool(quizData, category, nextLesson);
+      const session = planSessionQuestions(pool, 10, 997 + nextLesson, {}, finishedLesson, pendingRetries);
+      assert.equal(session.length, 10, `${category}: ${finishedLesson} → ${nextLesson}`);
+      assert.ok(session.every(question => question.category === category));
+      assert.ok(session.every(question => question.difficulty === categoryDifficultyForLesson(nextLesson)));
+      assert.deepEqual(Object.values(Object.groupBy(session, question => question.type)).map(items => items.length).sort(), [2, 2, 3, 3]);
+    }
+  }
+});
+
+test("the result button continues its saved category lesson and returns to the map at the final lesson", () => {
+  const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /category: mode === "lesson" \? pool\[0\]\.category : undefined/);
+  assert.match(page, /result\.lesson < MAX_CATEGORY_LEVEL\s*\? result\.lesson \+ 1/);
+  assert.match(page, /if \(nextLesson\) \{\s*startLesson\(resultCategory, nextLesson\);\s*return;/);
+  assert.match(page, /setActiveCategoryName\(resultCategory\);\s*navigate\("learn"\);\s*return;/);
+  assert.match(page, /onClick=\{continueLearning\}/);
+  assert.match(page, /"다음 단계 · 10문제" : "카테고리 학습 지도 보기"/);
+  assert.doesNotMatch(page, /onClick=\{\(\) => \{ setResult\(null\); startDaily\(\); \}\}>10문제 더 풀기/);
+});
+
 test("the category header uses its own level and the waiting speech bubble fits its copy", () => {
   const page = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
   const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
