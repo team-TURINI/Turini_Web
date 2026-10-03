@@ -23,45 +23,16 @@
   height: 100%;
 }
 
-/* 일반 화면: 꾸미기의 정면 기본 PNG를 그대로 움직입니다. */
+/* 일반 화면: 승인된 기본 캐릭터 프레임만 같은 정사각형 좌표로 재생합니다. */
 .turini-avatar--base { background: transparent; isolation: isolate; }
 .turini-avatar--base .turini-avatar__base-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
   object-fit: contain;
-  transform-origin: 50% 86%;
   filter: drop-shadow(0 5px 5px rgba(35, 73, 47, .10));
-}
-.turini-avatar--base[data-animated="true"] .turini-avatar__base-image {
-  animation: turini-base-breathe 3.7s ease-in-out infinite;
-}
-.turini-avatar--base[data-motion="thinking"] .turini-avatar__base-image,
-.turini-avatar--base[data-motion="reading"] .turini-avatar__base-image {
-  animation-name: turini-base-think;
-  animation-duration: 4.4s;
-}
-.turini-avatar--base[data-motion="correct"] .turini-avatar__base-image,
-.turini-avatar--base[data-motion="celebrate"] .turini-avatar__base-image {
-  animation-name: turini-base-cheer;
-  animation-duration: 1.8s;
-}
-.turini-avatar--base[data-motion="wrong"] .turini-avatar__base-image {
-  animation-name: turini-base-think;
-  animation-duration: 5s;
-}
-@keyframes turini-base-breathe {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-2px) scale(1.008); }
-}
-@keyframes turini-base-think {
-  0%, 100% { transform: rotate(-1deg) translateY(0); }
-  50% { transform: rotate(1deg) translateY(-2px); }
-}
-@keyframes turini-base-cheer {
-  0%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-5px) rotate(-1deg); }
-  65% { transform: translateY(-2px) rotate(1deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .turini-avatar--base .turini-avatar__base-image { animation: none !important; }
 }
 
 /* 배경이 있는 무대 — 홈·마이페이지·꾸미기 */
